@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>
+        <%= series.name %> - Watch Free Movies and TV Series on H.A Entertainment
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="content-language" content="en" />
+    <meta name="description"
+        content="<%= series.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
+    <meta name="keywords"
+        content="best movies site, free movies watch, free movies streaming, free series watch, watch movies online, watch free movies, watch movies free" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+    <link rel="shortcut icon" href="https://ha-entertainment.netlify.app/images/logo.png" type="image/x-icon" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://1hd.to" />
+    <meta property="og:title" content="<%= series.name %> - Watch Free Movies and TV Series on H.A Entertainment" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/w500/<%= series.backdrop_path %>" />
+    <meta property="og:image:width" content="650">
+    <meta property="og:image:height" content="350">
+    <meta property="og:description"
+        content="<%= series.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
+    <!-- Begin: Stylesheet -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <link rel="stylesheet" href="/css/theme_1.css">
+    <style>
+        body .dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.film-episodes {
+    position: relative;
+}
+
+.ps-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ps-scrollbar-x-rail,
+.ps-scrollbar-y-rail {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.ps-scrollbar-x-rail {
+    height: 8px;
+}
+
+.ps-scrollbar-y-rail {
+    width: 8px;
+}
+
+.ps-scrollbar-x {
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+}
+
+.ps-scrollbar-y {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 4px;
+}
+
+    </style>
+    <!-- End: Stylesheet -->
+</head>
+
+<body id="gMNrTK">
+    <div id="mobile-overlay"></div>
+    <div id="menu-display">
+        <ul class="nav menu-display-list">
+            <li class="nav-item"><a class="nav-link" href="/index.html" title="">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="/movie.html" title="">Movies</a></li>
+            <li class="nav-item"><a class="nav-link" href="/tv-series.html" title="">TV Series</a></li>
+            <li class="nav-item"><a class="nav-link" href="/contact-us.html" title="">Contact Us</a></li>
+        </ul>
+    </div>
+    <div id="app">
+        <!--/// Header ///-->
+        <header class="">
+            <div class="container">
+                <div id="header_elements">
+                    <div class="btn btn-touch mobile-button" id="mobile_menu"><i class="fas fa-bars"></i></div>
+                    <a href="/" id="header_logo">
+                        <img src="https://ha-entertainment.netlify.app/images/logo.png" alt="H.A Entertainment">
+                    </a>
+                    <!-- <div id="header_search">
+                        <div class="search-elements">
+                            <form action="/search">
+                                <div class="search-submit">
+                                    <div class="search-icon"><i class="fa fa-search"></i></div>
+                                </div>
+                                <input name="keyword" type="text" id="search-input" class="form-control is-input" autocomplete="off"
+                                       placeholder="Search for movies or tv series">
+                            </form>
+                            <div class="is-result search-suggest" style="display: none;"></div>
+                        </div>
+                    </div> -->
+                    <div id="header_menu">
+                        <div class="menu-item">
+                            <a href="index.html" class="menu-link ">Home</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="movies.html" class="menu-link ">Movies</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="tv-series.html" class="menu-link active">TV Series</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="contact-us.html" class="menu-link ">Contact Us</a>
+                        </div>
+                    </div>
+                    <div class="flex-grow"></div>
+                    <!-- <div class="btn btn-touch mobile-button" id="mobile_search"><i class="fas fa-search"></i></div> -->
+                    <div id="header_member"></div>
+                </div>
+            </div>
+        </header>
+        <!--/// Page body ///-->
+        <div id="page-watch">
+            <section class="section-detail is-watch is-watch-series">
+                <div class="slide-cover">
+                    <img src="https://image.tmdb.org/t/p/original/<%= series.backdrop_path %>" alt="<%= series.name %>">
+                </div>
+                <div class="container">
+                    <div class="detail-wrap">
+                        <div class="detail-elements">
+                            <div id="watch-area" class="watch-wrap backdrop-blur-50">
+                                <div class="ww-top">
+                                    <div class="is-name flex-grow-1">
+                                        <h2 class="heading-sm sum mb-0"><%= series.name %></h2>
+                                    </div>
+                                    <div class="top-right">
+                                        <div class="is-detail">
+                                            <a href="/tv/<%= series.id %>" class="btn w-icon"><i class="fas fa-info-circle mr-2"></i>Detail</a>
+                                        </div>
+                                        <div class="is-share">
+                                            <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-share-alt mr-2"></i>Share this
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ww-player">
+                                    <div class="if-hd">
+                                        <div id="player-loading" class="loading-relative" style="display: none;">
+                                            <div class="loading">
+                                                <div class="span1"></div>
+                                                <div class="span2"></div>
+                                                <div class="span3"></div>
+                                            </div>
+                                        </div>
+                                        <% if (currentEpisode && currentSeason) { %>
+                                            <iframe id="iframe-player" width="100%" height="500" scrolling="no" frameborder="0"
+                                                src="<%= servers[0].url.replace('{episode_number}', currentEpisode.episode_number).replace('{season_number}', currentSeason.season_number).replace('{seriesId}', series.id) %>"
+                                                allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                                        <% } else { %>
+                                            <p>No episode information available.</p>
+                                        <% } %>                                                                 </div>
+                                </div>
+                                <div class="ww-controls">
+                                    <div id="server-play" class="dropdown is-servers">
+                                        <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span id="current-server">Select Server</span><i class="fas fa-angle-down ml-3"></i>
+                                        </div>
+                                        <div class="dropdown-menu dropdown-primary mine-dropdown" style="max-height: 300px; overflow-y: auto;">
+                                            <% servers.forEach(server => { %>
+                                                <a class="dropdown-item sv-item <%= server.id === servers[0].id ? 'active' : '' %>" href="javascript:;" data-url="<%= server.url.replace('{episode_id}', currentEpisode.id).replace('{season_number}', currentSeason.season_number).replace('{episode_number}', currentEpisode.episode_number).replace('{seriesId}', series.id) %>">
+                                                    <i class="fas fa-cloud is-icon"></i>
+                                                    <div class="d-name">
+                                                        <div class="sv-name">Server <strong><%= server.name %></strong></div>
+                                                        <small class="text-active" style="<%= server.id === servers[0].id ? 'display: inline;' : 'display: none;' %>">Selected</small>
+                                                    </div>
+                                                </a>
+                                            <% }); %>
+                                        </div>
+                                        <small>If the current server doesn't work, please try other servers above</small>
+                                    </div>
+                                    <div class="is-func">
+                                        <div class="item item-light">
+                                            <div id="toggle-light" class="btn w-icon">
+                                                <i class="fas fa-adjust mr-2"></i>Toggle light
+                                            </div>
+                                        </div>
+                                        <div class="item item-fav" id="wl-content">
+                                            <a href="contact-us.html">
+                                                <div class="btn w-icon icon-fav btn-wl">
+                                                    <i class="far fa-flag mr-2"></i> Report Video
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="item item-comment">
+                                            <div class="btn w-icon btn-comment"><i class="fas fa-comment mr-2"></i>Comment</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="eps-list" class="film-episodes backdrop-blur-50">
+                                <div class="eps-top">
+                                    <!-- Season Dropdown -->
+                                    <div class="dropdown is-seasons">
+                                        <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span id="current-ss">Season <%= currentSeason.season_number %></span><i class="fas fa-angle-down ml-3"></i>
+                                        </div>
+                                        <div class="dropdown-menu dropdown-primary mine-dropdown" style="max-height: 300px; overflow-y: auto;">
+                                            <% seasons.forEach(season => { %>
+                                                <a data-id="<%= season.season_number %>" class="dropdown-item ss-item <%= season.season_number === currentSeason.season_number ? 'active' : '' %>">
+                                                    <i class="fas fa-list is-icon"></i>
+                                                    <div class="d-name">
+                                                        <div class="ss-name">Season <strong><%= season.season_number %></strong></div>
+                                                        <small><%= season.air_date %></small>
+                                                    </div>
+                                                </a>
+                                            <% }); %>
+                                        </div>
+                                    </div>
+                                    <div class="item item-fav" id="wl-content">
+                                        <a href="contact-us.html">
+                                            <div class="btn w-icon icon-fav btn-wl">
+                                                <i class="far fa-flag mr-2"></i> Report Episode
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- Episodes List -->
+                                <div class="eps-list" style="max-height: 660px; overflow-y: auto;">
+                                    <div class="eps-wrap no-thumb ps-container" id="ss-episodes-<%= currentSeason.season_number %>">
+                                        <% currentSeason.episodes.forEach(episode => { %>
+                                            <div>
+                                                <a data-id="<%= episode.id %>" href="javascript:;" class="ep-item <%= episode.id === currentEpisode.id ? 'on-air' : '' %>">
+                                                    <div class="is-icon"><i class="fas fa-play"></i></div>
+                                                    <div class="is-info">
+                                                        <span class="number">Episode <%= episode.episode_number %> </span>
+                                                        <span class="name sum"><%= episode.name %></span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            
+            <section class="section-default section-flow-vertical section-film-list is-carousel">
+                <div class="container">
+                    <div class="section-header">
+                        <div class="is-title">
+                            <h3 class="heading-md">You may also like</h3>
+                        </div>
+                        <div class="flex-grow"></div>
+                    </div>
+                </div>
+                <div id="carousel-related-movies" class="film-carousel">
+                    <div class="swiper-container">
+                        <div class="swiper-wrapper">
+                            <% relatedSeries.forEach(relatedSeries => { %>
+                                <div class="swiper-slide">
+                                    <div class="item-film">
+                                        <a href="/series/<%= relatedSeries.id %>" class="film-mask"></a>
+                                        <div class="film-thumbnail">
+                                            <div class="badge-tag quality">HD</div>
+                                            <img class="film-thumbnail-img"
+                                                src="https://image.tmdb.org/t/p/w500<%= relatedSeries.poster_path %>"
+                                                alt="<%= relatedSeries.name %>">
+                                        </div>
+                                        <div class="film-detail">
+                                            <h3 class="film-name sum-2">
+                                                <a href="/series/<%= relatedSeries.id %>" title="<%= relatedSeries.name %>">
+                                                    <%= relatedSeries.name %>
+                                                </a>
+                                            </h3>
+                                            <div class="film-info">
+                                                <span class="item">TV Series</span>
+                                                <span class="item"><%= new Date(relatedSeries.first_air_date).getFullYear() %></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <div class="carousel-controls">
+                        <div class="button-next"><i class="fas fa-angle-right"></i></div>
+                        <div class="button-prev"><i class="fas fa-angle-left"></i></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--/// Footer ///-->
+        <footer>
+            <div class="footer-top">
+                <div class="container">
+                    <div class="d-flex footer-elements">
+                        <div class="footer-logo">
+                            <a href="/" class="is-logo"><img
+                                    src="/images/logo.png"
+                                    alt="H.A Entertainment"></a>
+                        </div>
+                        <div class="footer-about">
+                            <div class="heading-sm mb-3">About Us</div>
+                            <p>H.A Entertainment is free tv shows streaming website with zero ads, it
+                                allows you <strong>watch tv shows online</strong>, <strong>watch tv shows online
+                                    free</strong>
+                                in high quality for free.
+                            </p>
+                            <small>This site does not store any files on our server, we only linked to the media which
+                                is hosted
+                                on 3rd party services.</small>
+                            <div class="links pt-5">
+                                <a href="/contact-us">Contact</a>
+                                <a href="/terms">Terms of service</a>
+
+                            </div>
+                        </div>
+                        <div class="footer-menu">
+                            <div class="heading-sm mb-3">Links</div>
+                            <div class="d-flex">
+                                <ul class="style-none">
+                                    <li><a href="/movies">Movies</a></li>
+                                    <li><a href="/tv-series">TV Series</a></li>
+                                    <li><a href="/top-imdb">Top IMDb</a></li>
+                                </ul>
+                                <ul class="style-none">
+
+                                    <li><a href="/genre/28">Action</a></li>
+
+                                    <li><a href="/genre/35">Comedy</a></li>
+
+                                    <li><a href="/genre/18">Drama</a></li>
+
+                                </ul>
+                                <ul class="style-none">
+
+                                    <li><a href="/genre/14">Fantasy</a></li>
+
+                                    <li><a href="/genre/27">Horror</a></li>
+
+                                    <li><a href="/genre/9648">Mystery</a></li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-grow"></div>
+                        <div class="footer-up">
+                            <a href="#app" class="btn btn-lg btn-light w-icon linknav"><i
+                                    class="fas fa-angle-up mr-2"></i><strong>Top</strong></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- Begin: Javascript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.min.js"></script>
+    <script src="/js/search.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const seriesId = '<%= series.id %>';
+    const seasonDropdown = document.querySelector('.mine-dropdown');
+    const currentSeasonElement = document.getElementById('current-ss');
+    const episodesListContainer = document.querySelector('.eps-list');
+    const iframe = document.getElementById('iframe-player');
+    const currentServerElement = document.getElementById('current-server');
+
+    // Assign EJS variables to JavaScript variables
+    const currentEpisodeId = '<%= currentEpisode.id %>';
+    const currentEpisodeNumber = '<%= currentEpisode.episode_number %>';
+    const currentSeasonNumber = '<%= currentSeason.season_number %>';
+
+    // Initial setup for the first episode and season
+    const initialEpisodeId = currentEpisodeId;
+    const initialSeasonNumber = currentSeasonNumber;
+    const initialEpisodeNumber = currentEpisodeNumber;
+
+    // Define your server URLs with placeholders
+    const servers = [
+        { id: '1', name: 'H.A', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id={episode_id}` },
+        { id: '2', name: 'UpCloud', url: `https://vidsrc.xyz/embed/tv?tmdb=2734&season={season_number}&episode={episode_number}` },
+        { id: '3', name: 'MegaCloud', url: `https://www.2embed.cc/embedtv/2734&season={season_number}&episode={episode_number}` },
+        { id: '4', name: 'TVUniverse', url: `https://movieuniverse.lol/embedtv/2734&season={season_number}&episode={episode_number}` }
+    ];
+
+    document.querySelectorAll('.dropdown-item.sv-item').forEach(serverItem => {
+        console.log('Original URL:', serverItem.getAttribute('data-url'));
+    });
+
+    function updateActiveEpisode(episodeId, episodeNumber, seasonNumber) {
+        console.log('Updating Active Episode:', { episodeId, episodeNumber, seasonNumber });
+
+        // Update the active episode
+        document.querySelectorAll('.ep-item').forEach(item => {
+            item.classList.remove('on-air');
+        });
+        document.querySelector(`.ep-item[data-id="${episodeId}"]`).classList.add('on-air');
+
+        // Update iframe source
+        const activeServerItem = document.querySelector('.dropdown-item.sv-item.active');
+        if (activeServerItem) {
+            const serverUrl = activeServerItem.getAttribute('data-url')
+                .replace('{episode_id}', episodeId)
+                .replace('{season_number}', seasonNumber)
+                .replace('{episode_number}', episodeNumber)
+                .replace('{seriesId}', seriesId);
+            iframe.src = serverUrl;
+            console.log('Updated iframe source:', serverUrl);
+        }
+
+        // Update the server links
+        document.querySelectorAll('.dropdown-item.sv-item').forEach(serverItem => {
+            console.log('Original URL:', serverItem.getAttribute('data-url'));
+            serverItem.setAttribute(
+                'data-url',
+                serverItem.getAttribute('data-url')
+                    .replace('{episode_id}', episodeId)
+                    .replace('{season_number}', seasonNumber)
+                    .replace('{episode_number}', episodeNumber)
+                    .replace('{seriesId}', seriesId)
+            );
+            console.log('Updated URL:', serverItem.getAttribute('data-url'));
+        });
+    }
+
+    function updateSeasonEpisodes(seasonNumber) {
+        console.log('Updating Season Episodes:', seasonNumber);
+
+        fetch(`/api/series/${seriesId}/season/${seasonNumber}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update the episodes list
+                episodesListContainer.innerHTML = '';
+                data.episodes.forEach(episode => {
+                    const episodeElement = document.createElement('div');
+                    episodeElement.innerHTML = `
+                        <a data-id="${episode.id}" href="javascript:;" class="ep-item ${episode.id === initialEpisodeId ? 'on-air' : ''}">
+                            <div class="is-icon"><i class="fas fa-play"></i></div>
+                            <div class="is-info">
+                                <span class="number">Episode ${episode.episode_number}</span>
+                                <span class="name sum">${episode.name}</span>
+                            </div>
+                        </a>
+                    `;
+                    episodesListContainer.appendChild(episodeElement);
+                });
+
+                // Update the season dropdown
+                currentSeasonElement.textContent = `Season ${seasonNumber}`;
+
+                // Add click event listeners to the new episode items
+                document.querySelectorAll('.ep-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const episodeId = item.getAttribute('data-id');
+                        const episodeNumber = item.querySelector('.number').textContent.split(' ')[1];
+                        updateActiveEpisode(episodeId, episodeNumber, seasonNumber);
+                    });
+                });
+
+                // Set the first episode of the new season as active
+                if (data.episodes.length > 0) {
+                    const firstEpisode = data.episodes[0];
+                    updateActiveEpisode(firstEpisode.id, firstEpisode.episode_number, seasonNumber);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching season episodes:', error);
+            });
+    }
+
+    // Add click event listeners to season items
+    document.querySelectorAll('.ss-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const seasonNumber = item.getAttribute('data-id');
+            updateSeasonEpisodes(seasonNumber);
+        });
+    });
+
+    // Add click event listeners to server items
+    document.querySelectorAll('.dropdown-item.sv-item').forEach(serverItem => {
+        serverItem.addEventListener('click', () => {
+            // Remove the active class from all server items
+            document.querySelectorAll('.dropdown-item.sv-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('small.text-active').style.display = 'none';
+            });
+
+            // Add the active class to the clicked server item
+            serverItem.classList.add('active');
+            serverItem.querySelector('small.text-active').style.display = 'inline';
+
+            // Update the current server text
+            currentServerElement.textContent = `Server ${serverItem.querySelector('.sv-name').textContent.trim().split(' ')[1]}`;
+
+            // Update the iframe source with the new server URL
+            const serverUrl = serverItem.getAttribute('data-url')
+                .replace('{episode_id}', initialEpisodeId)
+                .replace('{season_number}', initialSeasonNumber)
+                .replace('{episode_number}', initialEpisodeNumber)
+                .replace('{seriesId}', seriesId);
+            iframe.src = serverUrl;
+            console.log('Updated iframe source on server change:', serverUrl);
+        });
+    });
+
+    // Initialize the first episode and server
+    updateActiveEpisode(initialEpisodeId, initialEpisodeNumber, initialSeasonNumber);
+});
+
+</script>
+    <!-- End: Javascript -->
+</body>
+
+</html>

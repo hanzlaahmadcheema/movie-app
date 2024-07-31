@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>
+        <%= cast.name %> - Watch Free Movies and TV Series on H.A Entertainment
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="content-language" content="en" />
+    <meta name="description"
+        content="<%= cast.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
+    <meta name="keywords"
+        content="best movies site, free movies watch, free movies streaming, free series watch, watch movies online, watch free movies, watch movies free" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+    <link rel="shortcut icon" href="https://ha-entertainment.netlify.app/images/logo.png" type="image/x-icon" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://1hd.to" />
+    <meta property="og:title" content="<%= cast.name %> - Watch Free Movies and TV Series on H.A Entertainment" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/w500/<%= cast.poster_path %>" />
+    <meta property="og:image:width" content="650">
+    <meta property="og:image:height" content="350">
+    <meta property="og:description"
+        content="<%= cast.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
+    <!-- Begin: Stylesheet -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
+    <link rel="stylesheet" href="/css/theme_1.css">
+    <!-- End: Stylesheet -->
+</head>
+
+<body id="gMNrTK">
+    <div id="mobile-overlay" class=""></div>
+    <div id="menu-display" class="">
+        <ul class="nav menu-display-list">
+            <li class="nav-item active"><a class="nav-link" href="/" title="Home">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="/movies" title="Movies">Movies</a></li>
+            <li class="nav-item"><a class="nav-link" href="/tv-series" title="TV Series">TV Series</a></li>
+            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Genre</a>
+                <div class="toggle-submenu collapsed" data-toggle="collapse" data-target="#show-genres"
+                    aria-expanded="false" aria-controls="show-genres"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="multi-collapse is-sub collapse" id="show-genres" style="">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item"><a class="nav-link" href="genre/28">Action</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/12">Adventure</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/16">Animation</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/35">Comedy</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/80">Crime</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/99">Documentary</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/18">Drama</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/10751">Family</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/14">Fantasy</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/36">History</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/27">Horror</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/10402">Music</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/9648">Mystery</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/10749">Romance</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/878">Sci-Fi</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/53">Thriller</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/10767">Talk</a></li>
+                        <li class="nav-item"><a class="nav-link" href="genre/10752">War</a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Country</a>
+                <div class="toggle-submenu" data-toggle="collapse" data-target="#sidebar_subs_country"
+                    aria-expanded="false" aria-controls="sidebar_subs_country"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="collapse multi-collapse sidebar_menu-sub" id="sidebar_subs_country">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item"><a class="nav-link" href="country/US">United States</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/CN">China</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/GB">United Kingdom</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/KR">South Korea</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/JP">Japan</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/HK">Hongkong</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/PK">Pakistan</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/IN">India</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/TH">Thailand</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/TR">Türkiye</a></li>
+                        <li class="nav-item"><a class="nav-link" href="country/FR">France</a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
+        </ul>
+    </div>
+    <div id="app">
+        <!--/// Header ///-->
+        <header class="over-air">
+            <div class="container">
+                <div id="header_elements">
+                    <div class="btn btn-touch mobile-button" id="mobile_menu"><i class="fas fa-bars"></i></div>
+                    <a href="/" id="header_logo">
+                        <img src="/images/logo.png" alt="H.A Entertainment">
+                    </a>
+                    <div id="header_search">
+                        <div class="search-elements">
+                            <form id="search-form" action="/search" method="GET">
+                                <div class="search-submit">
+                                    <div class="search-icon"><i class="fa fa-search"></i></div>
+                                </div>
+                                <input name="keyword" type="text" id="search-input" class="form-control is-input"
+                                     placeholder="Search for movies or TV series" />
+                            </form>
+                            <div id="search-suggestions" class="is-result search-suggest" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="header_menu">
+                        <div class="menu-item">
+                            <a href="/" class="menu-link">Home</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="/movies" class="menu-link">Movies</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="/tv-series" class="menu-link">TV Series</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="/contact-us" class="menu-link">Contact Us</a>
+                        </div>
+                    </div>
+                    <div class="flex-grow"></div>
+                        <div class="btn btn-touch mobile-button" id="mobile_search"><i class="fas fa-search"></i></div>
+                </div>
+            </div>
+        </header>
+        <!--/// Page body ///-->
+        <div id="page-detail">
+            <!-- Cast Detail Section -->
+            <section class="section-detail is-detail-tv">
+                <div class="slide-cover">
+                    <img src="https://image.tmdb.org/t/p/original/<%= cast.profile_path %>" alt="<%= cast.name %>">
+                </div>
+                <div class="container">
+                    <div class="detail-wrap">
+                        <div class="detail-elements">
+                            <div class="one-block">
+                                <div class="is-thumbnail">
+                                    <div class="film-thumbnail">
+                                        <img class="film-thumbnail-img"
+                                            src="https://image.tmdb.org/t/p/original/<%= cast.profile_path %>"
+                                            alt="<%= cast.name %>">
+                                    </div>
+                                </div>
+                                <div class="is-caption backdrop-blur-50">
+                                    <div class="is-top">
+                                        <div class="detail-top">
+                                            <div class="is-back">
+                                                <a href="javascript:history.back()"
+                                                    class="btn btn-light btn-radius w-icon">
+                                                    <i class="fas fa-angle-left mr-2"></i>Go Back
+                                                </a>
+                                            </div>
+                                            <div class="is-share">
+                                                <div class="share-wrap">
+                                                    <!-- Add share buttons here if needed -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h3 class="heading-xl">
+                                            <%= cast.name %>
+                                        </h3>
+                                        <div class="is-action">
+                                            <div class="is-rate">
+                                                <div class="stars mr-2">
+                                                    <div class="fill fill-<%= Math.round(cast.popularity / 2) %>"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="is-bot">
+                                        <div class="item-description mb-4">
+                                            <div class="item-body">
+                                                <div class="name mb-2"><strong>Biography</strong></div>
+                                                <div class="description">
+                                                    <%= cast.biography %>
+                                                </div>
+                                                <div class="desc-more mt-2">
+                                                    <button data-toggle="dropdown" aria-haspopup="true"
+                                                        aria-expanded="false" class="btn btn-sm btn-trans w-icon">
+                                                        <i class="fas fa-plus mr-2"></i>read full
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-primary mine-dropdown">
+                                                        <div class="dropdown-text">
+                                                            <p>
+                                                                <%= cast.biography %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="others">
+                                            <div class="item">
+                                                <div class="name">Gender</div>
+                                                <div class="item-body">
+                                                    <span>
+                                                        <%= cast.gender===1 ? 'Female' : 'Male' %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="item">
+                                                <div class="name">IMDb Id</div>
+                                                <div class="item-body">
+                                                    <span>
+                                                        <%= cast.imdb_id %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="item">
+                                                <div class="name">Known For Department</div>
+                                                <div class="item-body">
+                                                    <span>
+                                                        <%= cast.known_for_department %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="item">
+                                                <div class="name">Also Known As</div>
+                                                <div class="item-body">
+                                                    <% cast.also_known_as.forEach(name=> { %>
+                                                        <span>
+                                                            <%= name %>
+                                                        </span>,
+                                                        <% }); %>
+                                                </div>
+                                            </div>
+                                            <div class="item">
+                                                <div class="name">Date of Birth</div>
+                                                <div class="item-body">
+                                                    <span>
+                                                        <%= cast.birthday %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="item">
+                                                <div class="name">Place of Birth</div>
+                                                <div class="item-body">
+                                                    <span>
+                                                        <%= cast.place_of_birth %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <% if (cast.deathday) { %>
+                                                <div class="item">
+                                                    <div class="name">Date of Death</div>
+                                                    <div class="item-body">
+                                                        <span>
+                                                            <%= cast.deathday %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="item">
+                                                        <div class="name">Status</div>
+                                                        <div class="item-body">
+                                                            <span>Alive</span>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="section-default section-flow-vertical section-page section-film-list is-head-cate is-list">
+                <div class="container">
+                    <div class="section-header">
+                        <div class="is-title">
+                            <h2 class="heading-md">Known For</h2>
+                        </div>
+                        <div class="flex-grow"></div>
+                    </div>
+                    <div class="section-body">
+                        <div class="film-list">
+                            <% known_for.forEach(movie=> { %>
+                                <div class="item-film">
+                                    <a href="<%= movie.media_type === 'movie' ? '/movie/' + movie.id : '/series/' + movie.id %>"
+                                        class="film-mask"></a>
+                                    <div class="film-thumbnail">
+                                        <div class="badge-tag quality">HD</div>
+                                        <img class="film-thumbnail-img"
+                                            src="https://image.tmdb.org/t/p/original/<%= movie.poster_path %>"
+                                            alt="<%= movie.title %>">
+                                    </div>
+                                    <div class="film-detail">
+                                        <h3 class="film-name sum-2">
+                                            <a href="<%= movie.media_type === 'movie' ? '/movie/' + movie.id : '/series/' + movie.id %>"
+                                                title="<%= movie.title %>">
+                                                <%= movie.media_type==='movie' ? movie.title : movie.name %>
+                                            </a>
+                                        </h3>
+                                        <div class="film-info">
+                                            <span class="item">
+                                                <%= movie.media_type==='movie' ? 'Movie' : 'TV Series' %>
+                                            </span>
+                                            <span class="item">
+                                                <%= movie.media_type==='movie' ? new
+                                                    Date(movie.release_date).getFullYear() : new
+                                                    Date(movie.first_air_date).getFullYear() %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                    </div>
+
+                    <% if (totalPages> 1) { %>
+                        <div class="section-pagination">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mb-0">
+                                    <% if (currentPage> 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= 1 %>" aria-label="First">
+                                                <span aria-hidden="true"><i class="fa fa-angle-double-left"></i></span>
+                                                <span class="sr-only">First</span>
+                                            </a>
+                                        </li>
+                                        <% } %>
+
+                                            <% if (currentPage> 1) { %>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=<%= currentPage - 1 %>"
+                                                        aria-label="Previous">
+                                                        <span aria-hidden="true"><i class="fa fa-angle-left"></i></span>
+                                                        <span class="sr-only">Previous</span>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+
+                                                    <% // Determine the range of pages to display const
+                                                        maxPagesToShow=3; // Number of pages to show at once const
+                                                        startPage=Math.max(1, currentPage - Math.floor(maxPagesToShow /
+                                                        2)); const endPage=Math.min(totalPages, startPage +
+                                                        maxPagesToShow - 1); %>
+
+                                                        <% for (let i=startPage; i <=endPage; i++) { %>
+                                                            <li
+                                                                class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                                <a class="page-link" href="?page=<%= i %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+
+                                                                <% if (currentPage < totalPages) { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="?page=<%= currentPage + 1 %>"
+                                                                            aria-label="Next">
+                                                                            <span aria-hidden="true"><i
+                                                                                    class="fa fa-angle-right"></i></span>
+                                                                            <span class="sr-only">Next</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } %>
+
+                                                                        <% if (totalPages> 1 && currentPage <
+                                                                                totalPages) { %>
+                                                                                <li class="page-item">
+                                                                                    <a class="page-link"
+                                                                                        href="?page=<%= totalPages %>"
+                                                                                        aria-label="Last">
+                                                                                        <span aria-hidden="true"><i
+                                                                                                class="fa fa-angle-double-right"></i></span>
+                                                                                        <span
+                                                                                            class="sr-only">Last</span>
+                                                                                    </a>
+                                                                                </li>
+                                                                                <% } %>
+                                </ul>
+                            </nav>
+                        </div>
+                        <% } %>
+                </div>
+            </section>
+
+        </div>
+        <!-- Footer Section -->
+        <div class="flex-grow"></div>
+        <footer>
+            <div class="footer-top">
+                <div class="container">
+                    <div class="d-flex footer-elements">
+                        <div class="footer-logo">
+                            <a href="/" class="is-logo"><img src="/images/logo.png" alt="H.A Entertainment"></a>
+                        </div>
+                        <div class="footer-about">
+                            <div class="heading-sm mb-3">About Us</div>
+                            <p>H.A Entertainment is free tv shows streaming website with zero ads, it
+                                allows you <strong>watch tv shows online</strong>, <strong>watch tv shows online
+                                    free</strong>
+                                in high quality for free.
+                            </p>
+                            <small>This site does not store any files on our server, we only linked to the media which
+                                is hosted
+                                on 3rd party services.</small>
+                            <div class="links pt-5">
+                                <a href="/contact-us">Contact</a>
+                                <a href="/terms">Terms of service</a>
+
+                            </div>
+                        </div>
+                        <div class="footer-menu">
+                            <div class="heading-sm mb-3">Links</div>
+                            <div class="d-flex">
+                                <ul class="style-none">
+                                    <li><a href="/movies">Movies</a></li>
+                                    <li><a href="/tv-series">TV Series</a></li>
+                                    <li><a href="/top-imdb">Top IMDb</a></li>
+                                </ul>
+                                <ul class="style-none">
+
+                                    <li><a href="/genre/28">Action</a></li>
+
+                                    <li><a href="/genre/35">Comedy</a></li>
+
+                                    <li><a href="/genre/18">Drama</a></li>
+
+                                </ul>
+                                <ul class="style-none">
+
+                                    <li><a href="/genre/14">Fantasy</a></li>
+
+                                    <li><a href="/genre/27">Horror</a></li>
+
+                                    <li><a href="/genre/9648">Mystery</a></li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-grow"></div>
+                        <div class="footer-up">
+                            <a href="#app" class="btn btn-lg btn-light w-icon linknav"><i
+                                    class="fas fa-angle-up mr-2"></i><strong>Top</strong></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- Begin: Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.min.js"></script>
+    <script src="/js/search.js"></script>
+    <!-- End: Scripts -->
+</body>
+
+</html>
