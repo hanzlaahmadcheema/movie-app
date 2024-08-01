@@ -376,6 +376,10 @@ app.get('/watch-movie/:id', async (req, res) => {
         posterPath: movie.poster_path,
         genres: movie.genres,
         release_date: movie.release_date,
+        runtime: movie.runtime,
+        vote_average: movie.vote_average,
+        vote_count: movie.vote_count
+
         // Add any other movie details you need
       };
   
@@ -467,6 +471,15 @@ app.get('/watch-movie/:id', async (req, res) => {
     }
 });
 
+app.get('/watch-series/:id', (req, res) => {
+    const { id } = req.params;
+    res.redirect(`/watch-series/${id}/season/1/episode/1`);
+});
+
+app.get('/watch-series/:id/season/:season', (req, res) => {
+    const { id, season } = req.params;
+    res.redirect(`/watch-series/${id}/season/${season}/episode/1`);
+});
 
 // Route to capture cast details
 app.get('/cast/:id', async (req, res) => {
@@ -744,19 +757,6 @@ app.get('/filter', async (req, res) => {
       res.status(500).send('Error fetching data');
   }
 });
-
-app.get('/watch-series/:id', (req, res) => {
-    const { id } = req.params;
-    res.redirect(`/watch-series/${id}/season/1/episode/1`);
-});
-
-app.get('/watch-series/:id/season/:season', (req, res) => {
-    const { id, season } = req.params;
-    res.redirect(`/watch-series/${id}/season/${season}/episode/1`);
-});
-
-
-
 
 
 module.exports = app;
