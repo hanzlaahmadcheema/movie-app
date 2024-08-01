@@ -82,10 +82,11 @@
           "video": {
             "@type": "VideoObject",
             "name": "<%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %>",
+            "description": "<%= series.overview %>",
             "contentUrl": "<%= servers[0].url %>",
             "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= series.backdrop_path %>",
             "embedUrl": "<%= servers[0].url %>",
-            "uploadDate": "<%= series.first_air_date %>"
+            "uploadDate": "<%= series.first_air_date %>T08:00:00+08:00"
           }
         }
     </script>

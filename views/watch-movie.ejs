@@ -91,26 +91,28 @@
           ],
           "releaseDate": "<%= movie.release_date %>",
           "duration": "<%= movie.runtime %> minutes",
-          "aggregateRating": {
-            "@type": "AggregateRating",
+          "reviewRating": {
+            "@type": "Rating",
             "ratingValue": "<%= movie.vote_average %>",
             "reviewCount": "<%= movie.vote_count %>"
           },
           "trailer": {
             "@type": "VideoObject",
             "name": "<%= movie.title %> Trailer",
+            "description": "<%= movie.overview %>",
             "contentUrl": "https://www.youtube.com/watch?v=<%= trailerId %>",
             "thumbnailUrl": "https://img.youtube.com/vi/<%= trailerId %>/maxresdefault.jpg",
             "embedUrl": "https://www.youtube.com/embed/<%= trailerId %>",
-            "uploadDate": "<%= movie.release_date %>"
+            "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
           },
           "video": {
             "@type": "VideoObject",
             "name": "<%= movie.title %>",
+            "description": "<%= movie.overview %>",
             "contentUrl": "<%= servers[0].url %>",
             "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
             "embedUrl": "<%= servers[0].url %>",
-            "uploadDate": "<%= movie.release_date %>"
+            "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
           }
         }
         </script>
