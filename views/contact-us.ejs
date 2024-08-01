@@ -341,7 +341,7 @@
             document.getElementById('modalContent').innerHTML = modalContent;
 
             // Construct the message
-            const textMessage = `Hello!%20H.A%0A%0A*Name:*%20_${encodeURIComponent(name)}_%0A*Email:*%20\`${encodeURIComponent(email)}\`%0A*Subject:*%20\`\`\`${encodeURIComponent(subject)}\`\`\`%0A*Message:*%0A> ${encodeURIComponent(message)}`;
+            const textMessage = `\`Hello!%20H.A\`%0A%0A*Name:*%20_${encodeURIComponent(name)}_%0A*Email:*%20_${encodeURIComponent(email)}_%0A*Subject:*%20\`\`\`${encodeURIComponent(subject)}\`\`\`%0A*Message:*%0A> ${encodeURIComponent(message)}`;
 
             // Update the WhatsApp link
             const whatsappLink = `https://api.whatsapp.com/send?phone=923020568468&text=${textMessage}`;
