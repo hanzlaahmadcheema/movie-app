@@ -385,8 +385,8 @@ app.get('/watch-movie/:id', async (req, res) => {
   
       const servers = [
         { id: '1', name: 'H.A', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-        { id: '2', name: 'UpCloud', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-        { id: '3', name: 'MegaCloud', url: `https://www.2embed.cc/embed/${movieId}` },
+        { id: '2', name: 'VidSrc', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+        { id: '3', name: '2Embed', url: `https://www.2embed.cc/embed/${movieId}` },
         { id: '4', name: 'MovieUniverse', url: `https://movieuniverse.lol/embed/${movieId}` }
       ];
   
@@ -453,7 +453,9 @@ app.get('/watch-movie/:id', async (req, res) => {
         // Servers data with URLs
         const servers = [
             { name: 'HA Entertainment', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
-            { name: 'VidSrc', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` }
+            { name: 'VidSrc', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
+            { name: '2Embed', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'MovieUniverse', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
 
         // Render the EJS template with series, seasons, episodes, and servers data
