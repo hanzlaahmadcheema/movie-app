@@ -58,8 +58,8 @@
               "url": "https://ha-entertainment.vercel.app/movie/<%= movie.id %>",
               "image": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
               "description": "<%= movie.overview %>",
-              "aggregateRating": {
-                "@type": "AggregateRating",
+              "reviewRating": {
+                "@type": "Rating",
                 "ratingValue": "<%= movie.vote_average %>",
                 "reviewCount": "<%= movie.vote_count %>"
               },
@@ -105,10 +105,15 @@
               "video": {
                 "@type": "VideoObject",
                 "name": "<%= movie.title %>",
+                description: "<%= movie.overview %>",
                 "contentUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
                 "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
                 "embedUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
-                "uploadDate": "<%= movie.release_date %>"
+                "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
+              },
+              "interactionStatistic": {
+                "@type": "InteractionCounter",
+                "interactionType": { "@type": "WatchAction" }
               }
             }
             </script>
