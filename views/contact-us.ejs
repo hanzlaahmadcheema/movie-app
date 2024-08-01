@@ -72,11 +72,11 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-VS8TC16J1Q"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-      gtag('config', 'G-VS8TC16J1Q');
+        gtag('config', 'G-VS8TC16J1Q');
     </script>
 </head>
 
@@ -155,7 +155,7 @@
                                     <div class="search-icon"><i class="fa fa-search"></i></div>
                                 </div>
                                 <input name="keyword" type="text" id="search-input" class="form-control is-input"
-                                     placeholder="Search for movies or TV series" />
+                                    placeholder="Search for movies or TV series" />
                             </form>
                             <div id="search-suggestions" class="is-result search-suggest" style="display: none;">
                             </div>
@@ -226,25 +226,29 @@
                 </div>
             </section>
             <!-- Modal -->
-<div class="modal fade mine-modal is-filter" id="modalfilter" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <h5 class="modal-title mb-0">Success</h5>
-                <div class="description">Your form was submitted successfully, we'll contact you shortly. Or Message us on WhatsApp.</div>
-                <div class="mt-3">&nbsp;</div>
-                <div class="filter-wrap" id="modalContent">
-                    <!-- Modal content will be inserted here -->
-                </div>
-                <div class="mt-4">&nbsp;</div>
-                <div class="filter-buttons">
-                    <button type="button" data-dismiss="modal" aria-label="Close" class="btn btn-lg btn-primary btn-filter flex-grow mr-2">Close</button>
-                <a class="btn btn-lg btn-secondary" href="https://api.whatsapp.com/send?phone=923020568468&text=Hello!%20H.A">WhatsApp.</a>
+            <div class="modal fade mine-modal is-filter" id="modalfilter" tabindex="-1" role="dialog"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <h5 class="modal-title mb-0">Success</h5>
+                            <div class="description">Your form was submitted successfully, we'll contact you shortly. Or
+                                Message us on WhatsApp.</div>
+                            <div class="mt-3">&nbsp;</div>
+                            <div class="filter-wrap" id="modalContent">
+                                <!-- Modal content will be inserted here -->
+                            </div>
+                            <div class="mt-4">&nbsp;</div>
+                            <div class="filter-buttons">
+                                <button type="button" data-dismiss="modal" aria-label="Close"
+                                    class="btn btn-lg btn-primary btn-filter flex-grow mr-2">Close</button>
+                                <a id="whatsappLink" class="btn btn-lg btn-secondary" href="#"
+                                    target="_blank">WhatsApp</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
         </div>
         <!-- Footer Section -->
         <div class="flex-grow"></div>
@@ -315,16 +319,16 @@
     <script src="/js/app.min.js"></script>
     <script src="/js/search.js"></script>
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(event) {
+        document.getElementById('contactForm').addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent the default form submission
-        
+
             // Collect form data
             const formData = new FormData(this);
             const name = formData.get('name');
             const email = formData.get('email');
             const subject = formData.get('subject');
             const message = formData.get('message');
-        
+
             // Create the content for the modal
             const modalContent = `
                 <p><strong>Name:</strong> ${name}</p>
@@ -332,18 +336,24 @@
                 <p><strong>Subject:</strong> ${subject}</p>
                 <p><strong>Message:</strong> ${message}</p>
             `;
-        
+
             // Set the content in the modal
             document.getElementById('modalContent').innerHTML = modalContent;
-        
+
+            // Construct the message
+            const textMessage = `Hello!%20H.A%0A%0A*Name:*%20${encodeURIComponent(name)}%0A*Email:*%20${encodeURIComponent(email)}%0A*Subject:*%20${encodeURIComponent(subject)}%0A*Message:*%0A> ${encodeURIComponent(message)}`;
+
+            // Update the WhatsApp link
+            const whatsappLink = `https://api.whatsapp.com/send?phone=923020568468&text=${textMessage}`;
+            document.getElementById('whatsappLink').href = whatsappLink;
             // Show the modal
             $('#modalfilter').modal('show');
-        
+
             // Optionally, you can clear the form fields
             this.reset();
         });
-        </script>
-        
+    </script>
+
     <!-- End: Scripts -->
 </body>
 
