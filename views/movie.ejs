@@ -51,72 +51,70 @@
 
     <!-- Schema Markup for Movie Details Page -->
     <script type="application/ld+json">
-            {
-              "@context": "https://schema.org",
-              "@type": "Movie",
-              "name": "<%= movie.title %>",
-              "url": "https://ha-entertainment.vercel.app/movie/<%= movie.id %>",
-              "image": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
-              "description": "<%= movie.overview %>",
-              "reviewRating": {
-                "@type": "Rating",
-                "ratingValue": "<%= movie.vote_average %>",
-                "reviewCount": "<%= movie.vote_count %>"
-              },
-              "genre": [
-                <% movie.genres.forEach(function(genre, index) { %>
-                  "<%= genre.name %>"
-                  <% if (index < movie.genres.length - 1) { %>, <% } %>
-                <% }) %>
-              ],
-              "actor": [
-        <% movie.cast.forEach(function(actor, index) { %>
-          {
-            "@type": "Person",
-            "name": "<%= actor.name %>",
-            "characterName": "<%= actor.character %>"
+        {
+          "@context": "https://schema.org",
+          "@type": "Movie",
+          "name": "<%= movie.title %>",
+          "url": "https://ha-entertainment.vercel.app/movie/<%= movie.id %>",
+          "image": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
+          "description": "<%= movie.overview %>",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "<%= movie.vote_average %>",
+            "reviewCount": "<%= movie.vote_count %>"
+          },
+          "genre": [
+            <% movie.genres.forEach(function(genre, index) { %>
+              "<%= genre.name %>"<% if (index < movie.genres.length - 1) { %>, <% } %>
+            <% }) %>
+          ],
+          "actor": [
+            <% movie.cast.forEach(function(actor, index) { %>
+              {
+                "@type": "Person",
+                "name": "<%= actor.name %>",
+                "characterName": "<%= actor.character %>"
+              }<% if (index < movie.cast.length - 1) { %>, <% } %>
+            <% }) %>
+          ],
+          "productionCompany": [
+            <% movie.production_companies.forEach(function(company, index) { %>
+              {
+                "@type": "Organization",
+                "name": "<%= company.name %>",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
+                }
+              }<% if (index < movie.production_companies.length - 1) { %>, <% } %>
+            <% }) %>
+          ],
+          "releaseDate": "<%= movie.release_date %>",
+          "productionCountry": [
+            <% movie.production_countries.forEach(function(country, index) { %>
+              {
+                "@type": "Place",
+                "name": "<%= country.name %>"
+              }<% if (index < movie.production_countries.length - 1) { %>, <% } %>
+            <% }) %>
+          ],
+          "video": {
+            "@type": "VideoObject",
+            "name": "<%= movie.title %>",
+            "description": "<%= movie.overview %>",
+            "contentUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
+            "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
+            "embedUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
+            "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
+          },
+          "interactionStatistic": {
+            "@type": "InteractionCounter",
+            "interactionType": { "@type": "WatchAction" },
+            "userInteractionCount": 5647018
           }
-          <% if (index < movie.cast.length - 1) { %>, <% } %>
-        <% }) %>
-      ],
-              "productionCompany": [
-                <% movie.production_companies.forEach(function(company, index) { %>
-                  {
-                    "@type": "Organization",
-                    "name": "<%= company.name %>",
-                    "logo": {
-                      "@type": "ImageObject",
-                      "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
-                    }
-                  }
-                  <% if (index < movie.production_companies.length - 1) { %>, <% } %>
-                <% }) %>
-              ],
-              "releaseDate": "<%= movie.release_date %>",
-              "productionCountry": [
-                <% movie.production_countries.forEach(function(country, index) { %>
-                  {
-                    "@type": "Place",
-                    "name": "<%= country.name %>"
-                  }
-                  <% if (index < movie.production_countries.length - 1) { %>, <% } %>
-                <% }) %>
-              ],
-              "video": {
-                "@type": "VideoObject",
-                "name": "<%= movie.title %>",
-                description: "<%= movie.overview %>",
-                "contentUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
-                "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= movie.backdrop_path %>",
-                "embedUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
-                "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
-              },
-              "interactionStatistic": {
-                "@type": "InteractionCounter",
-                "interactionType": { "@type": "WatchAction" }
-              }
-            }
-            </script>
+        }
+        </script>
+        
 
 
     <!-- Google tag (gtag.js) -->
