@@ -2,34 +2,105 @@
 <html lang="en">
 
 <head>
-    <title>
-        <%= series.name %> - Watch Free Movies and TV Series on H.A Entertainment
-    </title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Watch <%= series.name %> - Season <%= selectedSeason %> - Episode <%= currentEpisode.episode_number %> - Free Full HD Streaming - H.A Entertainment</title>
 
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
-    <meta name="description"
-        content="<%= series.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <meta name="keywords"
-        content="best movies site, free movies watch, free movies streaming, free series watch, watch movies online, watch free movies, watch movies free" />
+    <meta name="description" content="Watch <%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality." />
+    <meta name="keywords" content="watch <%= series.name %>, free TV series streaming, HD TV shows, <%= series.name %> Season <%= selectedSeason %>, Episode <%= currentEpisode.episode_number %>, free TV series online, watch TV shows without ads" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <link rel="shortcut icon" href="https://ha-entertainment.netlify.app/images/logo.png" type="image/x-icon" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://1hd.to" />
-    <meta property="og:title" content="<%= series.name %> - Watch Free Movies and TV Series on H.A Entertainment" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w500/<%= series.backdrop_path %>" />
-    <meta property="og:image:width" content="650">
-    <meta property="og:image:height" content="350">
-    <meta property="og:description"
-        content="<%= series.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <!-- Begin: Stylesheet -->
+
+    <!-- Canonical Link -->
+    <link rel="canonical" href="https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= currentEpisode.episode_number %>" />
+
+    <!-- Favicon and Icons -->
+    <link rel="shortcut icon" href="https://ha-entertainment.vercel.app/images/logo.png" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://ha-entertainment.vercel.app/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://ha-entertainment.vercel.app/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://ha-entertainment.vercel.app/images/apple-touch-icon.png">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="video.episode" />
+    <meta property="og:title" content="Watch <%= series.name %> - Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> - Free Full HD Streaming" />
+    <meta property="og:url" content="https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= currentEpisode.episode_number %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/original<%= series.backdrop_path %>" />
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="750">
+    <meta property="og:description" content="Watch <%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality." />
+    <meta property="og:site_name" content="H.A Entertainment" />
+    <meta property="og:video" content="<%= servers[0].url %>" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@HA_Entertainment">
+    <meta name="twitter:title" content="Watch <%= series.name %> - Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> - Free Full HD Streaming">
+    <meta name="twitter:description" content="Watch <%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality.">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/original<%= series.backdrop_path %>">
+    <meta name="twitter:player" content="<%= servers[0].url %>">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/css/perfect-scrollbar.min.css">
     <link rel="stylesheet" href="/css/theme_1.css">
-    <!-- End: Stylesheet -->
+
+    <!-- Schema Markup for TV Series Watching Page -->
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TVSeries",
+          "name": "<%= series.name %>",
+          "url": "https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= currentEpisode.episode_number %>",
+          "description": "<%= series.overview %>",
+          "image": "https://image.tmdb.org/t/p/original<%= series.backdrop_path %>",
+          "genre": [
+            <% if (series.genres && series.genres.length > 0) { %>
+              <% series.genres.forEach((genre, index) => { %>
+                "<%= genre.name %>"<% if (index < series.genres.length - 1) { %>,<% } %>
+              <% }) %>
+            <% } else { %>
+              "Unknown"
+            <% } %>
+          ],
+          "episode": [
+            <% if (episodes && episodes.length > 0) { %>
+              <% episodes.forEach((episode, index) => { %>
+                {
+                  "@type": "Episode",
+                  "episodeNumber": "<%= episode.episode_number %>",
+                  "name": "<%= episode.name %>",
+                  "url": "https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= episode.episode_number %>"
+                }<% if (index < episodes.length - 1) { %>,<% } %>
+              <% }) %>
+            <% } %>
+          ],
+          "season": {
+            "@type": "TVSeason",
+            "seasonNumber": "<%= selectedSeason %>"
+          }
+          "video": {
+            "@type": "VideoObject",
+            "name": "<%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %>",
+            "contentUrl": "<%= servers[0].url %>",
+            "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= series.backdrop_path %>",
+            "embedUrl": "<%= servers[0].url %>",
+            "uploadDate": "<%= series.first_air_date %>"
+          }
+        }
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VS8TC16J1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-VS8TC16J1Q');
+    </script>
 </head>
+
 
 <body id="gMNrTK">
     <div id="mobile-overlay"></div>
@@ -105,7 +176,7 @@
                                     <div class="search-icon"><i class="fa fa-search"></i></div>
                                 </div>
                                 <input name="keyword" type="text" id="search-input" class="form-control is-input"
-                                     placeholder="Search for movies or TV series" />
+                                    placeholder="Search for movies or TV series" />
                             </form>
                             <div id="search-suggestions" class="is-result search-suggest" style="display: none;">
                             </div>
@@ -143,14 +214,19 @@
                             <div id="watch-area" class="watch-wrap backdrop-blur-50">
                                 <div class="ww-top">
                                     <div class="is-name flex-grow-1">
-                                        <h2 class="heading-sm sum mb-0"><%= series.name %></h2>
+                                        <h2 class="heading-sm sum mb-0">
+                                            <%= series.name %>
+                                        </h2>
                                     </div>
                                     <div class="top-right">
                                         <div class="is-detail">
-                                            <a href="/movie/watch-the-idea-of-you-online-108547" class="btn w-icon"><i class="fas fa-info-circle mr-2"></i>Detail</a>
+                                            <a href="/series/<%= series.id %>" class="btn w-icon"><i
+                                                    class="fas fa-info-circle mr-2"></i>Detail</a>
                                         </div>
                                         <div class="is-share">
-                                            <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-share-alt mr-2"></i>Share this</div>
+                                            <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false"><i class="fas fa-share-alt mr-2"></i>Share this
+                                            </div>
                                             <div class="dropdown-menu mine-dropdown">
                                                 <!-- Add share options here -->
                                             </div>
@@ -166,22 +242,31 @@
                                                 <div class="span3"></div>
                                             </div>
                                         </div>
-                                        <iframe id="iframe-player" width="100%" height="500" scrolling="no" frameborder="0" src="<%= servers[0].url %>" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                                        <iframe id="iframe-player" width="100%" height="500" scrolling="no"
+                                            frameborder="0" src="<%= servers[0].url %>" allowfullscreen="true"
+                                            webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
                                     </div>
                                 </div>
                                 <div class="ww-controls">
                                     <div id="server-play" class="is-servers">
-                                        <div class="btn p-0 w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="icon-fast mr-2"></span><span id="current-server">Server <%= servers[0].name %></span> <i class="fas fa-angle-down ml-2"></i></div>
+                                        <div class="btn p-0 w-icon" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false"><span class="icon-fast mr-2"></span><span
+                                                id="current-server">Server <%= servers[0].name %></span> <i
+                                                class="fas fa-angle-down ml-2"></i></div>
                                         <div class="dropdown-menu dropdown-primary mine-dropdown">
-                                            <% servers.forEach((server, index) => { %>
-                                            <a class="dropdown-item sv-item <%= index === 0 ? 'active' : '' %>" href="javascript:;" data-url="<%= server.url %>">
-                                                <i class="fas fa-cloud is-icon"></i>
-                                                <div class="d-name">
-                                                    <div class="sv-name"><strong><%= server.name %></strong></div>
-                                                    <small class="text-active" style="display: <%= index === 0 ? 'block' : 'none' %>;">Selected</small>
-                                                </div>
-                                            </a>
-                                            <% }); %>
+                                            <% servers.forEach((server, index)=> { %>
+                                                <a class="dropdown-item sv-item <%= index === 0 ? 'active' : '' %>"
+                                                    href="javascript:;" data-url="<%= server.url %>">
+                                                    <i class="fas fa-cloud is-icon"></i>
+                                                    <div class="d-name">
+                                                        <div class="sv-name"><strong>
+                                                                <%= server.name %>
+                                                            </strong></div>
+                                                        <small class="text-active"
+                                                            style="display: <%= index === 0 ? 'block' : 'none' %>;">Selected</small>
+                                                    </div>
+                                                </a>
+                                                <% }); %>
                                         </div>
                                         <small>If current server doesn't work please try other servers above</small>
                                     </div>
@@ -199,7 +284,8 @@
                                             </a>
                                         </div>
                                         <div class="item item-comment">
-                                            <div class="btn w-icon btn-comment"><i class="fas fa-comment mr-2"></i>Comment</div>
+                                            <div class="btn w-icon btn-comment"><i
+                                                    class="fas fa-comment mr-2"></i>Comment</div>
                                         </div>
                                     </div>
                                 </div>
@@ -207,64 +293,69 @@
                             <div id="eps-list" class="film-episodes backdrop-blur-50">
                                 <div class="eps-top">
                                     <div class="is-seasons">
-                                        <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <span id="current-ss">Season <%= selectedSeason %></span><i class="fas fa-angle-down ml-3"></i>
+                                        <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                            <span id="current-ss">Season <%= selectedSeason %></span><i
+                                                class="fas fa-angle-down ml-3"></i>
                                         </div>
-                                        <div class="dropdown-menu dropdown-primary mine-dropdown" style="max-height: 200px; overflow-y: auto;">
-                                            <% seasons.forEach(season => { %>
-                                            <a data-id="<%= season.season_number %>" class="dropdown-item ss-item <%= season.season_number == selectedSeason ? 'active' : '' %>" href="/watch-series/<%= series.id %>?season=<%= season.season_number %>">
-                                                <i class="fas fa-list is-icon"></i>
-                                                <div class="d-name">
-                                                    <div class="ss-name">Season <strong><%= season.season_number %></strong></div>
-                                                </div>
-                                            </a>
-                                            <% }); %>
+                                        <div class="dropdown-menu dropdown-primary mine-dropdown"
+                                            style="max-height: 200px; overflow-y: auto;">
+                                            <% seasons.forEach(season=> { %>
+                                                <a data-id="<%= season.season_number %>"
+                                                    class="dropdown-item ss-item <%= season.season_number == selectedSeason ? 'active' : '' %>"
+                                                    href="/watch-series/<%= series.id %>/season/<%= season.season_number %>/episode/1">
+                                                    <i class="fas fa-list is-icon"></i>
+                                                    <div class="d-name">
+                                                        <div class="ss-name">Season <strong>
+                                                                <%= season.season_number %>
+                                                            </strong></div>
+                                                    </div>
+                                                </a>
+                                                <% }); %>
                                         </div>
                                     </div>
                                     <div class="is-title">
-                                        <div class="heading-xs mb-0"><strong>Episodes <%= currentEpisode.episode_number %></strong></div>
+                                        <div class="heading-xs mb-0"><strong>Episodes <%= currentEpisode.episode_number
+                                                    %></strong></div>
                                     </div>
                                 </div>
                                 <div class="eps-list">
                                     <div class="eps-wrap no-thumb ps-container" style="">
-                                        <% episodes.forEach(episode => { %>
-                                        <div>
-                                            <a data-id="<%= episode.id %>" href="/watch-series/<%= series.id %>?season=<%= selectedSeason %>&episode=<%= episode.episode_number %>" class="ep-item <%= episode.episode_number == currentEpisode.episode_number ? 'on-air' : '' %>">
-                                                <div class="is-icon"><i class="fas fa-play"></i></div>
-                                                <div class="is-info">
-                                                    <span class="number">Episode <%= episode.episode_number %></span>
-                                                    <span class="name sum"><%= episode.name %></span>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <% }); %>
+                                        <% episodes.forEach(episode=> { %>
+                                            <div>
+                                                <a data-id="<%= episode.id %>"
+                                                    href="/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= episode.episode_number %>"
+                                                    class="ep-item <%= episode.episode_number == currentEpisode.episode_number ? 'on-air' : '' %>">
+                                                    <div class="is-icon"><i class="fas fa-play"></i></div>
+                                                    <div class="is-info">
+                                                        <span class="number">Episode <%= episode.episode_number %>
+                                                                </span>
+                                                        <span class="name sum">
+                                                            <%= episode.name %>
+                                                        </span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <% }); %>
                                     </div>
-                                                                <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 3px;"><div class="ps-scrollbar-x" style="left: 0px; width: 0px;"></div></div>                                </div>
-                            </div>                         
+                                    <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 3px;">
+                                        <div class="ps-scrollbar-x" style="left: 0px; width: 0px;"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
-    
         </div>
-                <!--/// Share -->
-                <div class="share-this">
-                    <div class="share-elements">
-                        <div class="text">🔔 Share this</div>
-                        <div class="share-wrap">
-                            <div class="sharethis-inline-share-buttons"></div>
-                        </div>
-                    </div>
-                </div>
+
         <!--/// Footer ///-->
         <footer>
             <div class="footer-top">
                 <div class="container">
                     <div class="d-flex footer-elements">
                         <div class="footer-logo">
-                            <a href="/" class="is-logo"><img
-                                    src="/images/logo.png"
-                                    alt="H.A Entertainment"></a>
+                            <a href="/" class="is-logo"><img src="/images/logo.png" alt="H.A Entertainment"></a>
                         </div>
                         <div class="footer-about">
                             <div class="heading-sm mb-3">About Us</div>
@@ -325,15 +416,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.0/dist/perfect-scrollbar.min.js"></script>
     <script type="text/javascript"
-    src="https://platform-api.sharethis.com/js/sharethis.js#property=6433be364f61b7001240a339&product=inline-share-buttons&source=platform"
-    async="async"></script>
+        src="https://platform-api.sharethis.com/js/sharethis.js#property=6433be364f61b7001240a339&product=inline-share-buttons&source=platform"
+        async="async"></script>
     <script src="/js/search.js"></script>
     <script>
-        $(document).ready(function() {
-    // Get URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const season = urlParams.get('season') || 1;
-    const episode = urlParams.get('episode') || 1;
+$(document).ready(function() {
+    const seriesId = '<%= series.id %>'; // Pass series ID to the script
+
+    // Get URL parameters from path
+    const pathParts = window.location.pathname.split('/');
+    const season = pathParts[4] || 1;
+    const episode = pathParts[6] || 1;
 
     // Set the current season and episode
     $('#current-ss').text('Season ' + season);
@@ -365,45 +458,39 @@
     $('.ss-item').click(function() {
         var seasonNumber = $(this).data('id');
         var currentEpisodeId = $('.ep-item.on-air').data('id');
-        window.location.href = `/watch-series/${series.id}?season=${seasonNumber}&episode=${currentEpisodeId}`;
+        window.location.href = `/watch-series/${seriesId}/season/${seasonNumber}/episode/${currentEpisodeId}`;
     });
 
     // Handle episode change
     $('.ep-item').click(function() {
         var episodeNumber = $(this).data('id');
-        $('.ep-item').removeClass('on-air');
-        $(this).addClass('on-air');
-        // Update iframe player with the selected episode
-        // Update the iframe src based on the selected episode
-        $('.sv-item').each(function() {
-            var url = $(this).data('url');
-            var newUrl = url.replace(/episode=\d+/, `episode=${episodeNumber}`);
-            $('#iframe-player').attr('src', newUrl);
-        });
+        // Redirect to the URL for the selected episode
+        window.location.href = `/watch-series/${seriesId}/season/${season}/episode/${episodeNumber}`;
     });
 });
 
-    </script>
-       <script>
-        document.addEventListener('DOMContentLoaded', function() {
-    var container = document.querySelector('.ps-container');
-    if (container) {
-        var ps = new PerfectScrollbar(container);
-    }
-});
 
-       </script>
+    </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            var container = document.querySelector('.ps-container');
+            if (container) {
+                var ps = new PerfectScrollbar(container);
+            }
+        });
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             var toggleButton = document.getElementById('toggle-light');
             var body = document.body;
 
-            toggleButton.addEventListener('click', function() {
+            toggleButton.addEventListener('click', function () {
                 body.classList.toggle('dark-mode');
             });
         });
     </script>
-<!-- End: Javascript -->
+    <!-- End: Javascript -->
 </body>
 
 </html>

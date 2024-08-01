@@ -2,33 +2,121 @@
 <html lang="en">
 
 <head>
-    <title> <%= tv.name %> - Watch Free Movies and TV Series on H.A Entertainment  </title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Watch <%= tv.name %> - Free Full HD TV Series Streaming - H.A Entertainment</title>
 
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
-    <meta name="description"
-        content="<%= tv.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <meta name="keywords"
-        content="best movies site, free movies watch, free movies streaming, free series watch, watch movies online, watch free movies, watch movies free" />
+    <meta name="description" content="Watch <%= tv.name %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality." />
+    <meta name="keywords" content="watch <%= tv.name %>, free TV series streaming, HD TV series, <%= tv.name %> full HD, free TV series online, watch TV series without ads" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <link rel="shortcut icon" href="https://ha-entertainment.netlify.app/images/logo.png" type="image/x-icon" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://1hd.to" />
-    <meta property="og:title" content="<%= tv.name %> - Watch Free Movies and TV Series on H.A Entertainment" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w500<%= tv.poster_path %>" />
-    <meta property="og:image:width" content="650">
-    <meta property="og:image:height" content="350">
-    <meta property="og:description"
-        content="<%= tv.overview %> - H.A Entertainment is the Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <!-- Begin: Stylesheet -->
+
+    <!-- Canonical Link -->
+    <link rel="canonical" href="https://ha-entertainment.vercel.app/series/<%= tv.id %>" />
+
+    <!-- Favicon and Icons -->
+    <link rel="shortcut icon" href="https://ha-entertainment.vercel.app/images/logo.png" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://ha-entertainment.vercel.app/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://ha-entertainment.vercel.app/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://ha-entertainment.vercel.app/images/apple-touch-icon.png">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="video.tv_show" />
+    <meta property="og:title" content="Watch <%= tv.name %> - Free Full HD TV Series Streaming" />
+    <meta property="og:url" content="https://ha-entertainment.vercel.app/series/<%= tv.id %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/original<%= tv.backdrop_path %>" />
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="750">
+    <meta property="og:description" content="Watch <%= tv.name %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality." />
+    <meta property="og:site_name" content="H.A Entertainment" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@HA_Entertainment">
+    <meta name="twitter:title" content="Watch <%= tv.name %> - Free Full HD TV Series Streaming">
+    <meta name="twitter:description" content="Watch <%= tv.name %> in Full HD for free on H.A Entertainment. Stream without ads and enjoy the best quality.">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/original<%= tv.backdrop_path %>">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
     <link rel="stylesheet" href="/css/theme_1.css">
-    <style>
-    </style>
-    <!-- End: Stylesheet -->
+
+    <!-- Schema Markup for TV Series Page -->
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TVSeries",
+          "name": "<%= tv.name %>",
+          "url": "https://ha-entertainment.vercel.app/series/<%= tv.id %>",
+          "description": "<%= tv.overview %>",
+          "image": "https://image.tmdb.org/t/p/original<%= tv.backdrop_path %>",
+          "genre": [
+            <% if (tv.genres && tv.genres.length > 0) { %>
+              <% tv.genres.forEach((genre, index) => { %>
+                "<%= genre.name %>"<% if (index < tv.genres.length - 1) { %>,<% } %>
+              <% }) %>
+            <% } else { %>
+              "Unknown"
+            <% } %>
+          ],
+          "actor": [
+            <% if (cast && cast.length > 0) { %>
+              <% cast.forEach((member, index) => { %>
+                {
+                  "@type": "Person",
+                  "name": "<%= member.name %>",
+                  "character": "<%= member.character %>",
+                  "image": "https://image.tmdb.org/t/p/original<%= member.profile_path %>"
+                }<% if (index < cast.length - 1) { %>,<% } %>
+              <% }) %>
+            <% } %>
+          ],
+          "productionCompany": [
+            <% if (tv.production_companies && tv.production_companies.length > 0) { %>
+              <% tv.production_companies.forEach((company, index) => { %>
+                {
+                  "@type": "Organization",
+                  "name": "<%= company.name %>",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
+                  }
+                }<% if (index < tv.production_companies.length - 1) { %>,<% } %>
+              <% }) %>
+            <% } %>
+          ],
+          "releaseDate": "<%= tv.first_air_date %>",
+          "duration": "<%= tv.episode_run_time[0] %> minutes",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "<%= tv.vote_average %>",
+            "reviewCount": "<%= tv.vote_count %>"
+          },
+          "trailer": {
+            "@type": "VideoObject",
+            "name": "<%= tv.name %> Trailer",
+            "contentUrl": "https://www.youtube.com/watch?v=<%= trailerId %>",
+            "thumbnailUrl": "https://img.youtube.com/vi/<%= trailerId %>/maxresdefault.jpg",
+            "embedUrl": "https://www.youtube.com/embed/<%= trailerId %>",
+            "uploadDate": "<%= tv.first_air_date %>"
+          }
+        }
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VS8TC16J1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-VS8TC16J1Q');
+    </script>
 </head>
+
+
 
 <body id="gMNrTK">
     <div id="mobile-overlay" class=""></div>
@@ -207,11 +295,15 @@
                                             <div class="item item-casts">
                                                 <div class="name">Casts</div>
                                                 <div class="item-body">
-                                                    <% tv.cast.forEach(actor => { %>
-                                                        <a href="/cast/<%= actor.id %>" title="<%= actor.name %>"><%= actor.name %></a><%= actor !== tv.cast[tv.cast.length - 1] ? ', ' : '' %>
-                                                    <% }); %>
+                                                    <% if (tv.cast && tv.cast.length > 0) { %>
+                                                        <% tv.cast.forEach((actor, index) => { %>
+                                                            <a href="/cast/<%= actor.id %>" title="<%= actor.name %>"><%= actor.name %></a><%= index < tv.cast.length - 1 ? ', ' : '' %>
+                                                        <% }); %>
+                                                    <% } else { %>
+                                                        <p>No cast information available.</p>
+                                                    <% } %>
                                                 </div>
-                                            </div>
+                                            </div>                                            
                                             <div class="item item-genres">
                                                 <div class="name">Genres</div>
                                                 <div class="item-body">

@@ -2,30 +2,72 @@
 <html lang="en">
 
 <head>
-    <title>Content from <%= productionName %> - Watch Free Movies and TV Series on H.A Entertainment</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Production Company: <%= productionName %> - H.A Entertainment</title>
+
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
-    <meta name="description"
-          content="Watch Free Movies and TV Series from <%= productionName %> on H.A Entertainment - The Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <meta name="keywords"
-          content="best movies site, free movies watch, free movies streaming, free series watch, watch movies online, watch free movies, watch movies free" />
+    <meta name="description" content="Learn more about <%= productionName %> on H.A Entertainment. Discover their films, TV series, and more." />
+    <meta name="keywords" content="<%= productionName %>, production company, film production, TV production, H.A Entertainment" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
-    <link rel="shortcut icon" href="https://ha-entertainment.netlify.app/images/logo.png" type="image/x-icon" />
+
+    <!-- Canonical Link -->
+    <link rel="canonical" href="https://ha-entertainment.vercel.app/production/<%= productionId %>" />
+
+    <!-- Favicon and Icons -->
+    <link rel="shortcut icon" href="https://ha-entertainment.vercel.app/images/logo.png" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://ha-entertainment.vercel.app/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://ha-entertainment.vercel.app/images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://ha-entertainment.vercel.app/images/apple-touch-icon.png">
+
+    <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://page.com/production/<%= productionId %>" />
-    <meta property="og:title" content="Content from <%= productionName %> - Watch Free Movies and TV Series on H.A Entertainment" />
-    <meta property="og:description"
-          content="Watch Free Movies and TV Series from <%= productionName %> on H.A Entertainment - The Best Free website to watch movies online and download Free movies with Full HD quality" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w500/<%= combinedResults.length > 0 ? combinedResults[0].poster_path : '' %>" />
-    <meta property="og:image:width" content="650">
-    <meta property="og:image:height" content="350">
-    <!-- Begin: Stylesheet -->
+    <meta property="og:title" content="Production Company: <%= productionName %> - H.A Entertainment" />
+    <meta property="og:url" content="https://ha-entertainment.vercel.app/production/<%= productionId %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/original<%= Logo %>" />
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:description" content="Discover the production company <%= productionName %>, their films, and TV series on H.A Entertainment." />
+    <meta property="og:site_name" content="H.A Entertainment" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@HA_Entertainment">
+    <meta name="twitter:title" content="Production Company: <%= productionName %> - H.A Entertainment">
+    <meta name="twitter:description" content="Discover the production company <%= productionName %>, their films, and TV series on H.A Entertainment.">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/original<%= Logo %>">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
     <link rel="stylesheet" href="/css/theme_1.css">
-    <!-- End: Stylesheet -->
-</head> 
+
+    <!-- Schema Markup for Production Company Page -->
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "<%= productionName %>",
+          "url": "https://ha-entertainment.vercel.app/production/<%= productionId %>",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://image.tmdb.org/t/p/original<%= Logo %>"
+          }
+        }
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VS8TC16J1Q"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-VS8TC16J1Q');
+    </script>
+</head>
+
 
 <body id="gMNrTK">
     <div id="mobile-overlay"></div>

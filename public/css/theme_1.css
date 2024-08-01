@@ -1970,7 +1970,8 @@ footer .footer-up {
 .ep-item .is-info .name {
     font-size: 13px;
     opacity: .6;
-    flex-grow: 1
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 .ep-item .is-thumb {
@@ -4608,6 +4609,19 @@ button.swiper-pagination-bullet {
     }
 }
 
+@media screen and (max-width:390px) {
+    .heading-md {
+        font-size: 1.4em;
+        font-weight: 500;
+    }
+
+    .radius-tabs .nav-item .nav-link {
+        padding: 0.4rem .8rem;
+        font-size: .8em;
+        
+    }
+    
+}
 .ps-container {
     /* -ms-touch-action: none; */
     overflow: hidden !important
