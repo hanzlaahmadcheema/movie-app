@@ -89,18 +89,19 @@
           ],
           "releaseDate": "<%= tv.first_air_date %>",
           "duration": "<%= tv.episode_run_time[0] %> minutes",
-          "aggregateRating": {
-            "@type": "AggregateRating",
+          "reviewRating": {
+            "@type": "Rating",
             "ratingValue": "<%= tv.vote_average %>",
             "reviewCount": "<%= tv.vote_count %>"
           },
           "trailer": {
             "@type": "VideoObject",
             "name": "<%= tv.name %> Trailer",
+            "description": "<%= tv.overview %>",
             "contentUrl": "https://www.youtube.com/watch?v=<%= trailerId %>",
             "thumbnailUrl": "https://img.youtube.com/vi/<%= trailerId %>/maxresdefault.jpg",
             "embedUrl": "https://www.youtube.com/embed/<%= trailerId %>",
-            "uploadDate": "<%= tv.first_air_date %>"
+            "uploadDate": "<%= tv.first_air_date %>T08:00:00+08:00"
           }
         }
     </script>
