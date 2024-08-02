@@ -38,19 +38,7 @@ app.get('/', async (req, res) => {
       });
       const trendingSeries = seriesResponse.data.results.slice(0, 20); // Limit to 20 results
 
-              // Default image
-              let imageUrl = 'https://ha-entertainment.vercel.app/images/header.jpg';
-  
-              // Check if there are results and use the image of the first result
-              if (combinedResults.length > 0) {
-                  const firstResult = combinedResults[0];
-                  if (firstResult.backdrop_path) {
-                      imageUrl = `https://image.tmdb.org/t/p/original${firstResult.backdrop_path}`;
-                  } else if (firstResult.poster_path) {
-                      imageUrl = `https://image.tmdb.org/t/p/original${firstResult.poster_path}`;
-                  }
-              }
-
+      
       // Fetch latest movies (20 items)
       const latestMoviesResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing', {
           params: {
