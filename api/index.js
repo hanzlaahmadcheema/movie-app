@@ -385,7 +385,7 @@ app.get('/watch-movie/:id', async (req, res) => {
       };
   
       const servers = [
-        { id: '1', name: 'H.A', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+        { id: '1', name: 'HA', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
         { id: '2', name: 'VidSrc', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
         { id: '3', name: '2Embed', url: `https://www.2embed.cc/embed/${movieId}` },
         { id: '4', name: 'MovieUniverse', url: `https://movieuniverse.lol/embed/${movieId}` }
