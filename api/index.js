@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const cheerio = require('cheerio');
 const path = require('path');
 
 const app = express();
@@ -364,44 +365,80 @@ app.get('/watch-movie/:id', async (req, res) => {
     }
   });
   
-  // Function to fetch movie details from the TMDb API
-  async function getMovieDetails(movieId) {
-    try {
-      const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=en-US`);
-      const movie = response.data;
-  
-      const recommendationsResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=${apiKey}&language=en-US`);
-      const relatedMovies = recommendationsResponse.data.results;
-  
-      const movieDetails = {
-        id: movie.id,
-        title: movie.title,
-        overview: movie.overview,
-        backdropPath: movie.backdrop_path,
-        posterPath: movie.poster_path,
-        genres: movie.genres,
-        release_date: movie.release_date,
-        runtime: movie.runtime,
-        vote_average: movie.vote_average,
-        vote_count: movie.vote_count
 
-        // Add any other movie details you need
-      };
-  
-      const servers = [
-        { id: '1', name: 'HA', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-        { id: '2', name: 'VidSrc', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-        { id: '3', name: '2Embed', url: `https://www.2embed.cc/embed/${movieId}` },
-        { id: '4', name: 'MovieUniverse', url: `https://movieuniverse.lol/embed/${movieId}` }
-      ];
-  
-      return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
-    } catch (error) {
-      console.error('Error fetching movie details from TMDb:', error);
-      throw new Error('Failed to fetch movie details');
+  async function encodeMovieTitle(title) {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+async function fetchIframeUrl(encodedTitle) {
+    const url = `https://w1.nites.is/movies/${encodedTitle}/`;
+
+    try {
+        const response = await axios.get(url);
+        const $ = cheerio.load(response.data);
+
+        const iframe = $('iframe').first();
+        const iframeSrc = iframe.attr('data-lazy-src') || iframe.attr('src');
+
+        if (iframeSrc) {
+            return iframeSrc;
+        } else {
+            console.log('Iframe found but does not have a src attribute.');
+            return null;
+        }
+    } catch (err) {
+        console.error(`Error fetching page: ${err.message}`);
+        return null;
     }
-  }
-  
+}
+
+async function getMovieDetails(movieId) {
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=en-US`);
+        const movie = response.data;
+
+        const recommendationsResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=${apiKey}&language=en-US`);
+        const relatedMovies = recommendationsResponse.data.results;
+
+        const movieDetails = {
+            id: movie.id,
+            title: movie.title,
+            overview: movie.overview,
+            backdropPath: movie.backdrop_path,
+            posterPath: movie.poster_path,
+            genres: movie.genres,
+            release_date: movie.release_date,
+            runtime: movie.runtime,
+            vote_average: movie.vote_average,
+            vote_count: movie.vote_count
+            // Add any other movie details you need
+        };
+
+        const encodedTitle = await encodeMovieTitle(movie.title);
+        const iframeUrl = await fetchIframeUrl(encodedTitle);
+
+        const servers = [
+            { id: '1', name: 'English', url: iframeUrl },
+            { id: '2', name: 'Urdu/Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '3', name: 'Urdu/Hindi', url: `https://www.braflix.ru/movie/${movieId}?play=true` },
+            { id: '4', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '6', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+        ];
+
+        return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
+    } catch (error) {
+        console.error('Error fetching movie details from TMDb:', error);
+        throw new Error('Failed to fetch movie details');
+    }
+}
+
   // Function to fetch trailer ID
   async function getTrailerId(movieId) {
     try {
@@ -457,7 +494,9 @@ app.get('/watch-movie/:id', async (req, res) => {
 
         // Servers data with URLs
         const servers = [
-            { name: 'HA Entertainment', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
+            { name: 'HA (Ads Free)', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
+            { name: 'Super Embed', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'MoviesAPI', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
             { name: 'VidSrc', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
             { name: '2Embed', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'MovieUniverse', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
