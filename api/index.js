@@ -427,8 +427,8 @@ async function getMovieDetails(movieId) {
             { id: '2', name: 'Urdu/Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
             { id: '3', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '4', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '5', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-            { id: '6', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
@@ -493,12 +493,12 @@ async function getMovieDetails(movieId) {
 
         // Servers data with URLs
         const servers = [
-            { name: 'HA (Ads Free)', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
-            { name: 'Super Embed', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
-            { name: 'MoviesAPI', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'VidSrc', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
-            { name: '2Embed', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
-            { name: 'MovieUniverse', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
+            { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
+            { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
+            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
+            { name: 'English', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'English', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
 
         // Render the EJS template with series, seasons, episodes, and servers data
