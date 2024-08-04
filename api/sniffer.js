@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://hindilinks4u.show/auron-mein-kahan-dum-tha-2024-Watch-online-full-movie/';
+const url = 'https://cinehub.wf/movie/848326';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);
