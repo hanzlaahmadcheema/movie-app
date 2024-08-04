@@ -425,11 +425,10 @@ async function getMovieDetails(movieId) {
         const servers = [
             { id: '1', name: 'English', url: iframeUrl },
             { id: '2', name: 'Urdu/Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '3', name: 'Urdu/Hindi', url: `https://www.braflix.ru/movie/${movieId}?play=true` },
-            { id: '4', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
-            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '6', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '3', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '4', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '5', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '6', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
