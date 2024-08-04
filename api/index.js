@@ -146,7 +146,11 @@ app.get('/search/suggest', async (req, res) => {
 });
 
 app.get('/terms', (req, res) => {
-  res.render('terms');
+    res.render('terms');
+});
+
+app.get('/player', (req, res) => {
+    res.render('player');
 });
 
 app.get('/contact-us', (req, res) => {
