@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://cinehub.wf/movie/848326';
+const url = 'https://0gomovies.cam/movie/watch-parinda-paar-geyaa-2023-punjabi-full-movie-online-0gomovies/watching/';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);
