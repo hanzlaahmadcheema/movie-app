@@ -148,7 +148,8 @@ button {
     background-color: #320f4c3c;
     color: #ea5dff;
     padding: 1rem 2rem;
-    border-radius: 2rem
+    border-radius: 2rem;
+    border-color: #ea5dff;
 }
 
 .btn-watch.active {
@@ -532,7 +533,7 @@ header.over-air .search-elements input.is-input {
 }
 
 .slide-cover {
-    background-color: #320f4c3c;
+    /* background-color: #320f4c3c; */
     position: absolute;
     top: 0;
     left: 0;
@@ -549,8 +550,8 @@ header.over-air .search-elements input.is-input {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #121315;
-    background: linear-gradient(0deg, #121315 0, rgba(18, 19, 21, 0) 30%, rgba(18, 19, 21, 0) 100%)
+    /* background: #121315; */
+    /* background: linear-gradient(0deg, #121315 0, rgba(18, 19, 21, 0) 30%, rgba(18, 19, 21, 0) 100%) */
 }
 
 .slide-cover img {
@@ -558,15 +559,15 @@ header.over-air .search-elements input.is-input {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: blur(20px);
+    /* filter: blur(20px); */
     transform: scale(1.1);
-    opacity: .3
+    /* opacity: .3 */
 }
 
 .slide-element {
     display: flex;
     align-items: center;
-    padding: 0 120px
+    padding: 0px 120px
 }
 
 .slide-element .is-caption {
