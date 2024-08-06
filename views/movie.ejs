@@ -84,7 +84,7 @@
                 "name": "<%= company.name %>",
                 "logo": {
                   "@type": "ImageObject",
-                  "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
+                  "url": "https://image.tmdb.org/t/p/w185<%= company.logo_path %>"
                 }
               }<% if (index < movie.production_companies.length - 1) { %>, <% } %>
             <% }) %>
@@ -235,7 +235,7 @@
         <div id="page-detail">
             <section class="section-detail is-detail-tv">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/w500/<%= movie.backdrop_path || 'default.jpg' %>"
+                    <img src="https://image.tmdb.org/t/p/w185/<%= movie.backdrop_path || 'default.jpg' %>"
                         alt="<%= movie.title %>">
                 </div>
                 <div class="container">
@@ -246,7 +246,7 @@
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/w500/<%= movie.poster_path || 'default.jpg' %>"
+                                            src="https://image.tmdb.org/t/p/w185/<%= movie.poster_path || 'default.jpg' %>"
                                             alt="<%= movie.title %>">
                                     </div>
                                 </div>
@@ -424,7 +424,7 @@
                                         <div class="film-thumbnail">
                                             <div class="badge-tag quality">HD</div>
                                             <img class="film-thumbnail-img"
-                                                src="https://image.tmdb.org/t/p/w500<%= relatedMovies.poster_path %>"
+                                                src="https://image.tmdb.org/t/p/w185<%= relatedMovies.poster_path %>"
                                                 alt="<%= relatedMovies.title %>">
                                         </div>
                                         <div class="film-detail">

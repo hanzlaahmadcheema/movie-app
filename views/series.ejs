@@ -68,7 +68,7 @@
                   "@type": "Person",
                   "name": "<%= member.name %>",
                   "character": "<%= member.character %>",
-                  "image": "https://image.tmdb.org/t/p/original<%= member.profile_path %>"
+                  "image": "https://image.tmdb.org/t/p/w185<%= member.profile_path %>"
                 }<% if (index < cast.length - 1) { %>,<% } %>
               <% }) %>
             <% } %>
@@ -81,7 +81,7 @@
                   "name": "<%= company.name %>",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
+                    "url": "https://image.tmdb.org/t/p/w185<%= company.logo_path %>"
                   }
                 }<% if (index < tv.production_companies.length - 1) { %>,<% } %>
               <% }) %>
@@ -225,7 +225,7 @@
         <div id="page-detail">
             <section class="section-detail is-detail-tv">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/original/<%= tv.backdrop_path %>" alt="<%= tv.name %>">
+                    <img src="https://image.tmdb.org/t/p/w300/<%= tv.backdrop_path %>" alt="<%= tv.name %>">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
@@ -236,7 +236,7 @@
                                         <div class="badge-tag quality">HD</div>
                                         <!-- <div class="badge-tag release"><%= tv.first_air_date %></div> -->
                                         <img class="film-thumbnail-img"
-                                             src="https://image.tmdb.org/t/p/w500/<%= tv.poster_path %>"
+                                             src="https://image.tmdb.org/t/p/w185/<%= tv.poster_path %>"
                                              alt="<%= tv.name %>">
                                     </div>
                                 </div>
@@ -374,7 +374,7 @@
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/w500<%= relatedTv.poster_path %>"
+                                            src="https://image.tmdb.org/t/p/w185<%= relatedTv.poster_path %>"
                                             alt="<%= relatedTv.name %>">
                                     </div>
                                     <div class="film-detail">

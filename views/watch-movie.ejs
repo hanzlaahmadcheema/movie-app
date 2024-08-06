@@ -70,7 +70,7 @@
                   "@type": "Person",
                   "name": "<%= member.name %>",
                   "character": "<%= member.character %>",
-                  "image": "https://image.tmdb.org/t/p/original<%= member.profilePath %>"
+                  "image": "https://image.tmdb.org/t/p/w185<%= member.profilePath %>"
                 }<% if (index < cast.length - 1) { %>,<% } %>
               <% }) %>
             <% } %>
@@ -83,7 +83,7 @@
                   "name": "<%= company.name %>",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
+                    "url": "https://image.tmdb.org/t/p/w185<%= company.logo_path %>"
                   }
                 }<% if (index < movie.production_companies.length - 1) { %>,<% } %>
               <% }) %>
@@ -237,7 +237,7 @@
         <div id="page-watch">
             <section class="section-detail is-watch is-watch-movie">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/original/<%= movie.backdropPath %>" alt="<%= movie.title %>">
+                    <img src="https://image.tmdb.org/t/p/w300/<%= movie.backdropPath %>" alt="<%= movie.title %>">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
