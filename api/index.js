@@ -389,11 +389,11 @@ async function fetchIframeUrl(encodedTitle) {
         if (iframeSrc) {
             return iframeSrc;
         } else {
-            console.log('Iframe found but does not have a src attribute.');
+            // console.log('Iframe found but does not have a src attribute.');
             return null;
         }
     } catch (err) {
-        console.error(`Error fetching page: ${err.message}`);
+        // console.error(`Error fetching page: ${err.message}`);
         return null;
     }
 }
