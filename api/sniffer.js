@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://0gomovies.cam/movie/watch-parinda-paar-geyaa-2023-punjabi-full-movie-online-0gomovies/watching/';
+const url = 'https://cloudy.com.pk/parinda-paar-geyaa-2023-punjabi-8-full-movie/';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);
