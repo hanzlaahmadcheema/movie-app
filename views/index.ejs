@@ -198,24 +198,9 @@
                 <% trendingContent.forEach(item=> { %>
                     <div class="swiper-slide">
                         <div class="slide-cover-slider">
-                            <img 
-                              src="https://image.tmdb.org/t/p/w1280<%= item.backdrop_path %>"
-                              srcset="
-                                https://image.tmdb.org/t/p/w92<%= item.backdrop_path %> 92w, 
-                                https://image.tmdb.org/t/p/w154<%= item.backdrop_path %> 154w, 
-                                https://image.tmdb.org/t/p/w185<%= item.backdrop_path %> 185w, 
-                                https://image.tmdb.org/t/p/w342<%= item.backdrop_path %> 342w, 
-                                https://image.tmdb.org/t/p/w500<%= item.backdrop_path %> 500w, 
-                                https://image.tmdb.org/t/p/w780<%= item.backdrop_path %> 780w, 
-                                https://image.tmdb.org/t/p/original<%= item.backdrop_path %> 2000w" 
-                              sizes="(max-width: 600px) 92px, 
-                                     (max-width: 900px) 154px, 
-                                     (max-width: 1200px) 185px, 
-                                     (max-width: 1800px) 342px, 
-                                     (min-width: 1801px) 500px" 
-                              alt="<%= item.title || item.name %>">
-                          </div>
-                          
+                            <img src="https://image.tmdb.org/t/p/original<%= item.backdrop_path %>"
+                                alt="<%= item.title || item.name %>">
+                        </div>
                         <div class="container">
                             <div class="slide-element">
                                 <!-- <div class="is-poster">
