@@ -3888,9 +3888,9 @@ button.swiper-pagination-bullet {
 
     #slider .swiper-slide .is-caption {
         padding: 2rem;
-        background-color: rgba(255, 255, 255, .1);
+        /* background-color: rgba(255, 255, 255, .1);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px); */
         border-radius: 1rem
     }
 
