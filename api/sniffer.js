@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://cloudy.com.pk/parinda-paar-geyaa-2023-punjabi-8-full-movie/';
+const url = 'https://playdesi.cc/movies/dunki/';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);

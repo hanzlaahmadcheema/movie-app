@@ -382,7 +382,9 @@ app.get('/watch-movie/:id', async (req, res) => {
   });
   
 
-  async function encodeMovieTitle(title) {
+// Function to encode movie title
+// Function to encode movie title
+async function encodeMovieTitle(title) {
     return title
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, '')
@@ -391,8 +393,9 @@ app.get('/watch-movie/:id', async (req, res) => {
         .replace(/-+/g, '-');
 }
 
-async function fetchIframeUrl(encodedTitle) {
-    const url = `https://w1.nites.is/movies/${encodedTitle}/`;
+// Function to fetch iframe URL for a given encoded title and base URL
+async function fetchIframeUrl(encodedTitle, baseUrl) {
+    const url = `${baseUrl}/${encodedTitle}/`;
 
     try {
         const response = await axios.get(url);
@@ -404,11 +407,11 @@ async function fetchIframeUrl(encodedTitle) {
         if (iframeSrc) {
             return iframeSrc;
         } else {
-            // console.log('Iframe found but does not have a src attribute.');
+            console.log('Iframe found but does not have a src attribute.');
             return null;
         }
     } catch (err) {
-        // console.error(`Error fetching page: ${err.message}`);
+        console.error(`Error fetching page: ${err.message}`);
         return null;
     }
 }
@@ -436,16 +439,18 @@ async function getMovieDetails(movieId) {
         };
 
         const encodedTitle = await encodeMovieTitle(movie.title);
-        const iframeUrl = await fetchIframeUrl(encodedTitle);
+        const iframeUrl1 = await fetchIframeUrl(encodedTitle, 'https://w1.nites.is/movies');
+        const iframeUrl2 = await fetchIframeUrl(encodedTitle, 'https://playdesi.cc/movies');
 
         const servers = [
-            { id: '1', name: 'English', url: iframeUrl },
-            { id: '2', name: 'Urdu/Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '3', name: 'Urdu/Hindi', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
-            { id: '4', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '5', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
-            { id: '6', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '1', name: 'English', url: iframeUrl1 },
+            { id: '2', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
+            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '4', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
+            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '6', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '7', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '8', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
