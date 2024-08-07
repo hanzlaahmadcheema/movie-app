@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://playdesi.cc/movies/dunki/';
+const url = 'https://vegamovies.gs/19194-the-legend-of-maula-jatt-2022-punjabi-movie-dvdscr-720p-480p.html';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);

@@ -434,7 +434,8 @@ async function getMovieDetails(movieId) {
             release_date: movie.release_date,
             runtime: movie.runtime,
             vote_average: movie.vote_average,
-            vote_count: movie.vote_count
+            vote_count: movie.vote_count,
+            imdb_id: movie.imdb_id 
             // Add any other movie details you need
         };
 
@@ -444,12 +445,13 @@ async function getMovieDetails(movieId) {
 
         const servers = [
             { id: '1', name: 'English', url: iframeUrl1 },
-            { id: '2', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
-            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '4', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
-            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '6', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
-            { id: '7', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '2', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/series3?id=${movie.imdb_id}` },            
+            { id: '3', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
+            { id: '4', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
+            { id: '6', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '7', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
             // { id: '8', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
