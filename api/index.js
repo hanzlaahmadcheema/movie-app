@@ -450,7 +450,7 @@ async function getMovieDetails(movieId) {
             { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
             { id: '6', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '7', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-            { id: '8', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            // { id: '8', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
