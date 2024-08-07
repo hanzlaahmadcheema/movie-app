@@ -17,12 +17,28 @@ app.set('view engine', 'ejs');
 app.get('/', async (req, res) => {
   try {
       // Fetch trending content for slider (10 items)
-      const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/week', {
-          params: {
-              api_key: apiKey
-          }
-      });
-      const trendingContent = sliderResponse.data.results.slice(0, 10); // Limit to 10 results
+      const fetchGenres = async (item) => {
+        const type = item.media_type === 'movie' ? 'movie' : 'tv';
+        const response = await axios.get(`https://api.themoviedb.org/3/${type}/${item.id}`, {
+            params: {
+                api_key: apiKey
+            }
+        });
+        return response.data.genres;
+    };
+
+    const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/week', {
+        params: {
+            api_key: apiKey
+        }
+    });
+
+    const trendingContent = await Promise.all(
+        sliderResponse.data.results.slice(0, 10).map(async (item) => {
+            const genres = await fetchGenres(item);
+            return { ...item, genres };
+        })
+    );
 
       // Fetch trending movies (20 items)
       const moviesResponse = await axios.get('https://api.themoviedb.org/3/trending/movie/week', {
@@ -88,7 +104,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Define the search route
 // Define the search route
 app.get('/search', async (req, res) => {
     const keyword = req.query.keyword || '';

@@ -172,7 +172,7 @@
                     </div>
                     <div id="header_menu">
                         <div class="menu-item">
-                            <a href="/" class="menu-link">Home</a>
+                            <a href="/" class="menu-link active">Home</a>
                         </div>
                         <div class="menu-item">
                             <a href="/movies" class="menu-link">Movies</a>
@@ -198,7 +198,7 @@
                 <% trendingContent.forEach(item=> { %>
                     <div class="swiper-slide">
                         <div class="slide-cover-slider">
-                            <img src="https://image.tmdb.org/t/p/w1280/<%= item.backdrop_path %>"
+                            <img src="https://image.tmdb.org/t/p/original/<%= item.backdrop_path %>"
                                 alt="<%= item.title || item.name %>">
                         </div>
                         <div class="container">
@@ -227,14 +227,24 @@
                                             <%= item.title || item.name %>
                                         </a>
                                     </h2>
-                                    <div class="is-rate">
+                                    <!-- <div class="is-rate">
                                         <div class="stars mr-2">
                                             <div class="fill fill-<%= Math.round(item.vote_average / 2) %>"></div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <p class="description">
-                                        <%= item.overview %>
+                                        <% if (item.genres && item.genres.length > 0) { %>
+                                            <% item.genres.forEach((genre, index) => { %>
+                                                <a href="/genre/<%= genre.id %>" rel="tag" title="<%= genre.name %>">
+                                                    <%= genre.name %>
+                                                </a>
+                                                <%= index < item.genres.length - 1 ? '•' : '' %>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <span>No genres available.</span>
+                                        <% } %>
                                     </p>
+                                    
                                     <div class="div-buttons">
                                         <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
                                             class="btn w-icon btn-watch">
@@ -339,15 +349,6 @@
                 </div>
             </div>
         </section>
-        <!--/// Share -->
-        <div class="share-this">
-            <div class="share-elements">
-                <div class="text">🔔 Share this</div>
-                <div class="share-wrap">
-                    <div class="sharethis-inline-share-buttons"></div>
-                </div>
-            </div>
-        </div>
 
         <!--/// Section carousel ///-->
         <!-- Latest Movies Section -->
@@ -501,7 +502,7 @@
                                             <div><i class="fas fa-play"></i></div>
                                         </a>
                                         <div class="badge-tag position">01</div>
-                                        <img src="https://image.tmdb.org/t/p/original<%= topMovie.backdrop_path %>"
+                                        <img src="https://image.tmdb.org/t/p/w780<%= topMovie.backdrop_path %>"
                                             alt="<%= topMovie.title %>">
                                     </div>
                                     <div class="is-caption">
@@ -580,7 +581,7 @@
                                             <div><i class="fas fa-play"></i></div>
                                         </a>
                                         <div class="badge-tag position">01</div>
-                                        <img src="https://image.tmdb.org/t/p/original<%= topSeries.backdrop_path %>"
+                                        <img src="https://image.tmdb.org/t/p/w780<%= topSeries.backdrop_path %>"
                                             alt="<%= topSeries.name %>">
                                     </div>
                                     <div class="is-caption">
@@ -718,9 +719,6 @@
     <!-- Begin: Scripts -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript"
-        src="https://platform-api.sharethis.com/js/sharethis.js#property=6433be364f61b7001240a339&product=inline-share-buttons&source=platform"
-        async="async"></script>
     <script src="/js/search.js"></script>
     <script src="/js/app.min.js"></script>
     <!-- End: Scripts -->

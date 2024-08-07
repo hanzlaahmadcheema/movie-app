@@ -145,11 +145,11 @@ button {
 }
 
 .btn-watch {
-    background-color: #320f4c3c;
+    background-color: #490767bf;
     color: #ea5dff;
     padding: 1rem 2rem;
     border-radius: 2rem;
-    border-color: #ea5dff;
+    /* border-color: #ea5dff; */
 }
 
 .btn-watch.active {
@@ -615,7 +615,7 @@ header.over-air .search-elements input.is-input {
     z-index: 3;
     color: #fff;
     flex-grow: 1;
-    padding-left: 4rem
+    padding-left: 1rem
 }
 
 .slide-element .is-caption .is-rate {
@@ -636,7 +636,7 @@ header.over-air .search-elements input.is-input {
 .slide-element .film-info .item {
     padding: .3rem .4rem;
     border-radius: .3rem;
-    background-color: rgba(0, 0, 0, .2);
+    /* background-color: rgba(0, 0, 0, .2); */
     color: #ea5dff
 }
 
@@ -4516,8 +4516,8 @@ button.swiper-pagination-bullet {
 
     #slider .slide-element .is-caption .div-buttons .btn-watch {
         transform: none !important;
-        background-color: #ea5dff;
-        color: #000;
+        background-color: #490767bf;
+        color: #ea5dff;
         padding: .8rem 1.2rem
     }
 

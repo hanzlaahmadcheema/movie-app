@@ -25,7 +25,7 @@
     <meta property="og:type" content="video.episode" />
     <meta property="og:title" content="Watch <%= series.name %> - Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> - Free Full HD Streaming" />
     <meta property="og:url" content="https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= currentEpisode.episode_number %>" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/original<%= series.backdrop_path %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/w780<%= series.backdrop_path %>" />
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="750">
     <meta property="og:description" content="Watch <%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
@@ -37,7 +37,7 @@
     <meta name="twitter:site" content="@HA_Entertainment">
     <meta name="twitter:title" content="Watch <%= series.name %> - Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> - Free Full HD Streaming">
     <meta name="twitter:description" content="Watch <%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality.">
-    <meta name="twitter:image" content="https://image.tmdb.org/t/p/original<%= series.backdrop_path %>">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= series.backdrop_path %>">
     <meta name="twitter:player" content="<%= servers[0].url %>">
 
     <!-- Stylesheets -->
@@ -53,7 +53,7 @@
           "name": "<%= series.name %>",
           "url": "https://ha-entertainment.vercel.app/watch-series/<%= series.id %>/season/<%= selectedSeason %>/episode/<%= currentEpisode.episode_number %>",
           "description": "<%= series.overview %>",
-          "image": "https://image.tmdb.org/t/p/original<%= series.backdrop_path %>",
+          "image": "https://image.tmdb.org/t/p/w780<%= series.backdrop_path %>",
           "genre": [
             <% if (series.genres && series.genres.length > 0) { %>
               <% series.genres.forEach((genre, index) => { %>
@@ -84,7 +84,7 @@
             "name": "<%= series.name %> Season <%= selectedSeason %> Episode <%= currentEpisode.episode_number %>",
             "description": "<%= series.overview %>",
             "contentUrl": "<%= servers[0].url %>",
-            "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= series.backdrop_path %>",
+            "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= series.backdrop_path %>",
             "embedUrl": "<%= servers[0].url %>",
             "uploadDate": "<%= series.first_air_date %>T08:00:00+08:00"
           }
