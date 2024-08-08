@@ -27,7 +27,7 @@ app.get('/', async (req, res) => {
         return response.data.genres;
     };
 
-    const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/week', {
+    const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
         params: {
             api_key: apiKey
         }
