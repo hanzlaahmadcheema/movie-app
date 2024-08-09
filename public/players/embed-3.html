@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed - Movie</title>
+    <link rel="stylesheet" href="../css/players.css">
+</head>
+<body>
+        <!-- Player Container -->
+        <div id="player-container">
+            <div id="IndStreamPlayer" class="iframe-container"></div>
+        </div>
+        
+            <script>
+                function decodeUrlParameter(value) {
+                    return decodeURIComponent(value.replace(/\+/g, '%20'));
+                }
+        
+                function getUrlParameter(name) {
+                    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                    var results = regex.exec(location.search);
+                    return results === null ? '' : results[1].indexOf('%') !== -1 ? decodeUrlParameter(results[1]) : results[1];
+                }
+        
+                var sourceUrl = getUrlParameter('id');
+        
+                const IndStreamPlayerConfigs = {
+                       width: '100%',
+                       height: '100%',
+                       id: 'IndStreamPlayer',
+                       src: sourceUrl,
+                       tr: false
+                      };
+            </script>
+        
+            <script src="https://allmovieland.link/player.js?v=401"></script>
+</body>
+</html>

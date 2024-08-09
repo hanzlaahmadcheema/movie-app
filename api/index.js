@@ -383,7 +383,6 @@ app.get('/watch-movie/:id', async (req, res) => {
   
 
 // Function to encode movie title
-// Function to encode movie title
 async function encodeMovieTitle(title) {
     return title
         .toLowerCase()

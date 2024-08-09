@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed - Movie</title>
+    <link rel="stylesheet" href="../css/players.css">
+    <script src="../js/playerjs.js" type="text/javascript"></script>
+</head>
+<body>
+    <!-- Player Container -->
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
+        
+    <script type="text/javascript">
+        // Function to decode URL parameter value
+        function decodeUrlParameter(value) {
+            return decodeURIComponent(value.replace(/\+/g, '%20'));
+        }
+
+        // Function to parse URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : results[1].indexOf('%') !== -1 ? decodeUrlParameter(results[1]) : results[1];
+        }
+
+        // Extracting URL parameters
+        var sourceUrl = getUrlParameter('source');
+        var title = getUrlParameter('title-1');
+        var splashImageUrl = getUrlParameter('img');
+        var duration = parseInt(getUrlParameter('duration')); // Parsing duration as integer
+        var languageCode = getUrlParameter('subcode');
+        var subtitlesUrl = getUrlParameter('substitleurl');
+
+        // Setup player configuration object
+        var playerConfig = {
+            id: "player", 
+            file: sourceUrl, 
+            poster: splashImageUrl, 
+            title: title,
+            autoplay: 1,              
+            duration: duration,       
+            subtitle: subtitlesUrl    
+        };
+
+        // Initialize Playerjs
+        var player = new Playerjs(playerConfig);
+    </script>
+        
+</body>
+</html>
