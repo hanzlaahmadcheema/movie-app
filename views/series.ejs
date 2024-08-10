@@ -225,7 +225,7 @@
         <div id="page-detail">
             <section class="section-detail is-detail-tv">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/w300/<%= tv.backdrop_path %>" alt="<%= tv.name %>">
+                    <img src="https://image.tmdb.org/t/p/w300/<%= tv.backdrop_path %>" alt="<%= tv.name %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
@@ -237,7 +237,7 @@
                                         <!-- <div class="badge-tag release"><%= tv.first_air_date %></div> -->
                                         <img class="film-thumbnail-img"
                                              src="https://image.tmdb.org/t/p/w185/<%= tv.poster_path %>"
-                                             alt="<%= tv.name %>">
+                                             alt="<%= tv.name %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                                     </div>
                                 </div>
                                 <div class="is-caption backdrop-blur-50">
@@ -375,7 +375,7 @@
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
                                             src="https://image.tmdb.org/t/p/w185<%= relatedTv.poster_path %>"
-                                            alt="<%= relatedTv.name %>">
+                                            alt="<%= relatedTv.name %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">

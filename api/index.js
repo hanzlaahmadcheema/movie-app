@@ -118,7 +118,7 @@ app.get('/search', async (req, res) => {
         const currentPage = data.page;
   
         // Default image
-        let imageUrl = 'https://ha-entertainment.vercel.app/images/logo.png';
+        let imageUrl = 'https://ha-entertainment.vercel.app/images/header.jpg';
   
         // Check if there are results and use the image of the first result
         if (combinedResults.length > 0) {
@@ -191,7 +191,7 @@ app.get('/movies', async (req, res) => {
           params: {
               api_key: apiKey,
               language: 'en-US',
-              page: currentPage
+              page: currentPage,
           }
       });
 
@@ -670,16 +670,20 @@ app.get('/country/:code', async (req, res) => {
           }
       });
       const countries = countriesResponse.data;
-      const country = countries.find(c => c.iso_3166_1 === countryCode);
+      const countryCodeUpperCase = countryCode.toUpperCase();
+      const country = countries.find(c => c.iso_3166_1 === countryCodeUpperCase);
       const countryName = country ? country.english_name : countryCode;
 
       // Fetch movies by country
       const moviesResponse = await axios.get(`https://api.themoviedb.org/3/discover/movie`, {
           params: {
               api_key: apiKey,
-              with_origin_country: countryCode,
+              with_origin_country: countryCodeUpperCase,
               page: page,
-              language: 'en-US'
+              language: 'en-US',
+              sort_by: 'release_date.desc',
+              'release_date.lte': new Date().toISOString().split('T')[0] // Limit to the present date
+
           }
       });
       const movies = moviesResponse.data.results;
@@ -689,9 +693,11 @@ app.get('/country/:code', async (req, res) => {
       const tvShowsResponse = await axios.get(`https://api.themoviedb.org/3/discover/tv`, {
           params: {
               api_key: apiKey,
-              with_origin_country: countryCode,
+              with_origin_country: countryCodeUpperCase,
               page: page,
-              language: 'en-US'
+              language: 'en-US',
+              sort_by: 'first_air_date.desc',
+              'first_air_date.lte': new Date().toISOString().split('T')[0] // Limit to the present date
           }
       });
       const tvShows = tvShowsResponse.data.results;
@@ -705,7 +711,7 @@ app.get('/country/:code', async (req, res) => {
       const totalPages = Math.max(totalMoviesPages, totalTvShowsPages);
 
       res.render('country', {
-          countryCode,
+          countryCodeUpperCase,
           countryName,
           combinedResults,
           totalPages,

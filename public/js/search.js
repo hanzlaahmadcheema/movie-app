@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 suggestionItem.innerHTML = `
                     <div class="film-thumbnail">
-                        <img src="https://image.tmdb.org/t/p/w200/${item.poster_path}" class="film-thumbnail-img" alt="${item.title || item.name}">
+                        <img src="https://image.tmdb.org/t/p/w200/${item.poster_path}" class="film-thumbnail-img" alt="${item.title || item.name}" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                     </div>
                     <div class="is-detail">
                         <h3 class="film-name heading-xs">${item.title || item.name}</h3>

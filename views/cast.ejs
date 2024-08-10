@@ -187,7 +187,7 @@
             <!-- Cast Detail Section -->
             <section class="section-detail is-detail-tv">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/w185/<%= cast.profile_path %>" alt="<%= cast.name %>">
+                    <img src="https://image.tmdb.org/t/p/w185/<%= cast.profile_path %>" alt="<%= cast.name %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
@@ -342,7 +342,7 @@
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
                                             src="https://image.tmdb.org/t/p/w185/<%= movie.poster_path %>"
-                                            alt="<%= movie.title %>">
+                                            alt="<%= movie.title %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">

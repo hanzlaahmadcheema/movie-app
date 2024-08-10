@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
 
     <!-- Canonical Link -->
-    <link rel="canonical" href="https://ha-entertainment.vercel.app/country/<%= countryCode %>" />
+    <link rel="canonical" href="https://ha-entertainment.vercel.app/country/<%= countryCodeUpperCase %>" />
 
     <!-- Favicon and Icons -->
     <link rel="shortcut icon" href="https://ha-entertainment.vercel.app/images/logo.png" type="image/x-icon" />
@@ -24,8 +24,8 @@
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Explore Movies and TV Series from <%= countryName %> - HA Entertainment" />
-    <meta property="og:url" content="https://ha-entertainment.vercel.app/country/<%= countryCode %>" />
-    <meta property="og:image" content="https://flagcdn.com/w320/<%= countryCode %>.png" />
+    <meta property="og:url" content="https://ha-entertainment.vercel.app/country/<%= countryCodeUpperCase %>" />
+    <meta property="og:image" content="https://flagcdn.com/w320/<%= countryCodeUpperCase %>.png" />
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:description" content="Explore movies and TV series from <%= countryName %> on HA Entertainment. Discover top-rated and trending content from this country." />
@@ -36,7 +36,7 @@
     <meta name="twitter:site" content="@HA_Entertainment">
     <meta name="twitter:title" content="Explore Movies and TV Series from <%= countryName %> - HA Entertainment">
     <meta name="twitter:description" content="Explore movies and TV series from <%= countryName %> on HA Entertainment. Discover top-rated and trending content from this country.">
-    <meta name="twitter:image" content="https://flagcdn.com/w320/<%= countryCode %>.png">
+    <meta name="twitter:image" content="https://flagcdn.com/w320/<%= countryCodeUpperCase %>.png">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -49,12 +49,12 @@
           "@context": "https://schema.org",
           "@type": "Place",
           "name": "Movies and TV Series from <%= countryName %>",
-          "url": "https://ha-entertainment.vercel.app/country/<%= countryCode %>",
-          "image": "https://flagcdn.com/w320/<%= countryCode %>.png",
+          "url": "https://ha-entertainment.vercel.app/country/<%= countryCodeUpperCase %>",
+          "image": "https://flagcdn.com/w320/<%= countryCodeUpperCase %>.png",
           "description": "Explore top-rated and trending movies and TV series from <%= countryName %> on HA Entertainment.",
           "address": {
             "@type": "PostalAddress",
-            "addressCountry": "<%= countryCode %>"
+            "addressCountry": "<%= countryCodeUpperCase %>"
           }
         }
     </script>
@@ -192,7 +192,7 @@
                                     <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>" class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
-                                        <img class="film-thumbnail-img" src="https://image.tmdb.org/t/p/w185/<%= item.poster_path %>" alt="<%= item.title || item.name %>">
+                                        <img class="film-thumbnail-img" src="https://image.tmdb.org/t/p/w185/<%= item.poster_path %>" alt="<%= item.title || item.name %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">

@@ -16,7 +16,8 @@
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "vercel": "^35.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.0.1"

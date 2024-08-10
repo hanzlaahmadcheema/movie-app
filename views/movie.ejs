@@ -247,7 +247,7 @@
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
                                             src="https://image.tmdb.org/t/p/w185/<%= movie.poster_path || 'default.jpg' %>"
-                                            alt="<%= movie.title %>">
+                                            alt="<%= movie.title %>" onerror="this.onerror=null;this.src='https://ha-entertainment.vercel.app/images/header.jpg';">
                                     </div>
                                 </div>
                                 <div class="is-caption backdrop-blur-50">
