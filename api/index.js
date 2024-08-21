@@ -118,7 +118,7 @@ app.get('/search', async (req, res) => {
         const currentPage = data.page;
   
         // Default image
-        let imageUrl = 'https://ha-entertainment.vercel.app/images/header.jpg';
+        let imageUrl = 'https://ha-entertainment.com/images/header.jpg';
   
         // Check if there are results and use the image of the first result
         if (combinedResults.length > 0) {
@@ -444,7 +444,7 @@ async function getMovieDetails(movieId) {
 
         const servers = [
             { id: '1', name: 'English', url: iframeUrl1 },
-            { id: '2', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.vercel.app/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '2', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '3', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
             { id: '4', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
             { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
