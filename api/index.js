@@ -381,7 +381,6 @@ app.get('/watch-movie/:id', async (req, res) => {
     }
   });
   
-
 // Function to encode movie title
 async function encodeMovieTitle(title) {
     return title
@@ -831,6 +830,100 @@ app.get('/filter', async (req, res) => {
       console.error(error);
       res.status(500).send('Error fetching data');
   }
+});
+
+async function getGenres() {
+    try {
+        const [moviesGenresResponse, tvGenresResponse] = await Promise.all([
+            axios.get(`https://api.themoviedb.org/3/genre/movie/list`, {
+                params: {
+                    api_key: apiKey,
+                    language: 'en-US'
+                }
+            }),
+            axios.get(`https://api.themoviedb.org/3/genre/tv/list`, {
+                params: {
+                    api_key: apiKey,
+                    language: 'en-US'
+                }
+            })
+        ]);
+
+        // Combine the genres from both movie and TV responses
+        const genres = [
+            ...moviesGenresResponse.data.genres,
+            ...tvGenresResponse.data.genres
+        ];
+
+        return genres; // Returns an array of combined genre objects
+    } catch (error) {
+        console.error('Error fetching genres from TMDb:', error);
+        throw error;
+    }
+}
+
+app.get('/sitemap-genre.xml', async (req, res) => {
+    try {
+        const genres = await getGenres(); // Fetch genres from TMDb
+
+        let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        sitemap += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        genres.forEach(genre => {
+            sitemap += `    <url>\n`;
+            sitemap += `        <loc>https://ha-entertainment.com/genre/${genre.id}</loc>\n`; // Using genre.id for URL
+            sitemap += `        <changefreq>daily</changefreq>\n`;
+            sitemap += `        <priority>0.8</priority>\n`;
+            sitemap += `    </url>\n`;
+        });
+
+        sitemap += `</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        res.send(sitemap);
+    } catch (error) {
+        res.status(500).send('Error generating sitemap');
+    }
+});
+
+
+async function getCountries() {
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/configuration/countries`, {
+            params: {
+                api_key: apiKey
+            }
+        });
+
+        return response.data; // Returns an array of country objects
+    } catch (error) {
+        console.error('Error fetching countries from TMDb:', error);
+        throw error;
+    }
+}
+
+app.get('/sitemap-country.xml', async (req, res) => {
+    try {
+        const countries = await getCountries(); // Fetch countries from TMDb
+
+        let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        sitemap += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        countries.forEach(country => {
+            sitemap += `    <url>\n`;
+            sitemap += `        <loc>https://ha-entertainment.com/country/${country.iso_3166_1}</loc>\n`; // Using ISO country code for URL
+            sitemap += `        <changefreq>daily</changefreq>\n`;
+            sitemap += `        <priority>0.7</priority>\n`;
+            sitemap += `    </url>\n`;
+        });
+
+        sitemap += `</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        res.send(sitemap);
+    } catch (error) {
+        res.status(500).send('Error generating sitemap');
+    }
 });
 
 
