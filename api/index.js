@@ -862,7 +862,7 @@ app.get('/sitemap.xml', async (req, res) => {
     </sitemap>`).join('')}
     ${[...Array(movieSitemapCount).keys()].map(i => `
     <sitemap>
-        <loc>https://www.ha-entertainment.com/sitemap-watch-movies-${i + 1}.xml</loc>
+        <loc>https://www.ha-entertainment.com/sitemap-watch-movie-${i + 1}.xml</loc>
     </sitemap>`).join('')}
     ${[...Array(tvSitemapCount).keys()].map(i => `
     <sitemap>
@@ -989,7 +989,7 @@ async function fetchAllMovies() {
         movies.push(...response.data.results);
         totalPages = response.data.total_pages;
         page++;
-    } while (page <= 100); // Limit this if needed
+    } while (page <= 10); // Limit this if needed
 
     return movies;
 }
@@ -1006,7 +1006,7 @@ async function fetchAlltv() {
         tv.push(...response.data.results);
         totalPages = response.data.total_pages;
         page++;
-    } while (page <= 100); // Limit this if needed
+    } while (page <= 10); // Limit this if needed
 
     return tv;
 }
