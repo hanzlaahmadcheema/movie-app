@@ -832,6 +832,54 @@ app.get('/filter', async (req, res) => {
   }
 });
 
+
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const movies = await fetchAllMovies();
+        const tvShows = await fetchAlltv();
+        
+        const movieSitemapCount = Math.ceil(movies.length / DATA_PER_SITEMAP);
+        const tvSitemapCount = Math.ceil(tvShows.length / DATA_PER_SITEMAP);
+
+        const sitemapIndex = `
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-page.xml</loc>
+    </sitemap>
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-genre.xml</loc>
+    </sitemap>
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-country.xml</loc>
+    </sitemap>
+    ${[...Array(movieSitemapCount).keys()].map(i => `
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-movie-${i + 1}.xml</loc>
+    </sitemap>`).join('')}
+    ${[...Array(tvSitemapCount).keys()].map(i => `
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-series-${i + 1}.xml</loc>
+    </sitemap>`).join('')}
+    ${[...Array(movieSitemapCount).keys()].map(i => `
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-watch-movies-${i + 1}.xml</loc>
+    </sitemap>`).join('')}
+    ${[...Array(tvSitemapCount).keys()].map(i => `
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-watch-series-${i + 1}.xml</loc>
+    </sitemap>`).join('')}
+</sitemapindex>`;
+
+        res.setHeader('Content-Type', 'application/xml');
+        res.send(sitemapIndex.trim());
+    } catch (error) {
+        console.error('Error generating sitemap index:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
 async function getGenres() {
     try {
         const [moviesGenresResponse, tvGenresResponse] = await Promise.all([
@@ -926,5 +974,163 @@ app.get('/sitemap-country.xml', async (req, res) => {
     }
 });
 
+const DATA_PER_SITEMAP = 1000; // Adjust according to your needs
+
+
+async function fetchAllMovies() {
+    const movies = [];
+    let page = 1;
+    let totalPages;
+
+    do {
+        const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
+            params: { api_key: apiKey, language: 'en-US', page: page }
+        });
+        movies.push(...response.data.results);
+        totalPages = response.data.total_pages;
+        page++;
+    } while (page <= 500); // Limit this if needed
+
+    return movies;
+}
+
+async function fetchAlltv() {
+    const tv = [];
+    let page = 1;
+    let totalPages;
+
+    do {
+        const response = await axios.get('https://api.themoviedb.org/3/tv/popular', {
+            params: { api_key: apiKey, language: 'en-US', page: page }
+        });
+        tv.push(...response.data.results);
+        totalPages = response.data.total_pages;
+        page++;
+    } while (page <= 500); // Limit this if needed
+
+    return tv;
+}
+
+async function generateMovieSitemaps(movies) {
+    const sitemaps = [];
+    for (let i = 0; i < movies.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = movies.slice(i, i + DATA_PER_SITEMAP).map(movie => {
+            return `    <url>\n        <loc>https://ha-entertainment.com/movie/${movie.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+        }).join('');
+        
+        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
+    }
+    return sitemaps;
+}
+
+async function generateTvSitemaps(tv) {
+    const sitemaps = [];
+    for (let i = 0; i < tv.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = tv.slice(i, i + DATA_PER_SITEMAP).map(tvShow => {
+            return `    <url>\n        <loc>https://ha-entertainment.com/series/${tvShow.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+        }).join('');
+        
+        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
+    }
+    return sitemaps;
+}
+
+async function generateWatchMovieSitemaps(movies) {
+    const sitemaps = [];
+    for (let i = 0; i < movies.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = movies.slice(i, i + DATA_PER_SITEMAP).map(movie => {
+            return `    <url>\n        <loc>https://www.ha-entertainment.com/watch-movies/${movie.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+        }).join('');
+        
+        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
+    }
+    return sitemaps;
+}
+
+async function generateWatchSeriesSitemaps(tv) {
+    const sitemaps = [];
+    for (let i = 0; i < tv.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = tv.slice(i, i + DATA_PER_SITEMAP).map(tvShow => {
+            const seasonNumber = 1; // Example, adjust as needed
+            const episodeNumber = 1; // Example, adjust as needed
+            return `    <url>\n        <loc>https://www.ha-entertainment.com/watch-series/${tvShow.id}/season/${seasonNumber}/episode/${episodeNumber}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+        }).join('');
+        
+        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
+    }
+    return sitemaps;
+}
+
+app.get('/sitemap-movie-:index.xml', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        const movies = await fetchAllMovies();
+        const sitemaps = await generateMovieSitemaps(movies);
+        
+        if (index >= 1 && index <= sitemaps.length) {
+            res.setHeader('Content-Type', 'application/xml');
+            res.send(sitemaps[index - 1]);
+        } else {
+            res.status(404).send('Sitemap not found');
+        }
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/sitemap-series-:index.xml', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        const tv = await fetchAlltv();
+        const sitemaps = await generateTvSitemaps(tv);
+        
+        if (index >= 1 && index <= sitemaps.length) {
+            res.setHeader('Content-Type', 'application/xml');
+            res.send(sitemaps[index - 1]);
+        } else {
+            res.status(404).send('Sitemap not found');
+        }
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/sitemap-watch-movie-:index.xml', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        const movies = await fetchAllMovies();
+        const sitemaps = await generateWatchMovieSitemaps(movies);
+        
+        if (index >= 1 && index <= sitemaps.length) {
+            res.setHeader('Content-Type', 'application/xml');
+            res.send(sitemaps[index - 1]);
+        } else {
+            res.status(404).send('Sitemap not found');
+        }
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/sitemap-watch-series-:index.xml', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        const tv = await fetchAlltv();
+        const sitemaps = await generateWatchSeriesSitemaps(tv);
+        
+        if (index >= 1 && index <= sitemaps.length) {
+            res.setHeader('Content-Type', 'application/xml');
+            res.send(sitemaps[index - 1]);
+        } else {
+            res.status(404).send('Sitemap not found');
+        }
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 module.exports = app;
