@@ -112,7 +112,15 @@ app.get('/search', async (req, res) => {
         const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(keyword)}&page=${page}`);
         const data = await response.json();
   
-        const combinedResults = data.results;
+        // Filter results to exclude items without images
+        const combinedResults = data.results.filter(item => {
+            if (item.media_type === 'person') {
+                return item.profile_path; // Only include people with a profile picture
+            } else {
+                return item.poster_path || item.backdrop_path; // Include movies/TV series with either poster or backdrop
+            }
+        });
+
         const totalPages = data.total_pages;
         const currentPage = data.page;
   
@@ -141,24 +149,32 @@ app.get('/search', async (req, res) => {
         console.error('Error fetching search results:', error);
         res.status(500).send('An error occurred while searching.');
     }
-  });
+});
+
+
 
 app.get('/search/suggest', async (req, res) => {
-  const keyword = req.query.keyword || '';
-  
-  try {
-      const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(keyword)}&page=1`);
-      const data = await response.json();
-      
-      // Return the top results
-      res.json({
-          results: data.results
-      });
-  } catch (error) {
-      console.error('Error fetching search suggestions:', error);
-      res.status(500).json({ error: 'An error occurred while fetching search suggestions.' });
-  }
+    const keyword = req.query.keyword || '';
+    const searchType = req.query.type || 'multi'; // Default to 'multi' for combined results
+
+    try {
+        // Build URL based on search type
+        const searchUrl = `https://api.themoviedb.org/3/search/${searchType}?api_key=${apiKey}&query=${encodeURIComponent(keyword)}&page=1`;
+        const response = await fetch(searchUrl);
+        const data = await response.json();
+
+        const suggestions = data.results;
+
+        // Return top results
+        res.json({
+            results: suggestions
+        });
+    } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        res.status(500).json({ error: 'An error occurred while fetching search suggestions.' });
+    }
 });
+
 
 app.get('/terms', (req, res) => {
     res.render('terms');
@@ -776,6 +792,56 @@ app.get('/production/:id', async (req, res) => {
       res.status(500).send('Internal Server Error');
   }
 });
+const fetchCollectionDetails = async (collectionId, page = 1, itemsPerPage = 10) => {
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/collection/${collectionId}?api_key=${apiKey}`);
+        let movies = response.data.parts;
+
+        // Filter and sort movies by release_date
+        movies = movies
+            .filter(movie => movie.media_type === 'movie' && movie.release_date)
+            .sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
+
+        // Paginate movies
+        const paginatedMovies = movies.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+        return {
+            collectionDetails: response.data,
+            movies: paginatedMovies,
+            totalResults: movies.length,
+            totalPages: Math.ceil(movies.length / itemsPerPage),
+            currentPage: page
+        };
+    } catch (error) {
+        console.error('Error fetching collection details:', error);
+        throw new Error('An unexpected error occurred!');
+    }
+};
+
+app.get('/collection/:collectionId', async (req, res) => {
+    const { collectionId } = req.params;
+    const { page = 1 } = req.query; // Get page number from query, default to 1
+    
+    try {
+        // Fetch collection details and movies
+        const { collectionDetails, movies, totalResults, totalPages, currentPage } = await fetchCollectionDetails(collectionId, page);
+
+        res.render('collection', {
+            collectionId,
+            collectionName: collectionDetails.name,
+            movies, // Pass movies to the EJS template
+            totalResults,
+            currentPage,
+            itemsPerPage: 10, // Adjust items per page if necessary
+            totalPages
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('An unexpected error occurred!');
+    }
+});
+
+  
 
 app.get('/filter', async (req, res) => {
   const { type, genre, country, quality, year, sort, page } = req.query;
