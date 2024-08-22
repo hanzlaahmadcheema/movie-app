@@ -104,7 +104,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Define the search route
 app.get('/search', async (req, res) => {
     const keyword = req.query.keyword || '';
     const page = parseInt(req.query.page, 10) || 1;
@@ -143,7 +142,6 @@ app.get('/search', async (req, res) => {
         res.status(500).send('An error occurred while searching.');
     }
   });
-  
 
 app.get('/search/suggest', async (req, res) => {
   const keyword = req.query.keyword || '';
