@@ -259,7 +259,7 @@
                                             <a href="/movie/<%= movie.id %>" class="btn w-icon"><i class="fas fa-info-circle mr-2"></i>Detail</a>
                                         </div>
                                         <div class="is-share">
-                                            <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <div class="btn w-icon" onclick="shareToWhatsApp()">
                                                 <i class="fas fa-share-alt mr-2"></i>Share this
                                             </div>
                                         </div>
@@ -439,6 +439,22 @@
             body.classList.toggle('dark-mode');
         });
     });
+</script>
+<script>
+function shareToWhatsApp() {
+    const url = encodeURIComponent(window.location.href); // Get the current page URL and encode it
+    const movieTitle = encodeURIComponent(`<%= movie.title %>`); // Movie title
+    const movieOverview = encodeURIComponent(`<%= movie.overview %>`); // Movie overview
+    
+    // Construct the share text with newlines
+    const shareText = `*Watch ${movieTitle} Full HD + ADS Free*%0A%0A_${movieOverview}_%0A%0A`;
+    
+    const shareUrl = `https://api.whatsapp.com/send?text=${shareText} ${url}`; // Construct the WhatsApp share URL
+    
+    window.open(shareUrl, '_blank'); // Open the WhatsApp share link in a new window
+}
+
+
 </script>
 
     <!-- End: Scripts -->
