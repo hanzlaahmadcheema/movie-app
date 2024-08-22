@@ -322,6 +322,7 @@ app.get('/movie/:id', async (req, res) => {
 
       const movie = moviesResponse.data;
       const relatedMovies = moviesrelatedResponse.data.results;
+      const trailerId = await getTrailerId(movieId); // Function to fetch trailer ID
       const cast = moviescreditsResponse.data.cast;
       
 
@@ -335,7 +336,7 @@ app.get('/movie/:id', async (req, res) => {
       };
 
 
-      res.render('movie', { movie, relatedMovies, getRatingClass });
+      res.render('movie', { movie, relatedMovies, trailerId, getRatingClass });
   } catch (error) {
       console.error('Error fetching movie data:', error);
       res.status(500).send('Error fetching movie data');
