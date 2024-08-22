@@ -989,7 +989,7 @@ async function fetchAllMovies() {
         movies.push(...response.data.results);
         totalPages = response.data.total_pages;
         page++;
-    } while (page <= 500); // Limit this if needed
+    } while (page <= 10); // Limit this if needed
 
     return movies;
 }
