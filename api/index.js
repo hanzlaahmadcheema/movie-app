@@ -1074,101 +1074,90 @@ app.get('/sitemap-country.xml', async (req, res) => {
 });
 
 
+const cache = {};
+
 async function fetchAllMovies() {
+    if (cache.movies) {
+        return cache.movies;
+    }
+
     const movies = [];
     let page = 1;
-    let totalPages;
+    const totalPages = 500;
 
-    do {
+    while (page <= totalPages) {
         const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
             params: { api_key: apiKey, language: 'en-US', page: page }
         });
         movies.push(...response.data.results);
-        totalPages = response.data.total_pages;
         page++;
-    } while (page <= 100); // Limit this if needed
+    }
 
+    cache.movies = movies;
     return movies;
 }
 
 async function fetchAlltv() {
+    if (cache.tvShows) {
+        return cache.tvShows;
+    }
+
     const tv = [];
     let page = 1;
-    let totalPages;
+    const totalPages = 500;
 
-    do {
+    while (page <= totalPages) {
         const response = await axios.get('https://api.themoviedb.org/3/tv/popular', {
             params: { api_key: apiKey, language: 'en-US', page: page }
         });
         tv.push(...response.data.results);
-        totalPages = response.data.total_pages;
         page++;
-    } while (page <= 100); // Limit this if needed
+    }
 
+    cache.tvShows = tv;
     return tv;
 }
 
-const DATA_PER_SITEMAP = 50; // Number of pages per sitemap
 
-async function generateMovieSitemaps(movies) {
+const DATA_PER_SITEMAP = 1000; // Number of entries per sitemap
+
+// Function to generate sitemaps
+async function generateSitemaps(data, baseUrl) {
     const sitemaps = [];
-    for (let i = 0; i < movies.length; i += DATA_PER_SITEMAP * 20) { // Adjust this multiplication according to pages
-        const sitemapEntries = movies.slice(i, i + DATA_PER_SITEMAP * 20).map(movie => {
-            return `    <url>\n        <loc>https://ha-entertainment.com/movie/${movie.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+    for (let i = 0; i < data.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = data.slice(i, i + DATA_PER_SITEMAP).map(item => {
+            return `    <url>\n        <loc>${baseUrl}/${item.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
         }).join('');
         
         sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
     }
-
     return sitemaps;
-    
+}
+
+// Generate sitemap functions for different categories
+async function generateMovieSitemaps(movies) {
+    return generateSitemaps(movies, 'https://ha-entertainment.com/movie');
 }
 
 async function generateTvSitemaps(tv) {
-    const sitemaps = [];
-    for (let i = 0; i < tv.length; i += DATA_PER_SITEMAP * 20) {
-        const sitemapEntries = tv.slice(i, i + DATA_PER_SITEMAP * 20).map(tvShow => {
-            return `    <url>\n        <loc>https://ha-entertainment.com/series/${tvShow.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
-        }).join('');
-        
-        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
-    }
-    return sitemaps;
+    return generateSitemaps(tv, 'https://ha-entertainment.com/series');
 }
 
 async function generateWatchMovieSitemaps(movies) {
-    const sitemaps = [];
-    for (let i = 0; i < movies.length; i += DATA_PER_SITEMAP * 20) {
-        const sitemapEntries = movies.slice(i, i + DATA_PER_SITEMAP * 20).map(movie => {
-            return `    <url>\n        <loc>https://www.ha-entertainment.com/watch-movies/${movie.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
-        }).join('');
-        
-        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
-    }
-    return sitemaps;
+    return generateSitemaps(movies, 'https://www.ha-entertainment.com/watch-movies');
 }
 
 async function generateWatchSeriesSitemaps(tv) {
-    const sitemaps = [];
-    for (let i = 0; i < tv.length; i += DATA_PER_SITEMAP * 20) {
-        const sitemapEntries = tv.slice(i, i + DATA_PER_SITEMAP * 20).map(tvShow => {
-            const seasonNumber = 1; // Example, adjust as needed
-            const episodeNumber = 1; // Example, adjust as needed
-            return `    <url>\n        <loc>https://www.ha-entertainment.com/watch-series/${tvShow.id}/season/${seasonNumber}/episode/${episodeNumber}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
-        }).join('');
-        
-        sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
-    }
-    return sitemaps;
+    return generateSitemaps(tv, 'https://www.ha-entertainment.com/watch-series');
 }
 
-
+// Routes to handle sitemaps
 app.get('/sitemap-movie-:index.xml', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
-        const movies = await fetchAllMovies();
+        const movies = await fetchAllMovies(); // Fetch all movies (10,000 results)
         const sitemaps = await generateMovieSitemaps(movies);
-        const pageIndex = Math.floor((index - 1) / 50); // Determines the correct sitemap chunk
+        const pageIndex = index - 1;
 
         if (pageIndex >= 0 && pageIndex < sitemaps.length) {
             res.setHeader('Content-Type', 'application/xml');
@@ -1185,9 +1174,9 @@ app.get('/sitemap-movie-:index.xml', async (req, res) => {
 app.get('/sitemap-series-:index.xml', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
-        const tv = await fetchAlltv();
+        const tv = await fetchAlltv(); // Fetch all series (10,000 results)
         const sitemaps = await generateTvSitemaps(tv);
-        const pageIndex = Math.floor((index - 1) / 50);
+        const pageIndex = index - 1;
 
         if (pageIndex >= 0 && pageIndex < sitemaps.length) {
             res.setHeader('Content-Type', 'application/xml');
@@ -1204,9 +1193,9 @@ app.get('/sitemap-series-:index.xml', async (req, res) => {
 app.get('/sitemap-watch-movie-:index.xml', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
-        const movies = await fetchAllMovies();
+        const movies = await fetchAllMovies(); // Fetch all watch-movies (10,000 results)
         const sitemaps = await generateWatchMovieSitemaps(movies);
-        const pageIndex = Math.floor((index - 1) / 50);
+        const pageIndex = index - 1;
 
         if (pageIndex >= 0 && pageIndex < sitemaps.length) {
             res.setHeader('Content-Type', 'application/xml');
@@ -1223,9 +1212,9 @@ app.get('/sitemap-watch-movie-:index.xml', async (req, res) => {
 app.get('/sitemap-watch-series-:index.xml', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
-        const tv = await fetchAlltv();
+        const tv = await fetchAlltv(); // Fetch all watch-series (10,000 results)
         const sitemaps = await generateWatchSeriesSitemaps(tv);
-        const pageIndex = Math.floor((index - 1) / 50);
+        const pageIndex = index - 1;
 
         if (pageIndex >= 0 && pageIndex < sitemaps.length) {
             res.setHeader('Content-Type', 'application/xml');
