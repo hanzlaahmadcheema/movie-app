@@ -52,7 +52,12 @@
           "url": "https://ha-entertainment.com/search/<%= encodeURIComponent(keyword) %>",
           "description": "Find movies, TV series, and more related to <%= searchName %> on HA Entertainment.",
           "image": "<%= imageUrl %>"
-        }
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://ha-entertainment.com/search?keyword={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
     </script>
 
     <!-- Google tag (gtag.js) -->

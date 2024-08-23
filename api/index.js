@@ -151,8 +151,6 @@ app.get('/search', async (req, res) => {
     }
 });
 
-
-
 app.get('/search/suggest', async (req, res) => {
     const keyword = req.query.keyword || '';
     const searchType = req.query.type || 'multi'; // Default to 'multi' for combined results
@@ -174,7 +172,6 @@ app.get('/search/suggest', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching search suggestions.' });
     }
 });
-
 
 app.get('/terms', (req, res) => {
     res.render('terms');
@@ -457,15 +454,15 @@ async function getMovieDetails(movieId) {
         const iframeUrl2 = await fetchIframeUrl(encodedTitle, 'https://playdesi.cc/movies');
 
         const servers = [
-            { id: '1', name: 'English', url: iframeUrl1 },
-            { id: '2', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
-            { id: '3', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
-            { id: '4', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
-            { id: '6', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '7', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '1', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '2', name: 'English', url: iframeUrl1 },
+            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '4', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
+            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '6', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
+            { id: '7', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
             { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
-            // { id: '8', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '9', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };

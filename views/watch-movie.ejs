@@ -9,7 +9,7 @@
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
     <meta name="description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
-    <meta name="keywords" content="watch <%= movie.title %>, free movie streaming, HD movies, <%= movie.title %> full HD, free movies online, watch movies without ads" />
+    <meta name="keywords" content="watch <%= movie.title %> ha entertainment, watch <%= movie.title %> online ha entertainment, watch <%= movie.title %> free ha entertainment, watch <%= movie.title %>, free movie streaming, HD movies, <%= movie.title %> full HD, free movies online, watch movies without ads" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
 
     <!-- Canonical Link -->
@@ -25,7 +25,7 @@
     <meta property="og:type" content="video.movie" />
     <meta property="og:title" content="Watch <%= movie.title %> - Free Full HD Movie Streaming" />
     <meta property="og:url" content="https://ha-entertainment.com/watch-movie/<%= movie.id %>" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>" />
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="750">
     <meta property="og:description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
@@ -37,7 +37,7 @@
     <meta name="twitter:site" content="@HA_Entertainment">
     <meta name="twitter:title" content="Watch <%= movie.title %> - Free Full HD Movie Streaming">
     <meta name="twitter:description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality.">
-    <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>">
     <meta name="twitter:player" content="<%= servers[0].url %>">
 
     <!-- Stylesheets -->
@@ -53,7 +53,7 @@
           "name": "<%= movie.title %>",
           "url": "https://ha-entertainment.com/movie/<%= movie.id %>",
           "description": "<%= movie.overview %>",
-          "image": "https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>",
+          "image": "https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>",
           "genre": [
             <% if (movie.genres && movie.genres.length > 0) { %>
               <% movie.genres.forEach((genre, index) => { %>
@@ -110,7 +110,7 @@
             "name": "<%= movie.title %>",
             "description": "<%= movie.overview %>",
             "contentUrl": "<%= servers[0].url %>",
-            "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>",
+            "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>",
             "embedUrl": "<%= servers[0].url %>",
             "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
           }
