@@ -1074,65 +1074,82 @@ app.get('/sitemap-country.xml', async (req, res) => {
 });
 
 
-const cache = {};
+const CHUNK_SIZE = 10; // Number of pages to fetch in one go
+const DATA_PER_SITEMAP = 1000; // Entries per sitemap page
 
-async function fetchAllMovies() {
-    if (cache.movies) {
-        return cache.movies;
-    }
-
+async function fetchChunk(startPage, endPage, url) {
     const movies = [];
-    let page = 1;
-    const totalPages = 500;
-
-    while (page <= totalPages) {
-        const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
+    for (let page = startPage; page <= endPage; page++) {
+        const response = await axios.get(url, {
             params: { api_key: apiKey, language: 'en-US', page: page }
         });
         movies.push(...response.data.results);
-        page++;
     }
+    return movies;
+}
 
-    cache.movies = movies;
+async function fetchAllMovies() {
+    const totalPages = 500; // Total pages you need
+    const movies = [];
+    for (let i = 1; i <= totalPages; i += CHUNK_SIZE) {
+        const startPage = i;
+        const endPage = Math.min(i + CHUNK_SIZE - 1, totalPages);
+        const chunk = await fetchChunk(startPage, endPage, 'https://api.themoviedb.org/3/movie/popular');
+        movies.push(...chunk);
+    }
     return movies;
 }
 
 async function fetchAlltv() {
-    if (cache.tvShows) {
-        return cache.tvShows;
-    }
-
+    const totalPages = 500; // Total pages you need
     const tv = [];
-    let page = 1;
-    const totalPages = 500;
-
-    while (page <= totalPages) {
-        const response = await axios.get('https://api.themoviedb.org/3/tv/popular', {
-            params: { api_key: apiKey, language: 'en-US', page: page }
-        });
-        tv.push(...response.data.results);
-        page++;
+    for (let i = 1; i <= totalPages; i += CHUNK_SIZE) {
+        const startPage = i;
+        const endPage = Math.min(i + CHUNK_SIZE - 1, totalPages);
+        const chunk = await fetchChunk(startPage, endPage, 'https://api.themoviedb.org/3/tv/popular');
+        tv.push(...chunk);
     }
-
-    cache.tvShows = tv;
     return tv;
 }
 
-
-const DATA_PER_SITEMAP = 1000; // Number of entries per sitemap
-
 // Function to generate sitemaps
-async function generateSitemaps(data, baseUrl) {
+async function generateSitemaps(items, type) {
     const sitemaps = [];
-    for (let i = 0; i < data.length; i += DATA_PER_SITEMAP) {
-        const sitemapEntries = data.slice(i, i + DATA_PER_SITEMAP).map(item => {
-            return `    <url>\n        <loc>${baseUrl}/${item.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
+    for (let i = 0; i < items.length; i += DATA_PER_SITEMAP) {
+        const sitemapEntries = items.slice(i, i + DATA_PER_SITEMAP).map(item => {
+            return `    <url>\n        <loc>https://ha-entertainment.com/${type}/${item.id}</loc>\n        <changefreq>daily</changefreq>\n        <priority>0.8</priority>\n    </url>\n`;
         }).join('');
         
         sitemaps.push(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}</urlset>`);
     }
     return sitemaps;
 }
+
+app.get('/sitemap-:type-:index.xml', async (req, res) => {
+    try {
+        const type = req.params.type; // 'movie', 'series', 'watch-movie', 'watch-series'
+        const index = parseInt(req.params.index);
+        
+        // Fetch data
+        const dataFetcher = type === 'movie' ? fetchAllMovies : fetchAlltv;
+        const items = await dataFetcher();
+        
+        // Generate sitemaps
+        const sitemaps = await generateSitemaps(items, type);
+        const pageIndex = index - 1;
+
+        if (pageIndex >= 0 && pageIndex < sitemaps.length) {
+            res.setHeader('Content-Type', 'application/xml');
+            res.send(sitemaps[pageIndex]);
+        } else {
+            res.status(404).send('Sitemap not found');
+        }
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 // Generate sitemap functions for different categories
 async function generateMovieSitemaps(movies) {
