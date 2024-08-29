@@ -1236,5 +1236,33 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
+async function submitUrlsToIndexNow() {
+    const data = {
+      host: 'www.ha-entertainment.com',
+      key: '1de967fe9b604cbc88a398059a2aafad',
+      keyLocation: 'https://www.ha-entertainment.com/1de967fe9b604cbc88a398059a2aafad.txt',
+      urlList: [
+        'https://www.ha-entertainment.com/',
+        'https://www.ha-entertainment.com/movies',
+        'https://www.ha-entertainment.com/tv-series',
+        'https://www.ha-entertainment.com/top-imdb',
+        'https://www.ha-entertainment.com/contact-us',
+        'https://www.ha-entertainment.com/terms',
+      ]
+    };
+  
+    try {
+      const response = await axios.post('https://api.indexnow.org/indexnow', data, {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        }
+      });
+      console.log('Response:', response.data);
+    } catch (error) {
+      console.error('Error submitting URLs:', error);
+    }
+  }
+  
+  submitUrlsToIndexNow();
 
 module.exports = app;
