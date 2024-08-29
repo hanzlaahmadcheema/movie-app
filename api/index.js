@@ -1159,7 +1159,7 @@ app.get('/sitemap-watch-movie-:index.xml', async (req, res) => {
             res.status(404).send('Sitemap not found');
         }
     } catch (error) {
-        console.error('Error generating sitemap for watch-movies:', error);
+        console.error('Error generating sitemap for watch-movie:', error);
         res.status(500).send('Internal Server Error');
     }
 });

@@ -35,6 +35,8 @@
     <meta property="og:description"
         content="<%= movie.overview %> Watch <%= movie.title %> and enjoy streaming in Full HD quality for free on HA Entertainment." />
     <meta property="og:site_name" content="HA Entertainment" />
+    <meta property="og:video" content="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1" />
+
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
@@ -43,6 +45,7 @@
     <meta name="twitter:description"
         content="<%= movie.overview %> Watch <%= movie.title %> and other movies in Full HD quality for free on HA Entertainment.">
     <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>">
+    <meta name="twitter:player" content="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -102,9 +105,9 @@
             "@type": "VideoObject",
             "name": "<%= movie.title %>",
             "description": "<%= movie.overview %>",
-            "contentUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
+            "contentUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
             "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>",
-            "embedUrl": "https://ha-entertainment.netlify.app/embed/watch-embed?id=<%= movie.id %>",
+            "embedUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
             "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
           },
           "interactionStatistic": {
