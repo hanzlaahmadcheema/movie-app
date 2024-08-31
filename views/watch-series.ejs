@@ -232,11 +232,13 @@
                                                     class="fas fa-info-circle mr-2"></i>Detail</a>
                                         </div>
                                         <div class="is-share">
-                                            <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true"
+                                            <!-- <div class="btn w-icon" data-toggle="dropdown" aria-haspopup="true"
                                                 aria-expanded="false"><i class="fas fa-share-alt mr-2"></i>Share this
-                                            </div>
-                                            <div class="dropdown-menu mine-dropdown">
-                                                <span>WATCH</span>
+                                            </div> -->
+                                            <div class="is-share">
+                                                <div class="btn w-icon" onclick="shareToWhatsApp()">
+                                                    <i class="fas fa-share-alt mr-2"></i>Share this
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -501,6 +503,22 @@ $(document).ready(function() {
             });
         });
     </script>
+    <script>
+        function shareToWhatsApp() {
+            const url = encodeURIComponent(window.location.href); // Get the current page URL and encode it
+            const movieTitle = encodeURIComponent(`<%= series.name %>`); // Movie title
+            const movieOverview = encodeURIComponent(`<%= series.overview %>`); // Movie overview
+            
+            // Construct the share text with newlines
+            const shareText = `*Watch ${movieTitle} Full HD + ADS Free*%0A%0A_${movieOverview}_%0A%0A`;
+            
+            const shareUrl = `https://api.whatsapp.com/send?text=${shareText} ${url}`; // Construct the WhatsApp share URL
+            
+            window.open(shareUrl, '_blank'); // Open the WhatsApp share link in a new window
+        }
+        
+        
+        </script>
     <!-- End: Javascript -->
 </body>
 
