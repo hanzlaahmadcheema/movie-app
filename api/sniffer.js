@@ -28,7 +28,7 @@ async function fetchIframeUrl(pageUrl) {
 }
 
 // Example usage
-const url = 'https://vegamovies.gs/19194-the-legend-of-maula-jatt-2022-punjabi-movie-dvdscr-720p-480p.html';
+const url = 'https://www.1024tera.com/sharing/link?surl=sjwhFslAUi8Fd-J5seNRow';
 fetchIframeUrl(url).then(iframeUrl => {
     if (iframeUrl) {
         console.log(`Iframe URL: ${iframeUrl}`);

@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const path = require('path');
+const path = require('path');   
 
 const app = express();
 //define api key here not dotenv
@@ -13,7 +13,44 @@ app.use(express.json());
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
-
+// Puppeteer function to scrape video URL
+async function getVideoUrl(pageUrl) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(pageUrl, { waitUntil: 'networkidle2' });
+  
+    // Replace the selector below with the correct one that matches the video element on the page
+    const videoUrl = await page.evaluate(() => {
+      // Example for scraping a video source URL
+      const videoElement = document.querySelector('video'); // Change selector as needed
+      return videoElement ? videoElement.src : null;
+    });
+  
+    await browser.close();
+    return videoUrl;
+  }
+  
+  app.get('/video', async (req, res) => {
+    const { url } = req.query;
+  
+    if (!url) {
+      return res.status(400).send('URL is required');
+    }
+  
+    try {
+      const videoUrl = await getVideoUrl(url);
+  
+      if (!videoUrl) {
+        return res.status(404).send('No video found on the page');
+      }
+  
+      // Pass the video URL to the client
+      res.render('video', { videoUrl });
+    } catch (err) {
+      console.error('Error fetching video:', err);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 app.get('/', async (req, res) => {
   try {
       // Fetch trending content for slider (10 items)
@@ -458,10 +495,10 @@ async function getMovieDetails(movieId) {
             { id: '2', name: 'English', url: iframeUrl1 },
             { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '4', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
-            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '6', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
+            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '6', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
             { id: '7', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}` },
+            { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
             { id: '9', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
@@ -525,13 +562,14 @@ async function getMovieDetails(movieId) {
         // Get the current episode ID or the first episode in the season by default
         const currentEpisode = episodes.find(ep => ep.episode_number == episode) || episodes[0];
 
+        
         // Servers data with URLs
         const servers = [
             { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
-            { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${currentEpisode.id}` },
-            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
+            { name: 'Hindi/Urdu/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
+            { name: 'Hindi/Urdu/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${currentEpisode.id}` },
+            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}&ds_lang=en` },
             { name: 'English', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
