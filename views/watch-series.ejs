@@ -432,14 +432,21 @@
         src="https://platform-api.sharethis.com/js/sharethis.js#property=6433be364f61b7001240a339&product=inline-share-buttons&source=platform"
         async="async"></script>
     <script src="/js/search.js"></script>
-    <script>
-$(document).ready(function() {
+<script>
+    $(document).ready(function() {
     const seriesId = '<%= series.id %>'; // Pass series ID to the script
 
     // Get URL parameters from path
     const pathParts = window.location.pathname.split('/');
     const season = pathParts[4] || 1;
     const episode = pathParts[6] || 1;
+
+    // Get the server parameter from the URL or default to 1
+    const urlParams = new URLSearchParams(window.location.search);
+    let serverIndex = parseInt(urlParams.get('server'), 10);
+    if (isNaN(serverIndex) || serverIndex < 1) {
+        serverIndex = 1; // Default to server 1 if invalid
+    }
 
     // Set the current season and episode
     $('#current-ss').text('Season ' + season);
@@ -449,41 +456,70 @@ $(document).ready(function() {
     $('.ep-item').removeClass('on-air');
     $(`.ep-item[data-id="${episode}"]`).addClass('on-air');
 
-    // Update server URL based on episode
+    // Update server URLs based on episode and season
     $('.sv-item').each(function() {
         const serverUrl = $(this).data('url');
-        const newServerUrl = serverUrl.replace(/season=\d+/, `season=${season}`).replace(/episode=\d+/, `episode=${episode}`);
+        const newServerUrl = serverUrl
+            .replace(/season=\d+/, `season=${season}`)
+            .replace(/episode=\d+/, `episode=${episode}`);
         $(this).data('url', newServerUrl);
     });
 
+    // Set the initial server based on the URL parameter or default to the first server
+    let initialServer = $('.sv-item').eq(serverIndex - 1);
+    if (initialServer.length === 0) {
+        // If server index is out of bounds, default to the first server
+        initialServer = $('.sv-item').first();
+        serverIndex = 1; // Update serverIndex to 1 since we're defaulting
+    }
+
+    // Remove any previously active server classes
+    $('.sv-item').removeClass('active');
+    $('.sv-item .text-active').hide();
+
+    // Set the active server based on the URL or default
+    const initialUrl = initialServer.data('url');
+    $('#iframe-player').attr('src', initialUrl);
+    $('#current-server').text(initialServer.find('.sv-name strong').text());
+    initialServer.addClass('active');
+    initialServer.find('.text-active').show();
+
     // Handle server dropdown change
     $('.sv-item').click(function() {
-        var url = $(this).data('url');
+        const url = $(this).data('url');
         $('#iframe-player').attr('src', url);
         $('#current-server').text($(this).find('.sv-name strong').text());
+
+        // Remove active class and hide text from all servers
         $('.sv-item').removeClass('active');
         $('.sv-item .text-active').hide();
+
+        // Add active class to the selected server
         $(this).addClass('active');
         $(this).find('.text-active').show();
+
+        // Update the URL with the selected server index
+        const newUrl = new URL(window.location.href);
+        const selectedServerIndex = $('.sv-item').index(this) + 1; // Index starts from 1
+        newUrl.searchParams.set('server', selectedServerIndex);
+        window.history.replaceState({}, '', newUrl);
     });
 
     // Handle season dropdown change
     $('.ss-item').click(function() {
-        var seasonNumber = $(this).data('id');
-        var currentEpisodeId = $('.ep-item.on-air').data('id');
-        window.location.href = `/watch-series/${seriesId}/season/${seasonNumber}/episode/${currentEpisodeId}`;
+        const seasonNumber = $(this).data('id');
+        const currentEpisodeId = $('.ep-item.on-air').data('id');
+        window.location.href = `/watch-series/${seriesId}/season/${seasonNumber}/episode/${currentEpisodeId}?server=${serverIndex}`;
     });
 
     // Handle episode change
     $('.ep-item').click(function() {
-        var episodeNumber = $(this).data('id');
-        // Redirect to the URL for the selected episode
-        window.location.href = `/watch-series/${seriesId}/season/${season}/episode/${episodeNumber}`;
+        const episodeNumber = $(this).data('id');
+        window.location.href = `/watch-series/${seriesId}/season/${season}/episode/${episodeNumber}?server=${serverIndex}`;
     });
 });
 
-
-    </script>
+</script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var container = document.querySelector('.ps-container');

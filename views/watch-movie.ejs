@@ -391,35 +391,41 @@
     <script src="/js/search.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+    const serverItems = document.querySelectorAll('.sv-item');
+    const urlParams = new URLSearchParams(window.location.search);
+    const serverIndex = parseInt(urlParams.get('server'), 10) || 1; // Get server parameter or default to 1
+
+    // Select the server based on the parameter (serverIndex)
+    const initialServer = serverItems[serverIndex - 1] || serverItems[0]; // Default to the first server if not found
+    const initialUrl = initialServer.getAttribute('data-url');
     
-            const serverItems = document.querySelectorAll('.sv-item');
-            
-            // Set the initial server (first server) on page load
-            if (serverItems.length > 0) {
-                const initialServer = serverItems[0];
-                const initialUrl = initialServer.getAttribute('data-url');
-                document.getElementById('iframe-player').src = initialUrl;
-                document.getElementById('current-server').textContent = initialServer.querySelector('.sv-name').textContent;
-                initialServer.querySelector('.text-active').style.display = 'inline';
-                initialServer.classList.add('active');
-            }
-    
-            serverItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const url = item.getAttribute('data-url');
-                    document.getElementById('iframe-player').src = url;
-                    document.getElementById('current-server').textContent = item.querySelector('.sv-name').textContent;
-    
-                    // Remove "Selected" from all servers and remove active class
-                    document.querySelectorAll('.text-active').forEach(el => el.style.display = 'none');
-                    document.querySelectorAll('.sv-item').forEach(el => el.classList.remove('active'));
-    
-                    // Add "Selected" to the current server and add active class
-                    item.querySelector('.text-active').style.display = 'inline';
-                    item.classList.add('active');
-                });
-            });
+    document.getElementById('iframe-player').src = initialUrl;
+    document.getElementById('current-server').textContent = initialServer.querySelector('.sv-name').textContent;
+    initialServer.querySelector('.text-active').style.display = 'inline';
+    initialServer.classList.add('active');
+
+    serverItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            const url = item.getAttribute('data-url');
+            document.getElementById('iframe-player').src = url;
+            document.getElementById('current-server').textContent = item.querySelector('.sv-name').textContent;
+
+            // Remove "Selected" from all servers and remove active class
+            document.querySelectorAll('.text-active').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.sv-item').forEach(el => el.classList.remove('active'));
+
+            // Add "Selected" to the current server and add active class
+            item.querySelector('.text-active').style.display = 'inline';
+            item.classList.add('active');
+
+            // Update the URL to reflect the current server index
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('server', index + 1); // Server index starts from 1
+            window.history.replaceState({}, '', newUrl);
         });
+    });
+});
+
     </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
