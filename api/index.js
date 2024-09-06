@@ -567,9 +567,9 @@ async function getMovieDetails(movieId) {
         const servers = [
             { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'Hindi/Urdu/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
-            { name: 'Hindi/Urdu/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${currentEpisode.id}` },
-            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}&ds_lang=en` },
+            { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
+            { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${currentEpisode.id}` },
+            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
