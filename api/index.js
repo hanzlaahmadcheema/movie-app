@@ -13,44 +13,6 @@ app.use(express.json());
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
-// Puppeteer function to scrape video URL
-async function getVideoUrl(pageUrl) {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(pageUrl, { waitUntil: 'networkidle2' });
-  
-    // Replace the selector below with the correct one that matches the video element on the page
-    const videoUrl = await page.evaluate(() => {
-      // Example for scraping a video source URL
-      const videoElement = document.querySelector('video'); // Change selector as needed
-      return videoElement ? videoElement.src : null;
-    });
-  
-    await browser.close();
-    return videoUrl;
-  }
-  
-  app.get('/video', async (req, res) => {
-    const { url } = req.query;
-  
-    if (!url) {
-      return res.status(400).send('URL is required');
-    }
-  
-    try {
-      const videoUrl = await getVideoUrl(url);
-  
-      if (!videoUrl) {
-        return res.status(404).send('No video found on the page');
-      }
-  
-      // Pass the video URL to the client
-      res.render('video', { videoUrl });
-    } catch (err) {
-      console.error('Error fetching video:', err);
-      res.status(500).send('Internal Server Error');
-    }
-  });
 app.get('/', async (req, res) => {
   try {
       // Fetch trending content for slider (10 items)
@@ -544,6 +506,17 @@ async function getMovieDetails(movieId) {
     }
   } 
 
+  async function getImdbId(id) {
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}/external_ids?api_key=${apiKey}`);
+        const externalIds = response.data;
+        return externalIds.imdb_id;
+    } catch (error) {
+        console.error('Error fetching external IDs:', error);
+        return null; // Handle the case where the IMDb ID could not be fetched
+    }
+}
+
   app.get('/watch-series/:id/season/:season/episode/:episode', async (req, res) => {
     const { id, season, episode } = req.params;
 
@@ -562,11 +535,13 @@ async function getMovieDetails(movieId) {
         // Get the current episode ID or the first episode in the season by default
         const currentEpisode = episodes.find(ep => ep.episode_number == episode) || episodes[0];
 
-        
+        const imdbId = await getImdbId(id);
+
         // Servers data with URLs
         const servers = [
             { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
+            { name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${imdbId}` },            
             { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed?id=${currentEpisode.id}` },
             { name: 'Hindi/Urdu/Dubbed', url: `https://ha-entertainment.netlify.app/embed/watch-embed2?id=${currentEpisode.id}` },
             { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
