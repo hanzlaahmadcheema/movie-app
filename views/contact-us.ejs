@@ -362,6 +362,29 @@
         });
     </script>
 
+    //parameters
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to get URL parameters
+            function getQueryParams() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return {
+                    name: urlParams.get('name') || '',
+                    email: urlParams.get('email') || '',
+                    subject: urlParams.get('subject') || '',
+                    message: urlParams.get('message') || ''
+                };
+            }
+    
+            // Pre-fill form fields with parameters from the URL
+            const params = getQueryParams();
+            if (params.name) document.getElementById('name').value = params.name;
+            if (params.email) document.getElementById('email').value = params.email;
+            if (params.subject) document.getElementById('subject').value = params.subject;
+            if (params.message) document.getElementById('contact-textarea').value = params.message;
+        });
+    </script>
+    
 <!-- Start of OpenWidget (www.openwidget.com) code -->
 <script>
     window.__ow = window.__ow || {};
