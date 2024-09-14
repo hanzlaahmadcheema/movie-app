@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
-    <meta name="description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
+    <meta name="description" content="<%= movie.overview %> - Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
     <meta name="keywords" content="watch <%= movie.title %> ha entertainment, watch <%= movie.title %> online ha entertainment, watch <%= movie.title %> free ha entertainment, watch <%= movie.title %>, free movie streaming, HD movies, <%= movie.title %> full HD, free movies online, watch movies without ads" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
 
@@ -438,20 +438,49 @@
     });
 </script>
 <script>
-function shareToWhatsApp() {
-    const url = encodeURIComponent(window.location.href); // Get the current page URL and encode it
-    const movieTitle = encodeURIComponent(`<%= movie.title %>`); // Movie title
-    const movieOverview = encodeURIComponent(`<%= movie.overview %>`); // Movie overview
-    
-    // Construct the share text with newlines
-    const shareText = `*Watch ${movieTitle} Full HD + ADS Free*%0A%0A_${movieOverview}_%0A%0A`;
-    
-    const shareUrl = `https://api.whatsapp.com/send?text=${shareText} ${url}`; // Construct the WhatsApp share URL
-    
-    window.open(shareUrl, '_blank'); // Open the WhatsApp share link in a new window
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const serverItems = document.querySelectorAll('.sv-item');
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverIndex = parseInt(urlParams.get('server'), 10) || 1; // Get server parameter or default to 1
 
+        // Select the server based on the parameter (serverIndex)
+        const initialServer = serverItems[serverIndex - 1] || serverItems[0]; // Default to the first server if not found
+        const initialUrl = initialServer.getAttribute('data-url');
 
+        // Set iframe source and current server name
+        document.getElementById('iframe-player').src = initialUrl;
+        document.getElementById('current-server').textContent = initialServer.querySelector('.sv-name').textContent;
+
+        // Mark the initial server as selected
+        serverItems.forEach(item => {
+            item.querySelector('.text-active').style.display = 'none';
+            item.classList.remove('active');
+        });
+        initialServer.querySelector('.text-active').style.display = 'inline';
+        initialServer.classList.add('active');
+
+        // Add click event listeners to server items
+        serverItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                const url = item.getAttribute('data-url');
+                document.getElementById('iframe-player').src = url;
+                document.getElementById('current-server').textContent = item.querySelector('.sv-name').textContent;
+
+                // Remove "Selected" from all servers and remove active class
+                document.querySelectorAll('.text-active').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.sv-item').forEach(el => el.classList.remove('active'));
+
+                // Add "Selected" to the current server and add active class
+                item.querySelector('.text-active').style.display = 'inline';
+                item.classList.add('active');
+
+                // Update the URL to reflect the current server index
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('server', index + 1); // Server index starts from 1
+                window.history.replaceState({}, '', newUrl);
+            });
+        });
+    });
 </script>
 
 <!-- Start of OpenWidget (www.openwidget.com) code -->
