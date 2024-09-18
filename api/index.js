@@ -14,95 +14,87 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
 app.get('/', async (req, res) => {
-  try {
+    try {
       // Fetch trending content for slider (10 items)
       const fetchGenres = async (item) => {
         const type = item.media_type === 'movie' ? 'movie' : 'tv';
-        const response = await axios.get(`https://api.themoviedb.org/3/${type}/${item.id}`, {
+        try {
+          const response = await axios.get(`https://api.themoviedb.org/3/${type}/${item.id}`, {
             params: {
-                api_key: apiKey
+              api_key: apiKey
             }
-        });
-        return response.data.genres;
-    };
-
-    const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
-        params: {
-            api_key: apiKey
+          });
+          return response.data.genres;
+        } catch (error) {
+          console.error(`Error fetching genres for ${type} with ID ${item.id}:`, error.message);
+          return []; // Return empty array if genres can't be fetched
         }
-    });
-
-    const trendingContent = await Promise.all(
+      };
+  
+      const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
+        params: { api_key: apiKey }
+      });
+  
+      // Process trending content with error handling for each item
+      const trendingContent = await Promise.all(
         sliderResponse.data.results.slice(0, 10).map(async (item) => {
-            const genres = await fetchGenres(item);
-            return { ...item, genres };
+          const genres = await fetchGenres(item);
+          return { ...item, genres };
         })
-    );
-
+      );
+  
       // Fetch trending movies (20 items)
       const moviesResponse = await axios.get('https://api.themoviedb.org/3/trending/movie/week', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const trendingMovies = moviesResponse.data.results.slice(0, 20); // Limit to 20 results
-
+      const trendingMovies = moviesResponse.data.results.slice(0, 20);
+  
       // Fetch trending TV series (20 items)
       const seriesResponse = await axios.get('https://api.themoviedb.org/3/trending/tv/week', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const trendingSeries = seriesResponse.data.results.slice(0, 20); // Limit to 20 results
-
-      
+      const trendingSeries = seriesResponse.data.results.slice(0, 20);
+  
       // Fetch latest movies (20 items)
       const latestMoviesResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const latestMovies = latestMoviesResponse.data.results.slice(0, 20); // Limit to 20 results
-
+      const latestMovies = latestMoviesResponse.data.results.slice(0, 20);
+  
       // Fetch latest TV series (20 items)
       const latestSeriesResponse = await axios.get('https://api.themoviedb.org/3/tv/airing_today', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const latestSeries = latestSeriesResponse.data.results.slice(0, 20); // Limit to 20 results
-
+      const latestSeries = latestSeriesResponse.data.results.slice(0, 20);
+  
       // Fetch top-rated movies (20 items)
       const topRatedMoviesResponse = await axios.get('https://api.themoviedb.org/3/movie/top_rated', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const topRatedMovies = topRatedMoviesResponse.data.results.slice(0, 20); // Limit to 20 results
-
+      const topRatedMovies = topRatedMoviesResponse.data.results.slice(0, 20);
+  
       // Fetch top-rated TV series (20 items)
       const topRatedSeriesResponse = await axios.get('https://api.themoviedb.org/3/tv/top_rated', {
-          params: {
-              api_key: apiKey
-          }
+        params: { api_key: apiKey }
       });
-      const topRatedSeries = topRatedSeriesResponse.data.results.slice(0, 20); // Limit to 20 results
+      const topRatedSeries = topRatedSeriesResponse.data.results.slice(0, 20);
+  
       // Render the index.ejs template with the data
       res.render('index', {
-          trendingContent,
-          trendingMovies,
-          trendingSeries,
-          latestMovies,
-          latestSeries,
-          topRatedMovies,
-          topRatedSeries
+        trendingContent,
+        trendingMovies,
+        trendingSeries,
+        latestMovies,
+        latestSeries,
+        topRatedMovies,
+        topRatedSeries
       });
-  } catch (error) {
+    } catch (error) {
       console.error('Error fetching content:', error.message);
       res.status(500).send('Error fetching content');
-  }
-});
-
+    }
+  });
+  
 app.get('/search', async (req, res) => {
     const keyword = req.query.keyword || '';
     const page = parseInt(req.query.page, 10) || 1;
@@ -1249,33 +1241,5 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
-async function submitUrlsToIndexNow() {
-    const data = {
-      host: 'www.ha-entertainment.com',
-      key: '1de967fe9b604cbc88a398059a2aafad',
-      keyLocation: 'https://www.ha-entertainment.com/1de967fe9b604cbc88a398059a2aafad.txt',
-      urlList: [
-        'https://www.ha-entertainment.com/',
-        'https://www.ha-entertainment.com/movies',
-        'https://www.ha-entertainment.com/tv-series',
-        'https://www.ha-entertainment.com/top-imdb',
-        'https://www.ha-entertainment.com/contact-us',
-        'https://www.ha-entertainment.com/terms',
-      ]
-    };
-  
-    try {
-      const response = await axios.post('https://api.indexnow.org/indexnow', data, {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8'
-        }
-      });
-      console.log('Response:', response.data);
-    } catch (error) {
-      console.error('Error submitting URLs:', error);
-    }
-  }
-  
-  submitUrlsToIndexNow();
 
 module.exports = app;
