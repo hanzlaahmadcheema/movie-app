@@ -35,12 +35,15 @@ app.get('/', async (req, res) => {
         params: { api_key: apiKey }
       });
   
-      // Process trending content with error handling for each item
+      // Filter out 'person' media types and only process movies and TV series
       const trendingContent = await Promise.all(
-        sliderResponse.data.results.slice(0, 10).map(async (item) => {
-          const genres = await fetchGenres(item);
-          return { ...item, genres };
-        })
+        sliderResponse.data.results
+          .filter((item) => item.media_type !== 'person') // Exclude items with media_type 'person'
+          .slice(0, 10)
+          .map(async (item) => {
+            const genres = await fetchGenres(item);
+            return { ...item, genres };
+          })
       );
   
       // Fetch trending movies (20 items)
@@ -94,6 +97,7 @@ app.get('/', async (req, res) => {
       res.status(500).send('Error fetching content');
     }
   });
+  
   
 app.get('/search', async (req, res) => {
     const keyword = req.query.keyword || '';
