@@ -908,9 +908,19 @@ app.get('/sitemap-page.xml', (req, res) => {
             xmlns:xhtml="http://www.w3.org/1999/xhtml"
             xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
             xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-        <url>
+                    <url>
             <loc>https://ha-entertainment.com/</loc>
             <changefreq>daily</changefreq>
+            <priority>1.0</priority>
+        </url>
+                            <url>
+            <loc>https://turkish.ha-entertainment.com</loc>
+            <changefreq>daily</changefreq>
+            <priority>1.0</priority>
+        </url>
+                        <url>
+            <loc>https://turkish.ha-entertainment.com/sitemap.xml</loc>
+            <changefreq>monthly</changefreq>
             <priority>1.0</priority>
         </url>
         <url>
@@ -1207,7 +1217,16 @@ app.get('/sitemap.xml', async (req, res) => {
         const watchSeriesSitemapCount = 10; // Total number of watch-series sitemaps
 
         // Generate sitemap index entries
-        const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
+        const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n
+            <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-page.xml</loc>
+    </sitemap>
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-genre.xml</loc>
+    </sitemap>
+    <sitemap>
+        <loc>https://www.ha-entertainment.com/sitemap-country.xml</loc>
+    </sitemap>\n${
             Array.from({ length: movieSitemapCount }, (_, i) => 
                 `    <sitemap>\n        <loc>https://www.ha-entertainment.com/sitemap-movie-${i + 1}.xml</loc>\n    </sitemap>\n`
             ).join('')
@@ -1224,15 +1243,6 @@ app.get('/sitemap.xml', async (req, res) => {
                 `    <sitemap>\n        <loc>https://www.ha-entertainment.com/sitemap-watch-series-${i + 1}.xml</loc>\n    </sitemap>\n`
             ).join('')
         }
-    <sitemap>
-        <loc>https://www.ha-entertainment.com/sitemap-page.xml</loc>
-    </sitemap>
-    <sitemap>
-        <loc>https://www.ha-entertainment.com/sitemap-genre.xml</loc>
-    </sitemap>
-    <sitemap>
-        <loc>https://www.ha-entertainment.com/sitemap-country.xml</loc>
-    </sitemap>
 </sitemapindex>`;
 
         // Set the response headers and send the sitemap index

@@ -482,7 +482,22 @@
         });
     });
 </script>
-
+<script>
+    function shareToWhatsApp() {
+        const url = encodeURIComponent(window.location.href); // Get the current page URL and encode it
+        const movieTitle = encodeURIComponent(`<%= series.name %>`); // Movie title
+        const movieOverview = encodeURIComponent(`<%= series.overview %>`); // Movie overview
+        
+        // Construct the share text with newlines
+        const shareText = `*Watch ${movieTitle} Full HD + ADS Free*%0A%0A_${movieOverview}_%0A%0A`;
+        
+        const shareUrl = `https://api.whatsapp.com/send?text=${shareText} ${url}`; // Construct the WhatsApp share URL
+        
+        window.open(shareUrl, '_blank'); // Open the WhatsApp share link in a new window
+    }
+    
+    
+    </script>
 <!-- Start of OpenWidget (www.openwidget.com) code -->
 <script>
     window.__ow = window.__ow || {};
