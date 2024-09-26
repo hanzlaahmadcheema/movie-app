@@ -198,7 +198,7 @@
                     </a>
                     <div id="header_search">
                         <div class="search-elements">
-                            <form id="search-form" action="/search" method="GET">
+                            <form id="search-form" action="/search" class="" method="GET">
                                 <div class="search-submit">
                                     <div class="search-icon"><i class="fa fa-search"></i></div>
                                 </div>
@@ -498,6 +498,22 @@
     
     
     </script>
+    <script>
+    document.getElementById('mobile_search').addEventListener('click', function () {
+    // Get the mobile search button and header search elements
+    var mobileButton = document.getElementById('mobile_search');
+    var headerSearch = document.getElementById('header_search');
+    
+    // Toggle 'show' class on both elements
+    if (mobileButton.classList.contains('show') && headerSearch.classList.contains('show')) {
+        mobileButton.classList.remove('show');
+        headerSearch.classList.remove('show');
+    } else {
+        mobileButton.classList.add('show');
+        headerSearch.classList.add('show');
+    }
+});
+</script>
 <!-- Start of OpenWidget (www.openwidget.com) code -->
 <script>
     window.__ow = window.__ow || {};
