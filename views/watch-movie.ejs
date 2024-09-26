@@ -485,8 +485,8 @@
 <script>
     function shareToWhatsApp() {
         const url = encodeURIComponent(window.location.href); // Get the current page URL and encode it
-        const movieTitle = encodeURIComponent(`<%= series.name %>`); // Movie title
-        const movieOverview = encodeURIComponent(`<%= series.overview %>`); // Movie overview
+        const movieTitle = encodeURIComponent(`<%= movie.name %>`); // Movie title
+        const movieOverview = encodeURIComponent(`<%= movie.overview %>`); // Movie overview
         
         // Construct the share text with newlines
         const shareText = `*Watch ${movieTitle} Full HD + ADS Free*%0A%0A_${movieOverview}_%0A%0A`;
