@@ -451,10 +451,10 @@ async function getMovieDetails(movieId) {
         const servers = [
             { id: '1', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '2', name: 'English', url: iframeUrl1 },
-            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
-            { id: '4', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
-            { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '6', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
+            { id: '3', name: 'Hindi Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '4', name: 'Hindi Dubbed', url: iframeUrl2 },
+            { id: '5', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
+            { id: '6', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
             { id: '7', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
             { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
             { id: '9', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
@@ -537,7 +537,9 @@ async function getMovieDetails(movieId) {
         const servers = [
             { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'Urdu/Hindi/Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${imdbId}` },            
+            { name: 'Hindi Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${imdbId}` },            
+            { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
+            { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
             { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
