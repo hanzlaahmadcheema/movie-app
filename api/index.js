@@ -120,7 +120,7 @@ app.get('/search', async (req, res) => {
         const currentPage = data.page;
   
         // Default image
-        let imageUrl = 'https://ha-entertainment.com/images/header.jpg';
+        let imageUrl = 'https://www.ha-entertainment.com/images/header.jpg';
   
         // Check if there are results and use the image of the first result
         if (combinedResults.length > 0) {
@@ -451,7 +451,7 @@ async function getMovieDetails(movieId) {
         const servers = [
             { id: '1', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '2', name: 'English', url: iframeUrl1 },
-            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '3', name: 'Urdu/Hindi/Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '4', name: 'Urdu/Hindi/Dubbed', url: iframeUrl2 },
             { id: '5', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
             { id: '6', name: 'Urdu/Hindi/Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
@@ -907,7 +907,7 @@ app.get('/sitemap-page.xml', (req, res) => {
             xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
             xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
                     <url>
-            <loc>https://ha-entertainment.com/</loc>
+            <loc>https://www.ha-entertainment.com/</loc>
             <changefreq>daily</changefreq>
             <priority>1.0</priority>
         </url>
@@ -922,27 +922,27 @@ app.get('/sitemap-page.xml', (req, res) => {
             <priority>1.0</priority>
         </url>
         <url>
-            <loc>https://ha-entertainment.com/movies</loc>
+            <loc>https://www.ha-entertainment.com/movies</loc>
             <changefreq>daily</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
-            <loc>https://ha-entertainment.com/tv-series</loc>
+            <loc>https://www.ha-entertainment.com/tv-series</loc>
             <changefreq>daily</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
-            <loc>https://ha-entertainment.com/top-imdb</loc>
+            <loc>https://www.ha-entertainment.com/top-imdb</loc>
             <changefreq>daily</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
-            <loc>https://ha-entertainment.com/terms</loc>
+            <loc>https://www.ha-entertainment.com/terms</loc>
             <changefreq>monthly</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
-            <loc>https://ha-entertainment.com/contact-us</loc>
+            <loc>https://www.ha-entertainment.com/contact-us</loc>
             <changefreq>monthly</changefreq>
             <priority>0.9</priority>
         </url>
@@ -991,7 +991,7 @@ app.get('/sitemap-genre.xml', async (req, res) => {
 
         genres.forEach(genre => {
             sitemap += `    <url>\n`;
-            sitemap += `        <loc>https://ha-entertainment.com/genre/${genre.id}</loc>\n`; // Using genre.id for URL
+            sitemap += `        <loc>https://www.ha-entertainment.com/genre/${genre.id}</loc>\n`; // Using genre.id for URL
             sitemap += `        <changefreq>daily</changefreq>\n`;
             sitemap += `        <priority>0.8</priority>\n`;
             sitemap += `    </url>\n`;
@@ -1030,7 +1030,7 @@ app.get('/sitemap-country.xml', async (req, res) => {
 
         countries.forEach(country => {
             sitemap += `    <url>\n`;
-            sitemap += `        <loc>https://ha-entertainment.com/country/${country.iso_3166_1}</loc>\n`; // Using ISO country code for URL
+            sitemap += `        <loc>https://www.ha-entertainment.com/country/${country.iso_3166_1}</loc>\n`; // Using ISO country code for URL
             sitemap += `        <changefreq>daily</changefreq>\n`;
             sitemap += `        <priority>0.7</priority>\n`;
             sitemap += `    </url>\n`;
