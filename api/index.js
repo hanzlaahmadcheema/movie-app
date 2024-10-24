@@ -13,6 +13,9 @@ app.use(express.json());
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
+//port initialize
+const port = process.env.PORT || 3000;
+
 app.get('/', async (req, res) => {
     try {
       // Fetch trending content for slider (10 items)
@@ -120,7 +123,7 @@ app.get('/search', async (req, res) => {
         const currentPage = data.page;
   
         // Default image
-        let imageUrl = 'https://www.ha-entertainment.com/images/header.jpg';
+        let imageUrl = '/images/header.jpg';
   
         // Check if there are results and use the image of the first result
         if (combinedResults.length > 0) {
@@ -451,7 +454,7 @@ async function getMovieDetails(movieId) {
         const servers = [
             { id: '1', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '2', name: 'English', url: iframeUrl1 },
-            { id: '3', name: 'Hindi Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '3', name: 'Hindi Dubbed', url: `/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '4', name: 'Hindi Dubbed', url: iframeUrl2 },
             { id: '5', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
             { id: '6', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
@@ -537,7 +540,7 @@ async function getMovieDetails(movieId) {
         const servers = [
             { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
             { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'Hindi Dubbed', url: `https://www.ha-entertainment.com/players/embed-3.html?id=${imdbId}` },            
+            { name: 'Hindi Dubbed', url: `/players/embed-3.html?id=${imdbId}` },            
             { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
             { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
             { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
@@ -1255,5 +1258,7 @@ app.get('/sitemap.xml', async (req, res) => {
     }
 });
 
-
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+});
 module.exports = app;
