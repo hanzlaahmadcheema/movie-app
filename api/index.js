@@ -456,11 +456,9 @@ async function getMovieDetails(movieId) {
             { id: '2', name: 'English', url: iframeUrl1 },
             { id: '3', name: 'Hindi Dubbed', url: `/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '4', name: 'Hindi Dubbed', url: iframeUrl2 },
-            { id: '5', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${movieId}` },
-            { id: '6', name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${movieId}` },
-            { id: '7', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '8', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
-            { id: '9', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '6', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
+            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
