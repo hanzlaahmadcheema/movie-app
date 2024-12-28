@@ -452,13 +452,13 @@ async function getMovieDetails(movieId) {
         const iframeUrl2 = await fetchIframeUrl(encodedTitle, 'https://playdesi.cc/movies');
 
         const servers = [
-            { id: '1', name: 'English', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
-            { id: '2', name: 'English', url: iframeUrl1 },
-            { id: '3', name: 'Hindi Dubbed', url: `/players/embed-3.html?id=${movie.imdb_id}` },            
-            { id: '4', name: 'Hindi Dubbed', url: iframeUrl2 },
-            { id: '5', name: 'English', url: `https://moviesapi.club/movie/${movieId}` },
-            { id: '6', name: 'English', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
-            { id: '7', name: 'English', url: `https://www.2embed.cc/embed/${movieId}` },
+            { id: '1', name: 'English 1', url: `` },
+            { id: '2', name: 'English 2', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
+            { id: '3', name: 'Hindi Dubbed 3', url: `/players/embed-3.html?id=${movie.imdb_id}` },            
+            { id: '4', name: 'Hindi Dubbed 4', url: iframeUrl2 },
+            { id: '5', name: 'English 5', url: `https://moviesapi.club/movie/${movieId}` },
+            { id: '6', name: 'English 6', url: iframeUrl1 },
+            { id: '7', name: 'English 7', url: `https://www.2embed.cc/embed/${movieId}` },
         ];
 
         return { movie: movieDetails, servers: servers, relatedMovies: relatedMovies };
