@@ -544,7 +544,6 @@ async function getMovieDetails(movieId) {
             { name: 'English 6', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
 
-        
         // Render the EJS template with series, seasons, episodes, and servers data
         res.render('watch-series', {
             series,
