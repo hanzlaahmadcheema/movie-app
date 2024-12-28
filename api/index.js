@@ -536,14 +536,12 @@ async function getMovieDetails(movieId) {
 
         // Servers data with URLs
         const servers = [
-            { name: 'English', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
-            { name: 'English', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
-            { name: 'Hindi Dubbed', url: `/players/embed-3.html?id=${imdbId}` },            
-            { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
-            { name: 'Hindi Dubbed', url: `https://h-a-entertainment.netlify.app/embed/watch-embed2?id=${id}-s${season}-ep${currentEpisode.episode_number}` },
-            { name: 'English', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
-            { name: 'English', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
-            { name: 'English', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
+            { name: 'English 1', url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${currentEpisode.episode_number}` },
+            { name: 'English 2', url: `https://moviesapi.club/tv/${id}-${season}-${currentEpisode.episode_number}` },
+            { name: 'Hindi Dubbed 3', url: `/players/embed-3.html?id=${imdbId}` },            
+            { name: 'English 4', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'English 5', url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${currentEpisode.episode_number}` },
+            { name: 'English 6', url: `https://movieuniverse.lol/embedtv/${id}&season=${season}&episode=${currentEpisode.episode_number}` }
         ];
 
         // Render the EJS template with series, seasons, episodes, and servers data
