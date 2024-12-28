@@ -452,7 +452,7 @@ async function getMovieDetails(movieId) {
         const iframeUrl2 = await fetchIframeUrl(encodedTitle, 'https://playdesi.cc/movies');
 
         const servers = [
-            { id: '1', name: 'English 1', url: `` },
+            { id: '1', name: 'English 1', url: `https://vidsrc.xyz/embed/movie?tmdb=${movieId}&ds_lang=en` },
             { id: '2', name: 'English 2', url: `https://multiembed.mov/?video_id=${movieId}&tmdb=1` },
             { id: '3', name: 'Hindi Dubbed 3', url: `/players/embed-3.html?id=${movie.imdb_id}` },            
             { id: '4', name: 'Hindi Dubbed 4', url: iframeUrl2 },
