@@ -4,7 +4,9 @@ const cheerio = require('cheerio');
 const path = require('path');   
 
 const app = express();
-const apiKey = 'be61c0c4d2504f59b7dd5a83983d904c';
+//add .env to show api
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const apiKey = process.env.API_KEY;
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
