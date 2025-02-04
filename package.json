@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node api/index.js",
     "dev": "nodemon api/index.js",
-    "test": "jest"
+    "build": "npm install && npm install --prefix public && npm run build --prefix public"
   },
   "keywords": [],
   "author": "",

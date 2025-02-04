@@ -1,8 +1,11 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const path = require('path');   
-
+const path = require('path');  
+const { fileURLToPath } = require('url');
+//meta.data.url
+const fileName = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(fileName);
 const app = express();
 //add .env to show api
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });

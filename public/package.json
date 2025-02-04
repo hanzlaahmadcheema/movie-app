@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "new-express-project": "file:.."
+  }
+}
