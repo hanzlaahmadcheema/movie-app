@@ -2,12 +2,10 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');  
-const { fileURLToPath } = require('url');
-//meta.data.url
-const fileName = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(fileName);
+
+
+
 const app = express();
-//define api key here not dotenv
 const apiKey = 'be61c0c4d2504f59b7dd5a83983d904c';
 
 app.use(express.static(path.join(__dirname, '../public')));
