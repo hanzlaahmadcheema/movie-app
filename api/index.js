@@ -7,9 +7,8 @@ const { fileURLToPath } = require('url');
 const fileName = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(fileName);
 const app = express();
-//add .env to show api
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-const apiKey = process.env.API_KEY;
+//define api key here not dotenv
+const apiKey = 'be61c0c4d2504f59b7dd5a83983d904c';
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
