@@ -556,7 +556,48 @@
         
         </script>
         
-
+        <script>
+            document.getElementById('mobile_menu').addEventListener('click', function () {
+        // Get the mobile menu button and menu display elements
+        var mobileButton = document.getElementById('mobile_menu');
+        var menuDisplay = document.getElementById('menu-display');
+        var mobileOverlay = document.getElementById('mobile-overlay');
+        
+        // Toggle 'show' class on both elements
+        if (mobileButton.classList.contains('show') && menuDisplay.classList.contains('show')) {
+            mobileButton.classList.remove('show');
+            menuDisplay.classList.remove('show');
+            mobileOverlay.classList.remove('show');
+        } else {
+            mobileButton.classList.add('show');
+            menuDisplay.classList.add('show');
+            mobileOverlay.classList.add('show');
+        }
+    });
+    
+    </script>
+    <script>
+        document.getElementById('mobile_search').addEventListener('click', function () {
+        // Get the mobile search button and search input elements
+        var mobileButton = document.getElementById('mobile_search');
+        var searchInput = document.getElementById('search-input');
+        var searchSuggestions = document.getElementById('search-suggestions');
+        var mobileOverlay = document.getElementById('mobile-overlay');
+        
+        // Toggle 'show' class on both elements
+        if (mobileButton.classList.contains('show') && searchInput.classList.contains('show')) {
+            mobileButton.classList.remove('show');
+            searchInput.classList.remove('show');
+            searchSuggestions.classList.remove('show');
+            mobileOverlay.classList.remove('show');
+        } else {
+            mobileButton.classList.add('show');
+            searchInput.classList.add('show');
+            searchSuggestions.classList.add('show');
+            mobileOverlay.classList.add('show');
+        }
+    });
+    </script>
   
     <!-- End: Javascript -->
      
