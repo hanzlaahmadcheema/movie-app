@@ -70,7 +70,7 @@
                   "@type": "Person",
                   "name": "<%= member.name %>",
                   "character": "<%= member.character %>",
-                  "image": "https://image.tmdb.org/t/p/w185<%= member.profile_path %>"
+                  "image": "https://image.tmdb.org/t/p/original<%= member.profile_path %>"
                 }<% if (index < cast.length - 1) { %>,<% } %>
               <% }) %>
             <% } %>
@@ -83,7 +83,7 @@
                   "name": "<%= company.name %>",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://image.tmdb.org/t/p/w185<%= company.logo_path %>"
+                    "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
                   }
                 }<% if (index < tv.production_companies.length - 1) { %>,<% } %>
               <% }) %>
@@ -245,7 +245,7 @@
                                         <div class="badge-tag quality">HD</div>
                                         <!-- <div class="badge-tag release"><%= tv.first_air_date %></div> -->
                                         <img class="film-thumbnail-img"
-                                             src="https://image.tmdb.org/t/p/w185/<%= tv.poster_path %>"
+                                             src="https://image.tmdb.org/t/p/original/<%= tv.poster_path %>"
                                              alt="<%= tv.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
                                     </div>
                                 </div>
@@ -385,7 +385,7 @@
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/w185<%= relatedTv.poster_path %>"
+                                            src="https://image.tmdb.org/t/p/original<%= relatedTv.poster_path %>"
                                             alt="<%= relatedTv.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">

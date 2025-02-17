@@ -50,7 +50,7 @@
           "@type": "Person",
           "name": "<%= cast.name %>",
           "url": "https://www.ha-entertainment.com/cast/<%= cast.id %>",
-          "image": "https://image.tmdb.org/t/p/w185<%= cast.profile_path %>",
+          "image": "https://image.tmdb.org/t/p/original<%= cast.profile_path %>",
           "description": "<%= cast.biography %>",
           "birthDate": "<%= cast.birthday %>",
           "birthPlace": "<%= cast.place_of_birth %>",
@@ -194,7 +194,7 @@
             <!-- Cast Detail Section -->
             <section class="section-detail is-detail-tv">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/w185/<%= cast.profile_path %>" alt="<%= cast.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
+                    <img src="https://image.tmdb.org/t/p/original/<%= cast.profile_path %>" alt="<%= cast.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
@@ -203,7 +203,7 @@
                                 <div class="is-thumbnail">
                                     <div class="film-thumbnail">
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/w185/<%= cast.profile_path %>"
+                                            src="https://image.tmdb.org/t/p/original/<%= cast.profile_path %>"
                                             alt="<%= cast.name %>">
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/w185/<%= movie.poster_path %>"
+                                            src="https://image.tmdb.org/t/p/original/<%= movie.poster_path %>"
                                             alt="<%= movie.title %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">

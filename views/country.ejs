@@ -199,7 +199,7 @@
                                     <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>" class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
-                                        <img class="film-thumbnail-img" src="https://image.tmdb.org/t/p/w185/<%= item.poster_path %>" alt="<%= item.title || item.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
+                                        <img class="film-thumbnail-img" src="https://image.tmdb.org/t/p/original/<%= item.poster_path %>" alt="<%= item.title || item.name %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">

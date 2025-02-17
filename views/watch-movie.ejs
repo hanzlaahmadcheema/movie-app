@@ -25,7 +25,7 @@
     <meta property="og:type" content="video.movie" />
     <meta property="og:title" content="Watch <%= movie.title %> - Free Full HD Movie Streaming" />
     <meta property="og:url" content="https://www.ha-entertainment.com/watch-movie/<%= movie.id %>" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>" />
+    <meta property="og:image" content="https://image.tmdb.org/t/p/original<%= movie.backdropPath %>" />
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="750">
     <meta property="og:description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality." />
@@ -37,7 +37,7 @@
     <meta name="twitter:site" content="@HA_Entertainment">
     <meta name="twitter:title" content="Watch <%= movie.title %> - Free Full HD Movie Streaming">
     <meta name="twitter:description" content="Watch <%= movie.title %> in Full HD for free on HA Entertainment. Stream without ads and enjoy the best quality.">
-    <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>">
+    <meta name="twitter:image" content="https://image.tmdb.org/t/p/original<%= movie.backdropPath %>">
     <meta name="twitter:player" content="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1">
 
     <!-- Stylesheets -->
@@ -53,7 +53,7 @@
           "name": "<%= movie.title %>",
           "url": "https://www.ha-entertainment.com/movie/<%= movie.id %>",
           "description": "<%= movie.overview %>",
-          "image": "https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>",
+          "image": "https://image.tmdb.org/t/p/original<%= movie.backdropPath %>",
           "genre": [
             <% if (movie.genres && movie.genres.length > 0) { %>
               <% movie.genres.forEach((genre, index) => { %>
@@ -70,7 +70,7 @@
                   "@type": "Person",
                   "name": "<%= member.name %>",
                   "character": "<%= member.character %>",
-                  "image": "https://image.tmdb.org/t/p/w185<%= member.profilePath %>"
+                  "image": "https://image.tmdb.org/t/p/original<%= member.profilePath %>"
                 }<% if (index < cast.length - 1) { %>,<% } %>
               <% }) %>
             <% } %>
@@ -83,7 +83,7 @@
                   "name": "<%= company.name %>",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://image.tmdb.org/t/p/w185<%= company.logo_path %>"
+                    "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
                   }
                 }<% if (index < movie.production_companies.length - 1) { %>,<% } %>
               <% }) %>
@@ -101,7 +101,7 @@
             "name": "<%= movie.title %>",
             "description": "<%= movie.overview %>",
             "contentUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
-            "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= movie.backdropPath %>",
+            "thumbnailUrl": "https://image.tmdb.org/t/p/original<%= movie.backdropPath %>",
             "embedUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
             "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
           }
@@ -501,21 +501,41 @@
     
     </script>
     <script>
-    document.getElementById('mobile_search').addEventListener('click', function () {
-    // Get the mobile search button and header search elements
-    var mobileButton = document.getElementById('mobile_search');
-    var headerSearch = document.getElementById('header_search');
+        document.getElementById('mobile_search').addEventListener('click', function () {
+        // Get the mobile search button and header search elements
+        var mobileButton = document.getElementById('mobile_search');
+        var headerSearch = document.getElementById('header_search');
+        
+        // Toggle 'show' class on both elements
+        if (mobileButton.classList.contains('show') && headerSearch.classList.contains('show')) {
+            mobileButton.classList.remove('show');
+            headerSearch.classList.remove('show');
+        } else {
+            mobileButton.classList.add('show');
+            headerSearch.classList.add('show');
+        }
+    });
+    </script>
+    <script>
+        document.getElementById('mobile_menu').addEventListener('click', function () {
+    // Get the mobile menu button and menu display elements
+    var mobileButton = document.getElementById('mobile_menu');
+    var menuDisplay = document.getElementById('menu-display');
+    var mobileOverlay = document.getElementById('mobile-overlay');
     
     // Toggle 'show' class on both elements
-    if (mobileButton.classList.contains('show') && headerSearch.classList.contains('show')) {
+    if (mobileButton.classList.contains('show') && menuDisplay.classList.contains('show')) {
         mobileButton.classList.remove('show');
-        headerSearch.classList.remove('show');
+        menuDisplay.classList.remove('show');
+        mobileOverlay.classList.remove('show');
     } else {
         mobileButton.classList.add('show');
-        headerSearch.classList.add('show');
+        menuDisplay.classList.add('show');
+        mobileOverlay.classList.add('show');
     }
-});
-</script>
+    });
+    
+    </script>
     <!-- End: Scripts -->
 </body>
 
