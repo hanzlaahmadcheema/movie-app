@@ -104,54 +104,7 @@
             <li class="nav-item active"><a class="nav-link" href="/" title="Home">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="/movies" title="Movies">Movies</a></li>
             <li class="nav-item"><a class="nav-link" href="/tv-series" title="TV Series">TV Series</a></li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Genre</a>
-                <div class="toggle-submenu collapsed" data-toggle="collapse" data-target="#show-genres"
-                    aria-expanded="false" aria-controls="show-genres"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="multi-collapse is-sub collapse" id="show-genres" style="">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/genre/28">Action</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/12">Adventure</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/16">Animation</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/35">Comedy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/80">Crime</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/99">Documentary</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/18">Drama</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10751">Family</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/14">Fantasy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/36">History</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/27">Horror</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10402">Music</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/9648">Mystery</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10749">Romance</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/878">Sci-Fi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/53">Thriller</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10767">Talk</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10752">War</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Country</a>
-                <div class="toggle-submenu" data-toggle="collapse" data-target="#sidebar_subs_country"
-                    aria-expanded="false" aria-controls="sidebar_subs_country"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="collapse multi-collapse sidebar_menu-sub" id="sidebar_subs_country">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/country/US">United States</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/CN">China</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/GB">United Kingdom</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/KR">South Korea</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/JP">Japan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/HK">Hongkong</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/PK">Pakistan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/IN">India</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TH">Thailand</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TR">Türkiye</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/FR">France</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            
             <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
         </ul>
     </div>
@@ -205,7 +158,7 @@
                 <% trendingContent.forEach(item=> { %>
                     <div class="swiper-slide">
                         <div class="slide-cover-slider">
-                            <img src="https://image.tmdb.org/t/p/original<%= item.backdrop_path %>"
+                            <img src="https://image.tmdb.org/t/p/w780<%= item.backdrop_path %>"
                                 alt="<%= item.title || item.name %>">
                         </div>
                         <div class="container">
@@ -234,23 +187,6 @@
                                             <%= item.title || item.name %>
                                         </a>
                                     </h2>
-                                    <!-- <div class="is-rate">
-                                        <div class="stars mr-2">
-                                            <div class="fill fill-<%= Math.round(item.vote_average / 2) %>"></div>
-                                        </div>
-                                    </div> -->
-                                    <p class="description">
-                                        <% if (item.genres && item.genres.length > 0) { %>
-                                            <% item.genres.forEach((genre, index) => { %>
-                                                <a href="/genre/<%= genre.id %>" rel="tag" title="<%= genre.name %>">
-                                                    <%= genre.name %>
-                                                </a>
-                                                <%= index < item.genres.length - 1 ? '•' : '' %>
-                                            <% }); %>
-                                        <% } else { %>
-                                            <span>No genres available.</span>
-                                        <% } %>
-                                    </p>
                                     
                                     <div class="div-buttons">
                                         <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
@@ -297,7 +233,7 @@
                                             <div class="film-thumbnail">
                                                 <div class="badge-tag quality">HD</div>
                                                 <img class="film-thumbnail-img"
-                                                    src="https://image.tmdb.org/t/p/original<%= item.poster_path %>"
+                                                    src="https://image.tmdb.org/t/p/w342<%= item.poster_path %>"
                                                     alt="<%= item.title %>">
                                             </div>
                                             <div class="film-detail">
@@ -329,7 +265,7 @@
                                             <div class="film-thumbnail">
                                                 <div class="badge-tag quality">HD</div>
                                                 <img class="film-thumbnail-img"
-                                                    src="https://image.tmdb.org/t/p/original<%= item.poster_path %>"
+                                                    src="https://image.tmdb.org/t/p/w342<%= item.poster_path %>"
                                                     alt="<%= item.name %>">
                                             </div>
                                             <div class="film-detail">
@@ -341,7 +277,7 @@
                                                 <div class="film-info">
                                                     <span class="item">TV Series</span>
                                                     <span class="item">
-                                                        <%= new Date(item.first_air_date).getFullYear() %>
+                                                        <%= new Date(item.release_date).getFullYear() %>
                                                     </span>
                                                 </div>
                                             </div>
@@ -357,126 +293,6 @@
             </div>
         </section>
 
-        <!--/// Section carousel ///-->
-        <!-- Latest Movies Section -->
-        <section class="section-default section-flow-vertical section-film-list is-carousel">
-            <div class="container">
-                <div class="section-header">
-                    <div class="is-title">
-                        <h2 class="heading-md">Latest Movies</h2>
-                    </div>
-                    <div class="is-more">
-                        <a href="/movies" class="btn"><i class="fas fa-angle-right"></i></a>
-                    </div>
-                    <div class="flex-grow"></div>
-                </div>
-            </div>
-            <div id="carousel-latest-movies" class="film-carousel">
-                <div class="swiper-container">
-                    <div class="swiper-wrapper">
-                        <% latestMovies.forEach(movie=> { %>
-                            <div class="swiper-slide">
-                                <div class="item-film">
-                                    <a href="/movie/<%= movie.id %>" class="film-mask"></a>
-                                    <div class="film-thumbnail">
-                                        <div class="badge-tag quality">HD</div>
-                                        <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/original<%= movie.poster_path %>"
-                                            alt="<%= movie.title %>">
-                                    </div>
-                                    <div class="film-detail">
-                                        <h3 class="film-name sum-2">
-                                            <a href="/movie/<%= movie.id %>" title="<%= movie.title %>">
-                                                <%= movie.title %>
-                                            </a>
-                                        </h3>
-                                        <div class="film-info">
-                                            <span class="item">Movie</span>
-                                            <span class="item">
-                                                <%= new Date(movie.release_date).getFullYear() %>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <% }); %>
-                                <div class="swiper-slide">
-                                    <div class="item-film">
-                                        <div class="film-thumbnail"></div>
-                                        <a href="/movies" class="film-more">
-                                            <div class="mb-3"><i class="fas fa-ellipsis-h fa-2x"></i></div>
-                                            <div>More</div>
-                                        </a>
-                                    </div>
-                                </div>
-                    </div>
-                </div>
-                <div class="carousel-controls">
-                    <div class="button-next"><i class="fas fa-angle-right"></i></div>
-                    <div class="button-prev"><i class="fas fa-angle-left"></i></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Latest TV Series Section -->
-        <section class="section-default section-flow-vertical section-film-list is-carousel">
-            <div class="container">
-                <div class="section-header">
-                    <div class="is-title">
-                        <h2 class="heading-md">Latest TV Series</h2>
-                    </div>
-                    <div class="is-more">
-                        <a href="/tv-series" class="btn"><i class="fas fa-angle-right"></i></a>
-                    </div>
-                    <div class="flex-grow"></div>
-                </div>
-            </div>
-            <div id="carousel-latest-series" class="film-carousel">
-                <div class="swiper-container">
-                    <div class="swiper-wrapper">
-                        <% latestSeries.forEach(series=> { %>
-                            <div class="swiper-slide">
-                                <div class="item-film">
-                                    <a href="/series/<%= series.id %>" class="film-mask"></a>
-                                    <div class="film-thumbnail">
-                                        <div class="badge-tag quality">HD</div>
-                                        <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/original<%= series.poster_path %>"
-                                            alt="<%= series.name %>">
-                                    </div>
-                                    <div class="film-detail">
-                                        <h3 class="film-name sum-2">
-                                            <a href="/series/<%= series.id %>" title="<%= series.name %>">
-                                                <%= series.name %>
-                                            </a>
-                                        </h3>
-                                        <div class="film-info">
-                                            <span class="item">TV Series</span>
-                                            <span class="item">
-                                                <%= new Date(series.first_air_date).getFullYear() %>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <% }); %>
-                                <div class="swiper-slide">
-                                    <div class="item-film">
-                                        <div class="film-thumbnail"></div>
-                                        <a href="/tv-series" class="film-more">
-                                            <div class="mb-3"><i class="fas fa-ellipsis-h fa-2x"></i></div>
-                                            <div>More</div>
-                                        </a>
-                                    </div>
-                                </div>
-                    </div>
-                </div>
-                <div class="carousel-controls">
-                    <div class="button-next"><i class="fas fa-angle-right"></i></div>
-                    <div class="button-prev"><i class="fas fa-angle-left"></i></div>
-                </div>
-            </div>
-        </section>
         <!-- Top Rated Movies and TV Series Section -->
         <section class="section-default section-flow-vertical is-single">
             <div class="container">
@@ -509,7 +325,7 @@
                                             <div><i class="fas fa-play"></i></div>
                                         </a>
                                         <div class="badge-tag position">01</div>
-                                        <img src="https://image.tmdb.org/t/p/original<%= topMovie.backdrop_path %>"
+                                        <img src="https://image.tmdb.org/t/p/w780<%= topMovie.backdrop_path %>"
                                             alt="<%= topMovie.title %>">
                                     </div>
                                     <div class="is-caption">
@@ -525,15 +341,6 @@
                                                 <%= topMovie.title %>
                                             </a>
                                         </h2>
-                                        <div class="d-flex align-items-center is-rate">
-                                            <div class="stars">
-                                                <div class="fill fill-<%= Math.round(topMovie.vote_average / 2) %>">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p class="description">
-                                            <%= topMovie.overview %>
-                                        </p>
                                         <div class="div-buttons">
                                             <a href="/watch-movie/<%= topMovie.id %>" class="btn w-icon btn-watch"><i
                                                     class="fas fa-play mr-3"></i>Watch now</a>
@@ -551,7 +358,7 @@
                                                 <div class="film-thumbnail">
                                                     <div class="badge-tag quality">HD</div>
                                                     <img class="film-thumbnail-img"
-                                                        src="https://image.tmdb.org/t/p/original<%= movie.poster_path %>"
+                                                        src="https://image.tmdb.org/t/p/w342<%= movie.poster_path %>"
                                                         alt="<%= movie.title %>">
                                                 </div>
                                                 <div class="film-detail">
@@ -588,7 +395,7 @@
                                             <div><i class="fas fa-play"></i></div>
                                         </a>
                                         <div class="badge-tag position">01</div>
-                                        <img src="https://image.tmdb.org/t/p/original<%= topSeries.backdrop_path %>"
+                                        <img src="https://image.tmdb.org/t/p/w780<%= topSeries.backdrop_path %>"
                                             alt="<%= topSeries.name %>">
                                     </div>
                                     <div class="is-caption">
@@ -596,7 +403,7 @@
                                             <span class="item is-quality">HD</span>
                                             <span class="item">TV Series</span>
                                             <span class="item">
-                                                <%= new Date(topSeries.first_air_date).getFullYear() %>
+                                                <%= new Date(topSeries.release_date).getFullYear() %>
                                             </span>
                                         </div>
                                         <h2 class="heading-xl sum-2">
@@ -604,15 +411,6 @@
                                                 <%= topSeries.name %>
                                             </a>
                                         </h2>
-                                        <div class="d-flex align-items-center is-rate">
-                                            <div class="stars">
-                                                <div class="fill fill-<%= Math.round(topSeries.vote_average / 2) %>">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p class="description">
-                                            <%= topSeries.overview %>
-                                        </p>
                                         <div class="div-buttons">
                                             <a href="/watch-series/<%= topSeries.id %>" class="btn w-icon btn-watch"><i
                                                     class="fas fa-play mr-3"></i>Watch now</a>
@@ -630,7 +428,7 @@
                                                 <div class="film-thumbnail">
                                                     <div class="badge-tag quality">HD</div>
                                                     <img class="film-thumbnail-img"
-                                                        src="https://image.tmdb.org/t/p/original<%= series.poster_path %>"
+                                                        src="https://image.tmdb.org/t/p/w342<%= series.poster_path %>"
                                                         alt="<%= series.name %>">
                                                 </div>
                                                 <div class="film-detail">
@@ -641,7 +439,7 @@
                                                     <div class="film-info">
                                                         <span class="item">TV Series</span>
                                                         <span class="item">
-                                                            <%= new Date(series.first_air_date).getFullYear() %>
+                                                            <%= new Date(series.release_date).getFullYear() %>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -694,25 +492,7 @@
                                 <ul class="style-none">
                                     <li><a href="/movies">Movies</a></li>
                                     <li><a href="/tv-series">TV Series</a></li>
-                                    <li><a href="/top-imdb">Top IMDb</a></li>
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/28">Action</a></li>
-
-                                    <li><a href="/genre/35">Comedy</a></li>
-
-                                    <li><a href="/genre/18">Drama</a></li>
-
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/14">Fantasy</a></li>
-
-                                    <li><a href="/genre/27">Horror</a></li>
-
-                                    <li><a href="/genre/9648">Mystery</a></li>
-
+                                    
                                 </ul>
                             </div>
                         </div>
