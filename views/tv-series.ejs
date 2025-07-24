@@ -123,9 +123,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link active">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link ">Contact Us</a>
                         </div>
@@ -150,7 +148,7 @@
                         <div class="film-list">
                             <% tvSeries.forEach(series=> { %>
                                 <div class="item-film">
-                                    <a href="/series/<%= series.id %>" class="film-mask"></a>
+                                    <a href="/watch-series/<%= series.id %>" class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
@@ -159,7 +157,7 @@
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">
-                                            <a href="/series/<%= series.id %>" title="<%= series.name %>">
+                                            <a href="/watch-series/<%= series.id %>" title="<%= series.name %>">
                                                 <%= series.name %>
                                             </a>
                                         </h3>

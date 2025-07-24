@@ -123,9 +123,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link ">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link ">Contact Us</a>
                         </div>
@@ -151,7 +149,7 @@
                             <div class="film-list">
                                 <% combinedResults.forEach(item => { %>
                                     <div class="item-film">
-                                        <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : item.media_type === 'tv' ? '/series/' + item.id : '/cast/' + item.id %>" class="film-mask"></a>
+                                        <a href="<%= item.media_type === 'movie' ? '/watch-movie/' + item.id : item.media_type === 'tv' ? '/watch-series/' + item.id : '/cast/' + item.id %>" class="film-mask"></a>
                                         <div class="film-thumbnail">
                                             <div class="badge-tag quality">HD</div>
                                             <img class="film-thumbnail-img" 
@@ -160,7 +158,7 @@
                                         </div>
                                         <div class="film-detail">
                                             <h3 class="film-name sum-2">
-                                                <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : item.media_type === 'tv' ? '/series/' + item.id : '/cast/' + item.id %>" title="<%= item.title || item.name %>"><%= item.title || item.name %></a>
+                                                <a href="<%= item.media_type === 'movie' ? '/watch-movie/' + item.id : item.media_type === 'tv' ? '/watch-series/' + item.id : '/cast/' + item.id %>" title="<%= item.title || item.name %>"><%= item.title || item.name %></a>
                                             </h3>
                                             <div class="film-info">
                                                 <% if (item.media_type === 'movie' || item.media_type === 'tv') { %>

@@ -60,7 +60,7 @@
                 {
                   "@type": "Movie",
                   "name": "<%= movie.title %>",
-                  "url": "https://www.ha-entertainment.com/movie/<%= movie.id %>"
+                  "url": "https://www.ha-entertainment.com/watch-movie/<%= movie.id %>"
                 }<% if (index < cast.movies.length - 1) { %>,<% } %>
               <% }) %>
             <% } %>
@@ -130,9 +130,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link">Contact Us</a>
                         </div>
@@ -296,7 +294,7 @@
                         <div class="film-list">
                             <% known_for.forEach(movie=> { %>
                                 <div class="item-film">
-                                    <a href="<%= movie.media_type === 'movie' ? '/movie/' + movie.id : '/series/' + movie.id %>"
+                                    <a href="<%= movie.media_type === 'movie' ? '/watch-movie/' + movie.id : '/watch-series/' + movie.id %>"
                                         class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
@@ -306,7 +304,7 @@
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">
-                                            <a href="<%= movie.media_type === 'movie' ? '/movie/' + movie.id : '/series/' + movie.id %>"
+                                            <a href="<%= movie.media_type === 'movie' ? '/watch-movie/' + movie.id : '/watch-series/' + movie.id %>"
                                                 title="<%= movie.title %>">
                                                 <%= movie.media_type==='movie' ? movie.title : movie.name %>
                                             </a>

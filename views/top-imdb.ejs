@@ -152,7 +152,7 @@
                         <div class="film-list">
                             <% combinedContent.forEach(item=> { %>
                                 <div class="item-film">
-                                    <a href="<%= item.type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                    <a href="<%= item.type === 'movie' ? '/watch-movie/' + item.id : '/watch-series/' + item.id %>"
                                         class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
@@ -162,7 +162,7 @@
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">
-                                            <a href="<%= item.type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                            <a href="<%= item.type === 'movie' ? '/watch-movie/' + item.id : '/watch-series/' + item.id %>"
                                                 title="<%= item.title || item.name %>">
                                                 <%= item.title || item.name %>
                                             </a>

@@ -140,9 +140,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link">Contact Us</a>
                         </div>
@@ -164,12 +162,12 @@
                         <div class="container">
                             <div class="slide-element">
                                 <!-- <div class="is-poster">
-                                    <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                    <a href=""
                                         class="poster-mask">
                                         <div><i class="fas fa-play"></i></div>
                                     </a>
-                                    <img src="https://image.tmdb.org/t/p/original<%= item.backdrop_path%>"
-                                        alt="<%= item.title || item.name %>">
+                                    <img src=""
+                                        alt="">
                                 </div> -->
                                 <div class="is-caption">
                                     <div class="film-info">
@@ -182,14 +180,14 @@
                                         </span>
                                     </div>
                                     <h2 class="heading-xl sum-2">
-                                        <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                        <a href="<%= item.media_type === 'movie' ? '/watch-movie/' + item.id : '/watch-series/' + item.id %>"
                                             title="<%= item.title || item.name %>">
                                             <%= item.title || item.name %>
                                         </a>
                                     </h2>
                                     
                                     <div class="div-buttons">
-                                        <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                        <a href="<%= item.media_type === 'movie' ? '/watch-movie' + item.id : '/watch-series/' + item.id %>"
                                             class="btn w-icon btn-watch">
                                             <i class="fas fa-play mr-3"></i>Watch now
                                         </a>
@@ -229,7 +227,7 @@
                                 <% if (trendingMovies && trendingMovies.length) { %>
                                     <% trendingMovies.forEach(item=> { %>
                                         <div class="item-film">
-                                            <a href="/movie/<%= item.id %>" class="film-mask"></a>
+                                            <a href="/watch-movie/<%= item.id %>" class="film-mask"></a>
                                             <div class="film-thumbnail">
                                                 <div class="badge-tag quality">HD</div>
                                                 <img class="film-thumbnail-img"
@@ -238,7 +236,7 @@
                                             </div>
                                             <div class="film-detail">
                                                 <h3 class="film-name sum-2">
-                                                    <a href="/movie/<%= item.id %>" title="<%= item.title %>">
+                                                    <a href="/watch-movie/<%= item.id %>" title="<%= item.title %>">
                                                         <%= item.title %>
                                                     </a>
                                                 </h3>
@@ -261,7 +259,7 @@
                                 <% if (trendingSeries && trendingSeries.length) { %>
                                     <% trendingSeries.forEach(item=> { %>
                                         <div class="item-film">
-                                            <a href="/series/<%= item.id %>" class="film-mask"></a>
+                                            <a href="/watch-series/<%= item.id %>" class="film-mask"></a>
                                             <div class="film-thumbnail">
                                                 <div class="badge-tag quality">HD</div>
                                                 <img class="film-thumbnail-img"
@@ -270,7 +268,7 @@
                                             </div>
                                             <div class="film-detail">
                                                 <h3 class="film-name sum-2">
-                                                    <a href="/series/<%= item.id %>" title="<%= item.name %>">
+                                                    <a href="/watch-series/<%= item.id %>" title="<%= item.name %>">
                                                         <%= item.name %>
                                                     </a>
                                                 </h3>
@@ -337,7 +335,7 @@
                                             </span>
                                         </div>
                                         <h2 class="heading-xl sum-2">
-                                            <a href="/movie/<%= topMovie.id %>" title="<%= topMovie.title %>">
+                                            <a href="/watch-movie/<%= topMovie.id %>" title="<%= topMovie.title %>">
                                                 <%= topMovie.title %>
                                             </a>
                                         </h2>
@@ -354,7 +352,7 @@
                                     <% topRatedMovies.slice(1).forEach(movie=> { %>
                                         <div class="swiper-slide">
                                             <div class="item-film">
-                                                <a href="/movie/<%= movie.id %>" class="film-mask"></a>
+                                                <a href="/watch-movie/<%= movie.id %>" class="film-mask"></a>
                                                 <div class="film-thumbnail">
                                                     <div class="badge-tag quality">HD</div>
                                                     <img class="film-thumbnail-img"
@@ -362,7 +360,7 @@
                                                         alt="<%= movie.title %>">
                                                 </div>
                                                 <div class="film-detail">
-                                                    <h3 class="film-name sum-2"><a href="/movie/<%= movie.id %>"
+                                                    <h3 class="film-name sum-2"><a href="/watch-movie/<%= movie.id %>"
                                                             title="<%= movie.title %>">
                                                             <%= movie.title %>
                                                         </a></h3>
@@ -407,7 +405,7 @@
                                             </span>
                                         </div>
                                         <h2 class="heading-xl sum-2">
-                                            <a href="/series/<%= topSeries.id %>" title="<%= topSeries.name %>">
+                                            <a href="/watch-series/<%= topSeries.id %>" title="<%= topSeries.name %>">
                                                 <%= topSeries.name %>
                                             </a>
                                         </h2>
@@ -424,7 +422,7 @@
                                     <% topRatedSeries.slice(1).forEach(series=> { %>
                                         <div class="swiper-slide">
                                             <div class="item-film">
-                                                <a href="/series/<%= series.id %>" class="film-mask"></a>
+                                                <a href="/watch-series/<%= series.id %>" class="film-mask"></a>
                                                 <div class="film-thumbnail">
                                                     <div class="badge-tag quality">HD</div>
                                                     <img class="film-thumbnail-img"
@@ -432,7 +430,7 @@
                                                         alt="<%= series.name %>">
                                                 </div>
                                                 <div class="film-detail">
-                                                    <h3 class="film-name sum-2"><a href="/series/<%= series.id %>"
+                                                    <h3 class="film-name sum-2"><a href="/watch-series/<%= series.id %>"
                                                             title="<%= series.name %>">
                                                             <%= series.name %>
                                                         </a></h3>

@@ -124,9 +124,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link ">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link ">Contact Us</a>
                         </div>
@@ -140,7 +138,7 @@
         <div id="page-watch">
             <section class="section-detail is-watch is-watch-movie">
                 <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/w300/<%= movie.backdropPath %>" alt="<%= movie.title %>">
+                    <img src="" alt="<%= movie.title %>">
                 </div>
                 <div class="container">
                     <div class="detail-wrap">
@@ -152,7 +150,7 @@
                                     </div>
                                     <div class="top-right">
                                         <div class="is-detail">
-                                            <a href="/movie/<%= movie.id %>" class="btn w-icon"><i class="fas fa-info-circle mr-2"></i>Detail</a>
+                                            <a href="/watch-movie/<%= movie.id %>" class="btn w-icon"><i class="fas fa-info-circle mr-2"></i>Detail</a>
                                         </div>
                                         <div class="is-share">
                                             <div class="btn w-icon" onclick="shareToWhatsApp()">
