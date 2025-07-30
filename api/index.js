@@ -94,72 +94,97 @@ app.get('/logout', (req, res) => {
 
 app.get('/', requireAuth, async (req, res) => {
     try {
-      // Fetch trending content for slider (10 items)
-      const fetchGenres = async (item) => {
-        const type = item.media_type === 'movie' ? 'movie' : 'tv';
-        try {
-          const response = await axios.get(`https://api.themoviedb.org/3/${type}/${item.id}`, {
-            params: {
-              api_key: apiKey
-            }
-          });
-          return response.data.genres;
-        } catch (error) {
-          console.error(`Error fetching genres for ${type} with ID ${item.id}:`, error.message);
-          return []; // Return empty array if genres can't be fetched
-        }
-      };
-  
+      // Fetch trending content for slider (10 items) - keeping backdrop for index only
       const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
         params: { api_key: apiKey }
       });
   
       // Filter out 'person' media types and only process movies and TV series
-      const trendingContent = await Promise.all(
-        sliderResponse.data.results
-          .filter((item) => item.media_type !== 'person') // Exclude items with media_type 'person'
-          .slice(0, 10)
-          .map(async (item) => {
-            const genres = await fetchGenres(item);
-            return { ...item, genres };
-          })
-      );
+      const trendingContent = sliderResponse.data.results
+        .filter((item) => item.media_type !== 'person')
+        .slice(0, 10)
+        .map((item) => ({
+          id: item.id,
+          title: item.title || item.name,
+          media_type: item.media_type,
+          poster_path: item.poster_path,
+          backdrop_path: item.backdrop_path, // Keep backdrop for index only
+          release_date: item.release_date || item.first_air_date
+        }));
   
-      // Fetch trending movies (20 items)
+      // Fetch trending movies (20 items) - minimal data
       const moviesResponse = await axios.get('https://api.themoviedb.org/3/trending/movie/week', {
         params: { api_key: apiKey }
       });
-      const trendingMovies = moviesResponse.data.results.slice(0, 20);
+      const trendingMovies = moviesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.title,
+        media_type: 'movie',
+        poster_path: item.poster_path,
+        release_date: item.release_date
+      }));
   
-      // Fetch trending TV series (20 items)
+      // Fetch trending TV series (20 items) - minimal data
       const seriesResponse = await axios.get('https://api.themoviedb.org/3/trending/tv/week', {
         params: { api_key: apiKey }
       });
-      const trendingSeries = seriesResponse.data.results.slice(0, 20);
+      const trendingSeries = seriesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.name,
+        media_type: 'tv',
+        poster_path: item.poster_path,
+        release_date: item.first_air_date
+      }));
   
-      // Fetch latest movies (20 items)
+      // Fetch latest movies (20 items) - minimal data
       const latestMoviesResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing', {
         params: { api_key: apiKey }
       });
-      const latestMovies = latestMoviesResponse.data.results.slice(0, 20);
+      const latestMovies = latestMoviesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.title,
+        media_type: 'movie',
+        poster_path: item.poster_path,
+        release_date: item.release_date
+      }));
   
-      // Fetch latest TV series (20 items)
+      // Fetch latest TV series (20 items) - minimal data
       const latestSeriesResponse = await axios.get('https://api.themoviedb.org/3/tv/airing_today', {
         params: { api_key: apiKey }
       });
-      const latestSeries = latestSeriesResponse.data.results.slice(0, 20);
+      const latestSeries = latestSeriesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.name,
+        media_type: 'tv',
+        poster_path: item.poster_path,
+        release_date: item.first_air_date
+      }));
   
-      // Fetch top-rated movies (20 items)
+      // Fetch top-rated movies (20 items) - include backdrop for first item
       const topRatedMoviesResponse = await axios.get('https://api.themoviedb.org/3/movie/top_rated', {
         params: { api_key: apiKey }
       });
-      const topRatedMovies = topRatedMoviesResponse.data.results.slice(0, 20);
+      const topRatedMovies = topRatedMoviesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.title,
+        media_type: 'movie',
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        release_date: item.release_date
+      }));
   
-      // Fetch top-rated TV series (20 items)
+      // Fetch top-rated TV series (20 items) - include backdrop for first item
       const topRatedSeriesResponse = await axios.get('https://api.themoviedb.org/3/tv/top_rated', {
         params: { api_key: apiKey }
       });
-      const topRatedSeries = topRatedSeriesResponse.data.results.slice(0, 20);
+      const topRatedSeries = topRatedSeriesResponse.data.results.slice(0, 20).map(item => ({
+        id: item.id,
+        title: item.name,
+        media_type: 'tv',
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        release_date: item.first_air_date
+      }));
   
       // Render the index.ejs template with the data
       res.render('index', {
@@ -186,38 +211,32 @@ app.get('/search', requireAuth, async (req, res) => {
         const response = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(keyword)}&page=${page}`);
         const data = await response.json();
   
-        // Filter results to exclude items without images
-        const combinedResults = data.results.filter(item => {
-            if (item.media_type === 'person') {
-                return item.profile_path; // Only include people with a profile picture
-            } else {
-                return item.poster_path || item.backdrop_path; // Include movies/TV series with either poster or backdrop
-            }
-        });
+        // Filter and map results to minimal data
+        const combinedResults = data.results
+            .filter(item => {
+                if (item.media_type === 'person') {
+                    return false; // Exclude people
+                } else {
+                    return item.poster_path; // Only include movies/TV series with posters
+                }
+            })
+            .map(item => ({
+                id: item.id,
+                title: item.title || item.name,
+                media_type: item.media_type,
+                poster_path: item.poster_path,
+                release_date: item.release_date || item.first_air_date
+            }));
 
         const totalPages = data.total_pages;
         const currentPage = data.page;
   
-        // Default image
-        let imageUrl = '/images/header.jpg';
-  
-        // Check if there are results and use the image of the first result
-        if (combinedResults.length > 0) {
-            const firstResult = combinedResults[0];
-            if (firstResult.backdrop_path) {
-                imageUrl = `https://image.tmdb.org/t/p/original${firstResult.backdrop_path}`;
-            } else if (firstResult.poster_path) {
-                imageUrl = `https://image.tmdb.org/t/p/original${firstResult.poster_path}`;
-            }
-        }
-  
         res.render('search', {
-            searchName: keyword.replace(/\+/g, ' '),  // Replace '+' with space for display
+            searchName: keyword.replace(/\+/g, ' '),
             combinedResults,
             totalPages,
             currentPage,
-            keyword,
-            imageUrl
+            keyword
         });
     } catch (error) {
         console.error('Error fetching search results:', error);
@@ -280,14 +299,20 @@ app.get('/movies', requireAuth, async (req, res) => {
           }
       });
 
-      const movies = response.data.results;
+      const movies = response.data.results.map(item => ({
+          id: item.id,
+          title: item.title,
+          media_type: 'movie',
+          poster_path: item.poster_path,
+          release_date: item.release_date
+      }));
       const totalPages = response.data.total_pages;
 
       res.render('movies', {
           movies: movies,
           currentPage: currentPage,
           totalPages: totalPages,
-          maxPagesToShow: 5 // Adjust this based on how many page links you want to show
+          maxPagesToShow: 5
       });
   } catch (error) {
       console.error('Error fetching movies:', error.message);
@@ -316,14 +341,20 @@ app.get('/tv-series', requireAuth, async (req, res) => {
           }
       });
 
-      const tvSeries = response.data.results;
+      const tvSeries = response.data.results.map(item => ({
+          id: item.id,
+          title: item.name,
+          media_type: 'tv',
+          poster_path: item.poster_path,
+          release_date: item.first_air_date
+      }));
       const totalPages = response.data.total_pages;
 
       res.render('tv-series', {
           tvSeries: tvSeries,
           currentPage: currentPage,
           totalPages: totalPages,
-          maxPagesToShow: 5 // Adjust this based on how many page links you want to show
+          maxPagesToShow: 5
       });
   } catch (error) {
       console.error('Error fetching TV series:', error.message);
@@ -384,30 +415,22 @@ app.get('/top-imdb', requireAuth, async (req, res) => {
 app.get('/movie/:id', requireAuth, async (req, res) => {
   const movieId = req.params.id;
   try {
-      // Fetch movie details, related movies, and cast information
-      const [moviesResponse, moviesrelatedResponse, moviescreditsResponse] = await Promise.all([
-          axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=en-US`),
-          axios.get(`https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=${apiKey}&language=en-US`),
-          axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${apiKey}&language=en-US`)
-      ]);
-
-      const movie = moviesResponse.data;
-      const relatedMovies = moviesrelatedResponse.data.results;
-      const trailerId = await getTrailerId(movieId); // Function to fetch trailer ID
-      const cast = moviescreditsResponse.data.cast;
+      // Fetch only movie details
+      const moviesResponse = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=en-US`);
+      const movieData = moviesResponse.data;
       
-
-      // Attach cast information to the movie object
-      movie.cast = cast.slice(0, 7); // Limit to top 5 cast members
-
-      // Define getRatingClass function
-      const getRatingClass = (rating) => {
-          const starRating = Math.round(rating / 2);
-          return `fill-${starRating}`;
+      // Extract only essential data
+      const movie = {
+          id: movieData.id,
+          title: movieData.title,
+          media_type: 'movie',
+          poster_path: movieData.poster_path,
+          release_date: movieData.release_date,
+          overview: movieData.overview,
+          imdb_id: movieData.imdb_id
       };
 
-
-      res.render('movie', { movie, relatedMovies, trailerId, getRatingClass });
+      res.render('movie', { movie });
   } catch (error) {
       console.error('Error fetching movie data:', error);
       res.status(500).send('Error fetching movie data');
@@ -417,35 +440,26 @@ app.get('/movie/:id', requireAuth, async (req, res) => {
 app.get('/series/:id', requireAuth, async (req, res) => {
     const tvId = req.params.id;
     try {
-        // Fetch TV series details, related TV series, and cast information
-        const [tvResponse, tvRelatedResponse, tvCreditsResponse, tvVideosResponse] = await Promise.all([
-            axios.get(`https://api.themoviedb.org/3/tv/${tvId}?api_key=${apiKey}&language=en-US`),
-            axios.get(`https://api.themoviedb.org/3/tv/${tvId}/recommendations?api_key=${apiKey}&language=en-US`),
-            axios.get(`https://api.themoviedb.org/3/tv/${tvId}/credits?api_key=${apiKey}&language=en-US`),
-            axios.get(`https://api.themoviedb.org/3/tv/${tvId}/videos?api_key=${apiKey}&language=en-US`)
-        ]);
-  
-        const tv = tvResponse.data;
-        const relatedTv = tvRelatedResponse.data.results;
-        const cast = tvCreditsResponse.data.cast;
-        const videos = tvVideosResponse.data.results;
-  
-        const trailerId = videos.find(video => video.type === 'Trailer' && video.site === 'YouTube')?.key || null;
-  
-        tv.cast = cast.slice(0, 5); // Limit to top 5 cast members
-  
-        // Define getRatingClass function
-        const getRatingClass = (rating) => {
-            const starRating = Math.round(rating / 2);
-            return `fill-${starRating}`;
+        // Fetch only TV series details
+        const tvResponse = await axios.get(`https://api.themoviedb.org/3/tv/${tvId}?api_key=${apiKey}&language=en-US`);
+        const tvData = tvResponse.data;
+        
+        // Extract only essential data
+        const tv = {
+            id: tvData.id,
+            name: tvData.name,
+            media_type: 'tv',
+            poster_path: tvData.poster_path,
+            first_air_date: tvData.first_air_date,
+            overview: tvData.overview
         };
-  
-        res.render('series', { tv, relatedTv, getRatingClass, trailerId, cast });
+
+        res.render('series', { tv });
     } catch (error) {
         console.error('Error fetching TV data:', error);
         res.status(500).send('Error fetching TV data');
     }
-  });  
+  });
 
 app.get('/watch-movie/:id', requireAuth, async (req, res) => {
     try {

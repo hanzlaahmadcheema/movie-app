@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        Watch <%= movie.title %> - Free Full HD Movie Streaming - HA Entertainment
+        Watch Movies - Free Full HD Movie Streaming - HA Entertainment
     </title>
 
     <!-- Meta Tags -->
@@ -11,13 +11,13 @@
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
     <meta name="description"
-        content="<%= movie.overview %> Watch <%= movie.title %> and other movies in Full HD for free at HA Entertainment." />
+        content="Watch movies and other movies in Full HD for free at HA Entertainment." />
     <meta name="keywords"
-        content="watch <%= movie.title %> ha entertainment, watch <%= movie.title %> online ha entertainment, watch <%= movie.title %> free ha entertainment, <%= movie.title %>, free movies, HD movies, watch <%= movie.title %>, movie details, <%= movie.title %> online, free movie streaming" />
+        content="watch movies ha entertainment, watch movies online ha entertainment, watch movies free ha entertainment, free movies, HD movies, watch movies, movie details, movies online, free movie streaming" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
 
     <!-- Canonical Link -->
-    <link rel="canonical" href="https://www.ha-entertainment.com/movie/<%= movie.id %>" />
+    <link rel="canonical" href="https://www.ha-entertainment.com/movie" />
 
     <!-- Favicon and Icons -->
     <link rel="shortcut icon" href="https://www.ha-entertainment.com/images/logo.png" type="image/x-icon" />
@@ -27,25 +27,22 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="movie" />
-    <meta property="og:title" content="<%= movie.title %> - Watch Free Movies & TV Series Online" />
-    <meta property="og:url" content="https://www.ha-entertainment.com/movie/<%= movie.id %>" />
-    <meta property="og:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>" />
-    <meta property="og:image:width" content="500">
-    <meta property="og:image:height" content="750">
+    <meta property="og:title" content="Watch Free Movies & TV Series Online" />
+    <meta property="og:url" content="https://www.ha-entertainment.com/movie" />
+    <meta property="og:image" content="https://www.ha-entertainment.com/images/logo.png" />
+    <meta property="og:image:width" content="342">
+    <meta property="og:image:height" content="513">
     <meta property="og:description"
-        content="<%= movie.overview %> Watch <%= movie.title %> and enjoy streaming in Full HD quality for free on HA Entertainment." />
+        content="Watch movies and enjoy streaming in Full HD quality for free on HA Entertainment." />
     <meta property="og:site_name" content="HA Entertainment" />
-    <meta property="og:video" content="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1" />
-
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@HA_Entertainment">
-    <meta name="twitter:title" content="<%= movie.title %> - Watch Free Movies & TV Series Online">
+    <meta name="twitter:title" content="Watch Free Movies & TV Series Online">
     <meta name="twitter:description"
-        content="<%= movie.overview %> Watch <%= movie.title %> and other movies in Full HD quality for free on HA Entertainment.">
-    <meta name="twitter:image" content="https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>">
-    <meta name="twitter:player" content="https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1">
+        content="Watch movies and other movies in Full HD quality for free on HA Entertainment.">
+    <meta name="twitter:image" content="https://www.ha-entertainment.com/images/logo.png">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -56,64 +53,14 @@
     <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "Movie",
-          "name": "<%= movie.title %>",
-          "url": "https://www.ha-entertainment.com/movie/<%= movie.id %>",
-          "image": "https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>",
-          "description": "<%= movie.overview %>",
-          "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": "<%= movie.vote_average %>",
-            "reviewCount": "<%= movie.vote_count %>"
-          },
-          "genre": [
-            <% movie.genres.forEach(function(genre, index) { %>
-              "<%= genre.name %>"<% if (index < movie.genres.length - 1) { %>, <% } %>
-            <% }) %>
-          ],
-          "actor": [
-            <% movie.cast.forEach(function(actor, index) { %>
-              {
-                "@type": "Person",
-                "name": "<%= actor.name %>",
-                "characterName": "<%= actor.character %>"
-              }<% if (index < movie.cast.length - 1) { %>, <% } %>
-            <% }) %>
-          ],
-          "productionCompany": [
-            <% movie.production_companies.forEach(function(company, index) { %>
-              {
-                "@type": "Organization",
-                "name": "<%= company.name %>",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": "https://image.tmdb.org/t/p/original<%= company.logo_path %>"
-                }
-              }<% if (index < movie.production_companies.length - 1) { %>, <% } %>
-            <% }) %>
-          ],
-          "releaseDate": "<%= movie.release_date %>",
-          "productionCountry": [
-            <% movie.production_countries.forEach(function(country, index) { %>
-              {
-                "@type": "Place",
-                "name": "<%= country.name %>"
-              }<% if (index < movie.production_countries.length - 1) { %>, <% } %>
-            <% }) %>
-          ],
-          "video": {
-            "@type": "VideoObject",
-            "name": "<%= movie.title %>",
-            "description": "<%= movie.overview %>",
-            "contentUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
-            "thumbnailUrl": "https://image.tmdb.org/t/p/w780<%= movie.backdrop_path %>",
-            "embedUrl": "https://multiembed.mov/?video_id=<%= movie.id %>&tmdb=1",
-            "uploadDate": "<%= movie.release_date %>T08:00:00+08:00"
-          },
-          "interactionStatistic": {
-            "@type": "InteractionCounter",
-            "interactionType": { "@type": "WatchAction" },
-            "userInteractionCount": 5647018
+          "@type": "WebSite",
+          "name": "HA Entertainment",
+          "url": "https://www.ha-entertainment.com",
+          "description": "Watch movies and enjoy streaming in Full HD quality for free on HA Entertainment.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.ha-entertainment.com/search?keyword={search_term_string}",
+            "query-input": "required name=search_term_string"
           }
         }
         </script>
@@ -146,54 +93,7 @@
             <li class="nav-item"><a class="nav-link" href="/" title="Home">Home</a></li>
             <li class="nav-item active"><a class="nav-link" href="/movies" title="Movies">Movies</a></li>
             <li class="nav-item"><a class="nav-link" href="/tv-series" title="TV Series">TV Series</a></li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Genre</a>
-                <div class="toggle-submenu collapsed" data-toggle="collapse" data-target="#show-genres"
-                    aria-expanded="false" aria-controls="show-genres"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="multi-collapse is-sub collapse" id="show-genres" style="">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/genre/28">Action</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/12">Adventure</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/16">Animation</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/35">Comedy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/80">Crime</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/99">Documentary</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/18">Drama</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10751">Family</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/14">Fantasy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/36">History</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/27">Horror</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10402">Music</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/9648">Mystery</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10749">Romance</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/878">Sci-Fi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/53">Thriller</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10767">Talk</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10752">War</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Country</a>
-                <div class="toggle-submenu" data-toggle="collapse" data-target="#sidebar_subs_country"
-                    aria-expanded="false" aria-controls="sidebar_subs_country"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="collapse multi-collapse sidebar_menu-sub" id="sidebar_subs_country">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/country/US">United States</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/CN">China</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/GB">United Kingdom</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/KR">South Korea</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/JP">Japan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/HK">Hongkong</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/PK">Pakistan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/IN">India</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TH">Thailand</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TR">Türkiye</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/FR">France</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            
             <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
         </ul>
     </div>
@@ -229,9 +129,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link">Contact Us</a>
                         </div>
@@ -244,10 +142,6 @@
         <!--/// Page body ///-->
         <div id="page-detail">
             <section class="section-detail is-detail-tv">
-                <div class="slide-cover">
-                    <img src="https://image.tmdb.org/t/p/original/<%= movie.backdrop_path || 'default.jpg' %>"
-                        alt="<%= movie.title %>">
-                </div>
                 <div class="container">
                     <div class="detail-wrap">
                         <div class="detail-elements">
@@ -256,8 +150,8 @@
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
-                                            src="https://image.tmdb.org/t/p/original/<%= movie.poster_path || 'default.jpg' %>"
-                                            alt="<%= movie.title %>" onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
+                                            src="https://image.tmdb.org/t/p/w342<%= movie.poster_path %>"
+                                            alt="<%= movie.title %>">
                                     </div>
                                 </div>
                                 <div class="is-caption backdrop-blur-50">
@@ -270,36 +164,14 @@
                                             </div>
                                         </div>
                                         <h3 class="heading-xl">
-                                            <%= movie.title || 'Unknown Title' %>
+                                            <%= movie.title %>
                                         </h3>
                                         <div class="is-action">
                                             <div class="div-buttons">
-                                                <a href="/watch-movie/<%= movie.id || '' %>"
+                                                <a href="/watch-movie/<%= movie.id %>"
                                                     class="btn btn-primary w-icon">
                                                     <i class="fas fa-play mr-3"></i>Watch now
                                                 </a>
-                                            </div>
-                                            <div class="spacing"></div>
-                                            <div class="for-user">
-                                                <div class="film-fav">
-                                                    <div class="fav-btn icon-fav btn-wl" onclick="showTrailerModal('<%= trailerId %>', '<%= movie.title %>')">
-                                                        <i class="fas fa-video"></i>
-                                                        <span>Watch Trailer</span>
-                                                    </div>
-                                                </div>                                                
-                                                <div class="spacing"></div>
-                                                <div class="film-rating" id="vote-info"
-                                                    data-movie-id="<%= movie.id || '' %>">
-                                                    <div class="is-rate">
-                                                        <div class="stars mr-2">
-                                                            <div class="fill <%= getRatingClass(movie.vote_average) %>">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <span class="rating">
-                                                        <%= movie.vote_average.toFixed(1) || 'N/A' %>
-                                                    </span>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -308,110 +180,21 @@
                                             <div class="item-body">
                                                 <div class="name mb-2"><strong>Overview</strong></div>
                                                 <div class="description">
-                                                    <%= movie.overview || 'No overview available.' %>
-                                                </div>
-                                                <div class="desc-more mt-2" style="position: relative;">
-                                                    <button id="toggle-desc" class="btn btn-sm btn-trans w-icon">
-                                                        <i class="fas fa-plus mr-2"></i>read full
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-primary mine-dropdown">
-                                                        <div class="dropdown-text">
-                                                            <p>
-                                                                <%= movie.overview || 'No overview available.' %>
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                                                    <%= movie.overview %>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="others">
-                                            <div class="item item-casts">
-                                                <div class="name">Casts</div>
-                                                <div class="item-body">
-                                                    <% if (movie.cast && movie.cast.length) { %>
-                                                        <% movie.cast.forEach(castMember=> { %>
-                                                            <a href="/cast/<%= castMember.id %>"
-                                                                title="<%= castMember.name %>">
-                                                                <%= castMember.name %>
-                                                            </a>
-                                                            <%= castMember !==movie.cast[movie.cast.length - 1] ? ', '
-                                                                : '' %>
-                                                                <% }); %>
-                                                                    <% } else { %>
-                                                                        <span>No cast information available.</span>
-                                                                        <% } %>
-                                                </div>
-                                            </div>
-                                            <div class="item item-genres">
-                                                <div class="name">Genres</div>
-                                                <div class="item-body">
-                                                    <% if (movie.genres && movie.genres.length) { %>
-                                                        <% movie.genres.forEach(genre=> { %>
-                                                            <a href="/genre/<%= genre.id %>" rel="tag"
-                                                                title="<%= genre.name %>">
-                                                                <%= genre.name %>
-                                                            </a>
-                                                            <%= genre.id < movie.genres.length - 1 ? ',' : '' %>
-                                                                <% }); %>
-                                                                    <% } else { %>
-                                                                        <span>No genres available.</span>
-                                                                        <% } %>
-                                                </div>
-                                            </div>
                                             <div class="item">
-                                                <div class="name">Duration</div>
+                                                <div class="name">Type</div>
                                                 <div class="item-body">
-                                                    <span>
-                                                        <%= movie.runtime || 'N/A' %> min
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="item">
-                                                <div class="name">Country</div>
-                                                <div class="item-body">
-                                                    <% if (movie.production_countries &&
-                                                        movie.production_countries.length) { %>
-                                                        <a href="/country/<%= movie.production_countries[0].iso_3166_1 %>"
-                                                            title="<%= movie.production_countries[0].name %>">
-                                                            <%= movie.production_countries[0].name %>
-                                                        </a>
-                                                        <% } else { %>
-                                                            <span>Unknown</span>
-                                                            <% } %>
-                                                </div>
-                                            </div>
-                                            <div class="item">
-                                                <div class="name">IMDb</div>
-                                                <div class="item-body">
-                                                    <span>
-                                                        <%= movie.vote_average.toFixed(1) || 'N/A' %>
-                                                    </span>
+                                                    <span>Movie</span>
                                                 </div>
                                             </div>
                                             <div class="item">
                                                 <div class="name">Release</div>
                                                 <div class="item-body">
-                                                    <span>
-                                                        <%= movie.release_date || 'N/A' %>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="item">
-                                                <div class="name">Production</div>
-                                                <div class="item-body">
-                                                    <% if (movie.production_companies &&
-                                                        movie.production_companies.length) { %>
-                                                        <% movie.production_companies.forEach(company=> { %>
-                                                            <a href="/production/<%= company.id %>"
-                                                                title="<%= company.name %>">
-                                                                <%= company.name %>
-                                                            </a>
-                                                            <%= company.id < movie.production_companies.length - 1 ? ','
-                                                                : '' %>
-                                                                <% }); %>
-                                                                    <% } else { %>
-                                                                        <span>No production companies available.</span>
-                                                                        <% } %>
+                                                    <span><%= new Date(movie.release_date).getFullYear() %></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -419,53 +202,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-            </section>
-
-            <section class="section-default section-flow-vertical section-film-list is-carousel">
-                <div class="container">
-                    <div class="section-header">
-                        <div class="is-title">
-                            <h3 class="heading-md">You may also like</h3>
-                        </div>
-                        <div class="flex-grow"></div>
-                    </div>
-                </div>
-                <div id="carousel-related-movies" class="film-carousel">
-                    <div class="swiper-container">
-                        <div class="swiper-wrapper">
-                            <% relatedMovies.forEach(relatedMovies=> { %>
-                                <div class="swiper-slide">
-                                    <div class="item-film">
-                                        <a href="/movie/<%= relatedMovies.id %>" class="film-mask"></a>
-                                        <div class="film-thumbnail">
-                                            <div class="badge-tag quality">HD</div>
-                                            <img class="film-thumbnail-img"
-                                                src="https://image.tmdb.org/t/p/original<%= relatedMovies.poster_path %>"
-                                                alt="<%= relatedMovies.title %>">
-                                        </div>
-                                        <div class="film-detail">
-                                            <h3 class="film-name sum-2">
-                                                <a href="/movie/<%= relatedMovies.id %>"
-                                                    title="<%= relatedMovies.title %>">
-                                                    <%= relatedMovies.title %>
-                                                </a>
-                                            </h3>
-                                            <div class="film-info">
-                                                <span class="item">Movie</span>
-                                                <span class="item">
-                                                    <%= new Date(relatedMovies.release_date).getFullYear() %>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% }); %>
-                        </div>
-                    </div>
-                    <div class="carousel-controls">
-                        <div class="button-next"><i class="fas fa-angle-right"></i></div>
-                        <div class="button-prev"><i class="fas fa-angle-left"></i></div>
                     </div>
                 </div>
             </section>
@@ -523,25 +259,7 @@
                                 <ul class="style-none">
                                     <li><a href="/movies">Movies</a></li>
                                     <li><a href="/tv-series">TV Series</a></li>
-                                    <li><a href="/top-imdb">Top IMDb</a></li>
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/28">Action</a></li>
-
-                                    <li><a href="/genre/35">Comedy</a></li>
-
-                                    <li><a href="/genre/18">Drama</a></li>
-
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/14">Fantasy</a></li>
-
-                                    <li><a href="/genre/27">Horror</a></li>
-
-                                    <li><a href="/genre/9648">Mystery</a></li>
-
+                                    
                                 </ul>
                             </div>
                         </div>

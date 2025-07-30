@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.results.length > 0) {
             data.results.slice(0, 5).forEach(item => {
                 const suggestionItem = document.createElement('a');
-                suggestionItem.href = item.media_type === 'movie' ? `/movie/${item.id}` : `/series/${item.id}`;
+                suggestionItem.href = item.media_type === 'movie' ? `/watch-movie/${item.id}` : `/watch-series/${item.id}`;
                 suggestionItem.classList.add('nav-item');
                 
                 suggestionItem.innerHTML = `

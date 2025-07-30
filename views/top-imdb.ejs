@@ -88,54 +88,8 @@
             <li class="nav-item active"><a class="nav-link" href="/" title="Home">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="/movies" title="Movies">Movies</a></li>
             <li class="nav-item"><a class="nav-link" href="/tv-series" title="TV Series">TV Series</a></li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Genre</a>
-                <div class="toggle-submenu collapsed" data-toggle="collapse" data-target="#show-genres"
-                    aria-expanded="false" aria-controls="show-genres"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="multi-collapse is-sub collapse" id="show-genres" style="">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/genre/28">Action</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/12">Adventure</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/16">Animation</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/35">Comedy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/80">Crime</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/99">Documentary</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/18">Drama</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10751">Family</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/14">Fantasy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/36">History</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/27">Horror</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10402">Music</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/9648">Mystery</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10749">Romance</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/878">Sci-Fi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/53">Thriller</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10767">Talk</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10752">War</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Country</a>
-                <div class="toggle-submenu" data-toggle="collapse" data-target="#sidebar_subs_country"
-                    aria-expanded="false" aria-controls="sidebar_subs_country"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="collapse multi-collapse sidebar_menu-sub" id="sidebar_subs_country">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/country/US">United States</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/CN">China</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/GB">United Kingdom</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/KR">South Korea</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/JP">Japan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/HK">Hongkong</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/PK">Pakistan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/IN">India</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TH">Thailand</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TR">Türkiye</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/FR">France</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            
+            
             <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
         </ul>
     </div>
@@ -198,7 +152,7 @@
                         <div class="film-list">
                             <% combinedContent.forEach(item=> { %>
                                 <div class="item-film">
-                                    <a href="<%= item.type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                    <a href="<%= item.type === 'movie' ? '/watch-movie/' + item.id : '/watch-series/' + item.id %>"
                                         class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
@@ -208,7 +162,7 @@
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">
-                                            <a href="<%= item.type === 'movie' ? '/movie/' + item.id : '/series/' + item.id %>"
+                                            <a href="<%= item.type === 'movie' ? '/watch-movie/' + item.id : '/watch-series/' + item.id %>"
                                                 title="<%= item.title || item.name %>">
                                                 <%= item.title || item.name %>
                                             </a>
@@ -320,26 +274,9 @@
                                 <ul class="style-none">
                                     <li><a href="/movies">Movies</a></li>
                                     <li><a href="/tv-series">TV Series</a></li>
-                                    <li><a href="/top-imdb">Top IMDb</a></li>
+                                    
                                 </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/28">Action</a></li>
-
-                                    <li><a href="/genre/35">Comedy</a></li>
-
-                                    <li><a href="/genre/18">Drama</a></li>
-
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/14">Fantasy</a></li>
-
-                                    <li><a href="/genre/27">Horror</a></li>
-
-                                    <li><a href="/genre/9648">Mystery</a></li>
-
-                                </ul>
+                                
                             </div>
                         </div>
                         <div class="flex-grow"></div>

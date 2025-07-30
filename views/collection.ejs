@@ -126,7 +126,7 @@
                     <div class="clearfix"></div>
                 </div>
             </li>
-            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            
             <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
         </ul>
     </div>
@@ -162,9 +162,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link ">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link ">Contact Us</a>
                         </div>
@@ -189,7 +187,7 @@
                         <div class="film-list">
                             <% movies.forEach(movie => { %>
                                 <div class="item-film">
-                                    <a href="/movie/<%= movie.id %>" class="film-mask"></a>
+                                    <a href="/watch-movie/<%= movie.id %>" class="film-mask"></a>
                                     <div class="film-thumbnail">
                                         <div class="badge-tag quality">HD</div>
                                         <img class="film-thumbnail-img"
@@ -198,7 +196,7 @@
                                     </div>
                                     <div class="film-detail">
                                         <h3 class="film-name sum-2">
-                                            <a href="/movie/<%= movie.id %>" title="<%= movie.title %>">
+                                            <a href="/watch-movie/<%= movie.id %>" title="<%= movie.title %>">
                                                 <%= movie.title %>
                                             </a>
                                         </h3>
@@ -299,7 +297,7 @@
                             <ul class="style-none">
                                 <li><a href="/movies">Movies</a></li>
                                 <li><a href="/tv-series">TV Series</a></li>
-                                <li><a href="/top-imdb">Top IMDb</a></li>
+                                
                             </ul>
                             <ul class="style-none">
 

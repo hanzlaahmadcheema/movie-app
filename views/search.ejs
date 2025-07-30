@@ -2,18 +2,18 @@
 <html lang="en">
 
 <head>
-    <title>Search Results for <%= searchName %> - HA Entertainment</title>
+    <title>Search Results - HA Entertainment</title>
 
     <!-- Meta Tags -->
     <meta charset="UTF-8">
     <meta name="robots" content="index, follow">
     <meta http-equiv="content-language" content="en" />
-    <meta name="description" content="Find the best movies, TV series, and more related to <%= searchName %> on HA Entertainment. Stream without ads and enjoy high quality." />
-    <meta name="keywords" content="search <%= searchName %>, movies search, TV series search, find movies, find TV shows, HA Entertainment" />
+    <meta name="description" content="Find the best movies, TV series, and more on HA Entertainment. Stream without ads and enjoy high quality." />
+    <meta name="keywords" content="search movies, movies search, TV series search, find movies, find TV shows, HA Entertainment" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
 
     <!-- Canonical Link -->
-    <link rel="canonical" href="https://www.ha-entertainment.com/search/<%= encodeURIComponent(keyword) %>" />
+    <link rel="canonical" href="https://www.ha-entertainment.com/search" />
 
     <!-- Favicon and Icons -->
     <link rel="shortcut icon" href="https://www.ha-entertainment.com/images/logo.png" type="image/x-icon" />
@@ -23,20 +23,20 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Search Results for <%= searchName %> - HA Entertainment" />
-    <meta property="og:url" content="https://www.ha-entertainment.com/search/<%= encodeURIComponent(keyword) %>" />
-    <meta property="og:image" content="<%= imageUrl %>" />
+    <meta property="og:title" content="Search Results - HA Entertainment" />
+    <meta property="og:url" content="https://www.ha-entertainment.com/search" />
+    <meta property="og:image" content="https://www.ha-entertainment.com/images/logo.png" />
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:description" content="Find the best movies, TV series, and more related to <%= searchName %> on HA Entertainment. Stream without ads and enjoy high quality." />
+    <meta property="og:description" content="Find the best movies, TV series, and more on HA Entertainment. Stream without ads and enjoy high quality." />
     <meta property="og:site_name" content="HA Entertainment" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@HA_Entertainment">
-    <meta name="twitter:title" content="Search Results for <%= searchName %> - HA Entertainment">
-    <meta name="twitter:description" content="Find the best movies, TV series, and more related to <%= searchName %> on HA Entertainment.">
-    <meta name="twitter:image" content="<%= imageUrl %>">
+    <meta name="twitter:title" content="Search Results - HA Entertainment">
+    <meta name="twitter:description" content="Find the best movies, TV series, and more on HA Entertainment.">
+    <meta name="twitter:image" content="https://www.ha-entertainment.com/images/logo.png">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -47,17 +47,16 @@
     <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "SearchResultsPage",
-          "name": "Search Results for <%= searchName %>",
-          "url": "https://www.ha-entertainment.com/search/<%= encodeURIComponent(keyword) %>",
-          "description": "Find movies, TV series, and more related to <%= searchName %> on HA Entertainment.",
-          "image": "<%= imageUrl %>"
-        },
-        "potentialAction": {
+          "@type": "WebSite",
+          "name": "HA Entertainment",
+          "url": "https://www.ha-entertainment.com",
+          "description": "Find movies, TV series, and more on HA Entertainment.",
+          "potentialAction": {
             "@type": "SearchAction",
             "target": "https://www.ha-entertainment.com/search?keyword={search_term_string}",
             "query-input": "required name=search_term_string"
           }
+        }
     </script>
 
     <!-- Google tag (gtag.js) -->
@@ -87,54 +86,8 @@
             <li class="nav-item active"><a class="nav-link" href="/" title="Home">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="/movies" title="Movies">Movies</a></li>
             <li class="nav-item"><a class="nav-link" href="/tv-series" title="TV Series">TV Series</a></li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Genre</a>
-                <div class="toggle-submenu collapsed" data-toggle="collapse" data-target="#show-genres"
-                    aria-expanded="false" aria-controls="show-genres"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="multi-collapse is-sub collapse" id="show-genres" style="">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/genre/28">Action</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/12">Adventure</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/16">Animation</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/35">Comedy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/80">Crime</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/99">Documentary</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/18">Drama</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10751">Family</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/14">Fantasy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/36">History</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/27">Horror</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10402">Music</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/9648">Mystery</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10749">Romance</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/878">Sci-Fi</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/53">Thriller</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10767">Talk</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/genre/10752">War</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" title="">Country</a>
-                <div class="toggle-submenu" data-toggle="collapse" data-target="#sidebar_subs_country"
-                    aria-expanded="false" aria-controls="sidebar_subs_country"><i class="fas fa-ellipsis-h"></i></div>
-                <div class="collapse multi-collapse sidebar_menu-sub" id="sidebar_subs_country">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a class="nav-link" href="/country/US">United States</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/CN">China</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/GB">United Kingdom</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/KR">South Korea</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/JP">Japan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/HK">Hongkong</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/PK">Pakistan</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/IN">India</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TH">Thailand</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/TR">Türkiye</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/country/FR">France</a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/top-imdb" title="Top IMDb">Top IMDb</a></li>
+            
+            
             <li class="nav-item"><a class="nav-link" href="/contact-us" title="Contact Us">Contact Us</a></li>
         </ul>
     </div>
@@ -170,9 +123,7 @@
                         <div class="menu-item">
                             <a href="/tv-series" class="menu-link ">TV Series</a>
                         </div>
-                        <div class="menu-item">
-                            <a href="/top-imdb" class="menu-link">Top IMDb</a>
-                        </div>
+
                         <div class="menu-item">
                             <a href="/contact-us" class="menu-link ">Contact Us</a>
                         </div>
@@ -198,17 +149,16 @@
                             <div class="film-list">
                                 <% combinedResults.forEach(item => { %>
                                     <div class="item-film">
-                                        <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : item.media_type === 'tv' ? '/series/' + item.id : '/cast/' + item.id %>" class="film-mask"></a>
+                                        <a href="<%= item.media_type === 'movie' ? '/watch-movie/' + item.id : item.media_type === 'tv' ? '/watch-series/' + item.id : '/cast/' + item.id %>" class="film-mask"></a>
                                         <div class="film-thumbnail">
                                             <div class="badge-tag quality">HD</div>
                                             <img class="film-thumbnail-img" 
-                                                src="<%= item.media_type === 'person' && item.profile_path ? 'https://image.tmdb.org/t/p/original' + item.profile_path : 'https://image.tmdb.org/t/p/original' + (item.poster_path || '') %>" 
-                                                alt="<%= item.title || item.name %>" 
-                                                onerror="this.onerror=null;this.src='https://www.ha-entertainment.com/images/header.jpg';">
+                                                src="https://image.tmdb.org/t/p/w342<%= item.poster_path %>" 
+                                                alt="<%= item.title || item.name %>">
                                         </div>
                                         <div class="film-detail">
                                             <h3 class="film-name sum-2">
-                                                <a href="<%= item.media_type === 'movie' ? '/movie/' + item.id : item.media_type === 'tv' ? '/series/' + item.id : '/cast/' + item.id %>" title="<%= item.title || item.name %>"><%= item.title || item.name %></a>
+                                                <a href="<%= item.media_type === 'movie' ? '/watch-movie/' + item.id : item.media_type === 'tv' ? '/watch-series/' + item.id : '/cast/' + item.id %>" title="<%= item.title || item.name %>"><%= item.title || item.name %></a>
                                             </h3>
                                             <div class="film-info">
                                                 <% if (item.media_type === 'movie' || item.media_type === 'tv') { %>
@@ -319,26 +269,9 @@
                                 <ul class="style-none">
                                     <li><a href="/movies">Movies</a></li>
                                     <li><a href="/tv-series">TV Series</a></li>
-                                    <li><a href="/top-imdb">Top IMDb</a></li>
+                                    
                                 </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/28">Action</a></li>
-
-                                    <li><a href="/genre/35">Comedy</a></li>
-
-                                    <li><a href="/genre/18">Drama</a></li>
-
-                                </ul>
-                                <ul class="style-none">
-
-                                    <li><a href="/genre/14">Fantasy</a></li>
-
-                                    <li><a href="/genre/27">Horror</a></li>
-
-                                    <li><a href="/genre/9648">Mystery</a></li>
-
-                                </ul>
+                               
                             </div>
                         </div>
                         <div class="flex-grow"></div>
