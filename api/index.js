@@ -12,7 +12,8 @@ const apiKey = 'be61c0c4d2504f59b7dd5a83983d904c';
 const users = {
     'admin': 'password123',
     'user1': 'mypass',
-    'demo': 'demo123'
+    'demo': 'demo123',
+    'bilawal': '61568'
 };
 
 // Active sessions storage (username -> sessionId)
