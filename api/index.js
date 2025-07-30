@@ -43,6 +43,8 @@ function requireAuth(req, res, next) {
     if (req.session && req.session.userId && activeSessions.get(req.session.userId) === req.session.id) {
         return next();
     } else {
+        // Store the original URL the user was trying to access
+        req.session.redirectTo = req.originalUrl;
         return res.redirect('/login');
     }
 }
@@ -50,7 +52,10 @@ function requireAuth(req, res, next) {
 // Login routes
 app.get('/login', (req, res) => {
     if (req.session && req.session.userId && activeSessions.get(req.session.userId) === req.session.id) {
-        return res.redirect('/');
+        // If user is already logged in, redirect to intended page or home
+        const redirectTo = req.session.redirectTo || '/';
+        delete req.session.redirectTo;
+        return res.redirect(redirectTo);
     }
     res.render('login', { error: null });
 });
@@ -71,7 +76,11 @@ app.post('/login', (req, res) => {
         activeSessions.set(username, req.session.id);
         
         console.log(`User ${username} logged in successfully`);
-        return res.redirect('/');
+        
+        // Redirect to the original page user was trying to access, or home page
+        const redirectTo = req.session.redirectTo || '/';
+        delete req.session.redirectTo; // Clear the redirect URL
+        return res.redirect(redirectTo);
     } else {
         res.render('login', { error: 'Invalid username or password' });
     }
