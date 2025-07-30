@@ -1,22 +1,98 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const path = require('path');  
-
-
+const path = require('path');
+const session = require('express-session');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const apiKey = 'be61c0c4d2504f59b7dd5a83983d904c';
 
+// User database (you can modify this list)
+const users = {
+    'admin': 'password123',
+    'user1': 'mypass',
+    'demo': 'demo123'
+};
+
+// Active sessions storage (username -> sessionId)
+const activeSessions = new Map();
+
+// Session configuration
+app.use(session({
+    secret: 'your-secret-key-change-this',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true if using HTTPS
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For form data
 
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
 const port = process.env.PORT || 3000;
 
-app.get('/', async (req, res) => {
+// Authentication middleware
+function requireAuth(req, res, next) {
+    if (req.session && req.session.userId && activeSessions.get(req.session.userId) === req.session.id) {
+        return next();
+    } else {
+        return res.redirect('/login');
+    }
+}
+
+// Login routes
+app.get('/login', (req, res) => {
+    if (req.session && req.session.userId && activeSessions.get(req.session.userId) === req.session.id) {
+        return res.redirect('/');
+    }
+    res.render('login', { error: null });
+});
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (users[username] && users[username] === password) {
+        // Check if user is already logged in from another device
+        if (activeSessions.has(username)) {
+            // Remove the previous session
+            console.log(`User ${username} logged out from previous device`);
+        }
+        
+        // Create new session
+        req.session.userId = username;
+        req.session.sessionId = req.session.id;
+        activeSessions.set(username, req.session.id);
+        
+        console.log(`User ${username} logged in successfully`);
+        return res.redirect('/');
+    } else {
+        res.render('login', { error: 'Invalid username or password' });
+    }
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+    if (req.session && req.session.userId) {
+        activeSessions.delete(req.session.userId);
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+            }
+            res.redirect('/login');
+        });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/', requireAuth, async (req, res) => {
     try {
       // Fetch trending content for slider (10 items)
       const fetchGenres = async (item) => {
@@ -102,7 +178,7 @@ app.get('/', async (req, res) => {
   });
   
   
-app.get('/search', async (req, res) => {
+app.get('/search', requireAuth, async (req, res) => {
     const keyword = req.query.keyword || '';
     const page = parseInt(req.query.page, 10) || 1;
     
@@ -149,7 +225,7 @@ app.get('/search', async (req, res) => {
     }
 });
 
-app.get('/search/suggest', async (req, res) => {
+app.get('/search/suggest', requireAuth, async (req, res) => {
     const keyword = req.query.keyword || '';
     const searchType = req.query.type || 'multi'; // Default to 'multi' for combined results
 
@@ -171,20 +247,20 @@ app.get('/search/suggest', async (req, res) => {
     }
 });
 
-app.get('/terms', (req, res) => {
+app.get('/terms', requireAuth, (req, res) => {
     res.render('terms');
 });
 
-app.get('/player', (req, res) => {
+app.get('/player', requireAuth, (req, res) => {
     res.render('player');
 });
 
-app.get('/contact-us', (req, res) => {
+app.get('/contact-us', requireAuth, (req, res) => {
   res.render('contact-us');
 });
 
 // Route to fetch movies with pagination
-app.get('/movies', async (req, res) => {
+app.get('/movies', requireAuth, async (req, res) => {
   let currentPage = parseInt(req.query.page) || 1;
   const resultsPerPage = 20; // Number of results per page
   const maxPages = 500; // TMDb allows up to 500 pages
@@ -220,7 +296,7 @@ app.get('/movies', async (req, res) => {
 });
 
 // Route to fetch TV series with pagination
-app.get('/tv-series', async (req, res) => {
+app.get('/tv-series', requireAuth, async (req, res) => {
   let currentPage = parseInt(req.query.page) || 1;
   const resultsPerPage = 20; // Number of results per page
   const maxPages = 500; // TMDb allows up to 500 pages
@@ -256,7 +332,7 @@ app.get('/tv-series', async (req, res) => {
 });
 
 // Route to fetch combined top IMDb movies and TV series with pagination
-app.get('/top-imdb', async (req, res) => {
+app.get('/top-imdb', requireAuth, async (req, res) => {
   const currentPage = parseInt(req.query.page) || 1; // Current page from query parameter
   const resultsPerPage = 20; // Number of results per page
 
@@ -305,7 +381,7 @@ app.get('/top-imdb', async (req, res) => {
   }
 });
 
-app.get('/movie/:id', async (req, res) => {
+app.get('/movie/:id', requireAuth, async (req, res) => {
   const movieId = req.params.id;
   try {
       // Fetch movie details, related movies, and cast information
@@ -338,7 +414,7 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
-app.get('/series/:id', async (req, res) => {
+app.get('/series/:id', requireAuth, async (req, res) => {
     const tvId = req.params.id;
     try {
         // Fetch TV series details, related TV series, and cast information
@@ -371,7 +447,7 @@ app.get('/series/:id', async (req, res) => {
     }
   });  
 
-app.get('/watch-movie/:id', async (req, res) => {
+app.get('/watch-movie/:id', requireAuth, async (req, res) => {
     try {
       const movieId = req.params.id;
       const movieDetails = await getMovieDetails(movieId);
@@ -514,7 +590,7 @@ async function getMovieDetails(movieId) {
     }
 }
 
-  app.get('/watch-series/:id/season/:season/episode/:episode', async (req, res) => {
+  app.get('/watch-series/:id/season/:season/episode/:episode', requireAuth, async (req, res) => {
     const { id, season, episode } = req.params;
 
     try {
@@ -559,18 +635,18 @@ async function getMovieDetails(movieId) {
     }
 });
 
-app.get('/watch-series/:id', (req, res) => {
+app.get('/watch-series/:id', requireAuth, (req, res) => {
     const { id } = req.params;
     res.redirect(`/watch-series/${id}/season/1/episode/1`);
 });
 
-app.get('/watch-series/:id/season/:season', (req, res) => {
+app.get('/watch-series/:id/season/:season', requireAuth, (req, res) => {
     const { id, season } = req.params;
     res.redirect(`/watch-series/${id}/season/${season}/episode/1`);
 });
 
 // Route to capture cast details
-app.get('/cast/:id', async (req, res) => {
+app.get('/cast/:id', requireAuth, async (req, res) => {
   try {
       const castId = req.params.id;
       const currentPage = parseInt(req.query.page) || 1; // Get current page from query params
@@ -606,7 +682,7 @@ app.get('/cast/:id', async (req, res) => {
   }
 });
 
-app.get('/genre/:id', async (req, res) => {
+app.get('/genre/:id', requireAuth, async (req, res) => {
   try {
       const genreId = req.params.id;
       const page = parseInt(req.query.page) || 1;
@@ -672,7 +748,7 @@ app.get('/genre/:id', async (req, res) => {
   }
 });
 
-app.get('/country/:code', async (req, res) => {
+app.get('/country/:code', requireAuth, async (req, res) => {
   try {
       const countryCode = req.params.code;
       const page = parseInt(req.query.page) || 1;
@@ -743,7 +819,7 @@ app.get('/country/:code', async (req, res) => {
 });
 
 // Route to fetch movies and TV series by production company
-app.get('/production/:id', async (req, res) => {
+app.get('/production/:id', requireAuth, async (req, res) => {
   try {
       const productionId = req.params.id;
 
@@ -824,7 +900,7 @@ const fetchCollectionDetails = async (collectionId, page = 1, itemsPerPage = 10)
     }
 };
 
-app.get('/collection/:collectionId', async (req, res) => {
+app.get('/collection/:collectionId', requireAuth, async (req, res) => {
     const { collectionId } = req.params;
     const { page = 1 } = req.query; // Get page number from query, default to 1
     
@@ -847,7 +923,7 @@ app.get('/collection/:collectionId', async (req, res) => {
     }
 });
 
-app.get('/filter', async (req, res) => {
+app.get('/filter', requireAuth, async (req, res) => {
   const { type, genre, country, quality, year, sort, page } = req.query;
   const pageNumber = parseInt(page) || 1; // Default to page 1 if not provided
 
