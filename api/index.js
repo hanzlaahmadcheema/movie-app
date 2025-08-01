@@ -102,7 +102,7 @@ app.get('/logout', (req, res) => {
     }
 });
 
-app.get('/', requireAuth, async (req, res) => {
+app.get('/', async (req, res) => {
     try {
       // Fetch trending content for slider (10 items) - keeping backdrop for index only
       const sliderResponse = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
@@ -213,7 +213,7 @@ app.get('/', requireAuth, async (req, res) => {
   });
   
   
-app.get('/search', requireAuth, async (req, res) => {
+app.get('/search', async (req, res) => {
     const keyword = req.query.keyword || '';
     const page = parseInt(req.query.page, 10) || 1;
     
@@ -254,7 +254,7 @@ app.get('/search', requireAuth, async (req, res) => {
     }
 });
 
-app.get('/search/suggest', requireAuth, async (req, res) => {
+app.get('/search/suggest', async (req, res) => {
     const keyword = req.query.keyword || '';
     const searchType = req.query.type || 'multi'; // Default to 'multi' for combined results
 
@@ -276,20 +276,64 @@ app.get('/search/suggest', requireAuth, async (req, res) => {
     }
 });
 
-app.get('/terms', requireAuth, (req, res) => {
+app.get('/terms', (req, res) => {
     res.render('terms');
 });
 
-app.get('/player', requireAuth, (req, res) => {
+// Import player routes
+const playerRoutes = require('../routes/player');
+
+// Import m3u8 fetcher
+const { fetchM3U8FromVidSrc } = require('./m3u8-fetcher');
+
+// Mount player routes without authentication
+app.use('/player', playerRoutes);
+
+// Route to fetch m3u8 URL for a movie
+app.get('/player/movie/:id/m3u8', async (req, res) => {
+    const imdbId = req.params.id;
+    const createdAt = 'https://vidsrc.xyz/embed/movie?imdb=' + imdbId;
+    
+    try {
+        const m3u8Url = await fetchM3U8FromVidSrc(createdAt);
+        res.json({success: true, m3u8Url: m3u8Url});
+    } catch (error) {
+        console.error(`Error fetching m3u8 for IMDb ID ${imdbId}:`, error);
+        res.json({success: false, error: 'Failed to fetch m3u8 URL'});
+    }
+});
+
+// Route to serve embed-3.html player
+app.get('/players/embed-3.html', (req, res) => {
+    const id = req.query.id;
+    if (!id) {
+        return res.status(400).send('Missing id parameter');
+    }
+    
+    // Read the embed-3.html file and send it
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(__dirname, '../views/players/embed-3.html');
+    
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading embed-3.html:', err);
+            return res.status(500).send('Error loading player');
+        }
+        res.send(data);
+    });
+});
+
+app.get('/player', (req, res) => {
     res.render('player');
 });
 
-app.get('/contact-us', requireAuth, (req, res) => {
+app.get('/contact-us', (req, res) => {
   res.render('contact-us');
 });
 
 // Route to fetch movies with pagination
-app.get('/movies', requireAuth, async (req, res) => {
+app.get('/movies', async (req, res) => {
   let currentPage = parseInt(req.query.page) || 1;
   const resultsPerPage = 20; // Number of results per page
   const maxPages = 500; // TMDb allows up to 500 pages
@@ -331,7 +375,7 @@ app.get('/movies', requireAuth, async (req, res) => {
 });
 
 // Route to fetch TV series with pagination
-app.get('/tv-series', requireAuth, async (req, res) => {
+app.get('/tv-series', async (req, res) => {
   let currentPage = parseInt(req.query.page) || 1;
   const resultsPerPage = 20; // Number of results per page
   const maxPages = 500; // TMDb allows up to 500 pages
@@ -373,7 +417,7 @@ app.get('/tv-series', requireAuth, async (req, res) => {
 });
 
 // Route to fetch combined top IMDb movies and TV series with pagination
-app.get('/top-imdb', requireAuth, async (req, res) => {
+app.get('/top-imdb', async (req, res) => {
   const currentPage = parseInt(req.query.page) || 1; // Current page from query parameter
   const resultsPerPage = 20; // Number of results per page
 
@@ -422,7 +466,7 @@ app.get('/top-imdb', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/movie/:id', requireAuth, async (req, res) => {
+app.get('/movie/:id', async (req, res) => {
   const movieId = req.params.id;
   try {
       // Fetch only movie details
@@ -447,7 +491,7 @@ app.get('/movie/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/series/:id', requireAuth, async (req, res) => {
+app.get('/series/:id', async (req, res) => {
     const tvId = req.params.id;
     try {
         // Fetch only TV series details
@@ -471,7 +515,7 @@ app.get('/series/:id', requireAuth, async (req, res) => {
     }
   });
 
-app.get('/watch-movie/:id', requireAuth, async (req, res) => {
+app.get('/watch-movie/:id', async (req, res) => {
     try {
       const movieId = req.params.id;
       const movieDetails = await getMovieDetails(movieId);
@@ -614,7 +658,7 @@ async function getMovieDetails(movieId) {
     }
 }
 
-  app.get('/watch-series/:id/season/:season/episode/:episode', requireAuth, async (req, res) => {
+  app.get('/watch-series/:id/season/:season/episode/:episode', async (req, res) => {
     const { id, season, episode } = req.params;
 
     try {
@@ -659,18 +703,18 @@ async function getMovieDetails(movieId) {
     }
 });
 
-app.get('/watch-series/:id', requireAuth, (req, res) => {
+app.get('/watch-series/:id', (req, res) => {
     const { id } = req.params;
     res.redirect(`/watch-series/${id}/season/1/episode/1`);
 });
 
-app.get('/watch-series/:id/season/:season', requireAuth, (req, res) => {
+app.get('/watch-series/:id/season/:season', (req, res) => {
     const { id, season } = req.params;
     res.redirect(`/watch-series/${id}/season/${season}/episode/1`);
 });
 
 // Route to capture cast details
-app.get('/cast/:id', requireAuth, async (req, res) => {
+app.get('/cast/:id', async (req, res) => {
   try {
       const castId = req.params.id;
       const currentPage = parseInt(req.query.page) || 1; // Get current page from query params
@@ -706,7 +750,7 @@ app.get('/cast/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/genre/:id', requireAuth, async (req, res) => {
+app.get('/genre/:id', async (req, res) => {
   try {
       const genreId = req.params.id;
       const page = parseInt(req.query.page) || 1;
@@ -772,7 +816,7 @@ app.get('/genre/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/country/:code', requireAuth, async (req, res) => {
+app.get('/country/:code', async (req, res) => {
   try {
       const countryCode = req.params.code;
       const page = parseInt(req.query.page) || 1;
@@ -843,7 +887,7 @@ app.get('/country/:code', requireAuth, async (req, res) => {
 });
 
 // Route to fetch movies and TV series by production company
-app.get('/production/:id', requireAuth, async (req, res) => {
+app.get('/production/:id', async (req, res) => {
   try {
       const productionId = req.params.id;
 
@@ -924,7 +968,7 @@ const fetchCollectionDetails = async (collectionId, page = 1, itemsPerPage = 10)
     }
 };
 
-app.get('/collection/:collectionId', requireAuth, async (req, res) => {
+app.get('/collection/:collectionId', async (req, res) => {
     const { collectionId } = req.params;
     const { page = 1 } = req.query; // Get page number from query, default to 1
     
@@ -947,7 +991,7 @@ app.get('/collection/:collectionId', requireAuth, async (req, res) => {
     }
 });
 
-app.get('/filter', requireAuth, async (req, res) => {
+app.get('/filter', async (req, res) => {
   const { type, genre, country, quality, year, sort, page } = req.query;
   const pageNumber = parseInt(page) || 1; // Default to page 1 if not provided
 
