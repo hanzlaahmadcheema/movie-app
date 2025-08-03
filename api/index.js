@@ -280,14 +280,14 @@ app.get('/terms', (req, res) => {
     res.render('terms');
 });
 
-// Import player routes - temporarily commented out
-// const playerRoutes = require('../routes/player');
+// Import player routes
+const playerRoutes = require('../routes/player');
 
 // Import m3u8 fetcher - temporarily commented out
 // const { fetchM3U8FromVidSrc } = require('./m3u8-fetcher');
 
-// Mount player routes without authentication - temporarily commented out
-// app.use('/player', playerRoutes);
+// Mount player routes without authentication
+app.use('/player', playerRoutes);
 
 // Route to fetch m3u8 URL for a movie - temporarily commented out
 // app.get('/player/movie/:id/m3u8', async (req, res) => {

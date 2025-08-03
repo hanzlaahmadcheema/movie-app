@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed - Movie Player</title>
+    <link rel="stylesheet" href="../css/players.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+        #player-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #playerjs {
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        .loading {
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="player-container">
+        <div class="loading">Loading player...</div>
+        <div id="playerjs"></div>           
+    </div>
+    
+    <script src="../js/playerjs.js"></script>
+    <script>
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeUrlParameter(results[1]);
+        }
+        
+        function decodeUrlParameter(value) {
+            return decodeURIComponent(value.replace(/\+/g, '%20'));
+        }
+        
+        // Get the movie/TV ID from URL parameter
+        var mediaId = getUrlParameter('id');
+        
+        if (!mediaId) {
+            document.querySelector('.loading').innerHTML = 'Error: No media ID provided';
+        } else {
+            // Fetch m3u8 URL from our API
+            fetch(`/player/movie/${mediaId}/m3u8`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.loading').style.display = 'none';
+                    
+                    if (data.success && data.m3u8Url) {
+                        // Initialize PlayerJS with the m3u8 URL
+                        var player = new Playerjs({
+                            id: "playerjs",
+                            file: data.m3u8Url,
+                            poster: data.poster || '',
+                            title: data.title || 'Movie Player',
+                            default_quality: 'auto',
+                            skin: 'shaka',
+                            lang: 'en',
+                            captions: true,
+                            playbackRates: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
+                            chromecast: true,
+                            airplay: true,
+                            volume: 1,
+                            muted: false,
+                            loop: false,
+                            autoplay: false,
+                            shortcuts: true,
+                            fullscreen: true
+                        });
+                        
+                        // Handle player events
+                        player.api("addEventListener", "ready", function() {
+                            console.log('Player ready');
+                        });
+                        
+                        player.api("addEventListener", "play", function() {
+                            console.log('Playback started');
+                        });
+                        
+                        player.api("addEventListener", "error", function(error) {
+                            console.error('Player error:', error);
+                            document.querySelector('#playerjs').innerHTML = 
+                                '<div style="color: white; text-align: center; padding: 20px;">Error loading video. Please try again.</div>';
+                        });
+                        
+                    } else {
+                        document.querySelector('#playerjs').innerHTML = 
+                            '<div style="color: white; text-align: center; padding: 20px;">No streaming source found for this content.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching m3u8:', error);
+                    document.querySelector('#playerjs').innerHTML = 
+                        '<div style="color: white; text-align: center; padding: 20px;">Error loading player. Please try again.</div>';
+                });
+        }
+    </script>
+</body>
+</html>

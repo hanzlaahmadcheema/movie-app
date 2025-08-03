@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Error - Movie App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ff6b6b;
+        }
+
+        .error-message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .error-details {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #ffd93d;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .troubleshoot {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .troubleshoot h3 {
+            color: #74c0fc;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .troubleshoot ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .troubleshoot li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .troubleshoot li:last-child {
+            border-bottom: none;
+        }
+
+        .troubleshoot li::before {
+            content: "→";
+            color: #74c0fc;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .error-title {
+                font-size: 24px;
+            }
+
+            .error-message {
+                font-size: 16px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🎬💥</div>
+        
+        <h1 class="error-title">Streaming Error</h1>
+        
+        <p class="error-message">
+            We couldn't load the streaming content for this <%= contentType %>.
+            This might be a temporary issue with the streaming source.
+        </p>
+
+        <% if (error) { %>
+        <div class="error-details">
+            <strong>Error Details:</strong><br>
+            <%= error %>
+        </div>
+        <% } %>
+
+        <div class="btn-group">
+            <a href="javascript:history.back()" class="btn btn-primary">
+                ⬅️ Go Back
+            </a>
+            <a href="/" class="btn btn-secondary">
+                🏠 Home Page
+            </a>
+        </div>
+
+        <div class="troubleshoot">
+            <h3>🔧 Troubleshooting Tips</h3>
+            <ul>
+                <li>Try refreshing the page in a few minutes</li>
+                <li>Check your internet connection</li>
+                <li>The streaming source might be temporarily unavailable</li>
+                <li>Try a different movie or TV show</li>
+                <li>Contact support if the problem persists</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh after 30 seconds
+        setTimeout(() => {
+            if (confirm('Would you like to try loading the content again?')) {
+                window.location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
