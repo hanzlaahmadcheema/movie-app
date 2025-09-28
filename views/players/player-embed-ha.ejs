@@ -240,7 +240,8 @@
             <% } %>
             poster: "<%= typeof posterPath !== 'undefined' ? 'https://image.tmdb.org/t/p/w500' + posterPath : (typeof splashimgurl !== 'undefined' ? splashimgurl : '') %>",
             title: "<%= title %>",
-            duration: "<%= typeof duration !== 'undefined' ? duration : '' %>"
+            duration: "<%= typeof duration !== 'undefined' ? duration : '' %>",
+            autoplay: 1
         };
         
         // Initialize Playerjs
