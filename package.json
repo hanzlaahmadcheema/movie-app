@@ -24,5 +24,14 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanzlaahmadcheema/movie-app.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hanzlaahmadcheema/movie-app/issues"
+  },
+  "homepage": "https://github.com/hanzlaahmadcheema/movie-app#readme"
 }
