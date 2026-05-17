@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
-import '../../core/data/mock_data.dart';
+import '../../core/config/app_config.dart';
 import '../../core/models/detail_item.dart';
 import '../../core/models/movie_item.dart';
+import '../../core/models/tmdb_season.dart';
+import '../../core/models/tmdb_video.dart';
+import '../../core/services/tmdb_repository.dart';
 import '../../core/navigation/content_navigation.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
@@ -11,159 +14,263 @@ import '../../widgets/network_art.dart';
 import '../../widgets/poster_widgets.dart';
 
 class MovieWatchScreen extends StatelessWidget {
-  const MovieWatchScreen({super.key});
+  const MovieWatchScreen({this.item, super.key});
+
+  final MovieItem? item;
 
   @override
   Widget build(BuildContext context) {
-    return _WatchPage(item: movies[1], isSeries: false);
+    return _WatchPage(item: item, isSeries: false);
   }
 }
 
 class SeriesWatchScreen extends StatelessWidget {
-  const SeriesWatchScreen({super.key});
+  const SeriesWatchScreen({this.item, super.key});
+
+  final MovieItem? item;
 
   @override
   Widget build(BuildContext context) {
-    return _WatchPage(item: series[2], isSeries: true);
+    return _WatchPage(item: item, isSeries: true);
   }
 }
 
-class _WatchPage extends StatelessWidget {
+class _WatchPage extends StatefulWidget {
   const _WatchPage({required this.item, required this.isSeries});
 
-  final MovieItem item;
+  final MovieItem? item;
   final bool isSeries;
 
   @override
+  State<_WatchPage> createState() => _WatchPageState();
+}
+
+class _WatchPageState extends State<_WatchPage> {
+  late Future<TmdbDetail?> detailFuture = _loadDetail();
+  int? selectedSeasonNumber;
+  Future<List<Episode>>? episodesFuture;
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.item == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: Stack(
         children: [
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DetailBackdrop(
-                item: item,
-                child: SizedBox(
-                  height: isSeries ? 1125 : 623,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 125,
-                        left: 15,
-                        right: 15,
-                        child: _TopIconRow(item: item),
-                      ),
-                      Positioned(
-                        top: 155,
-                        left: 15,
-                        right: 15,
-                        child: Text(
-                          item.title,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                      Positioned(
-                        top: 211,
-                        left: 0,
-                        right: 0,
-                        child: WatchVideoPlayer(
-                          item: item,
-                          onPlay: () =>
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Playing ${item.title}'),
-                                ),
-                              ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 495,
-                        left: 38,
-                        right: 38,
-                        child: Text(
-                          "If current server doesn't work please try other servers above",
-                          style: AppTextStyles.normal,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Positioned(
-                        top: 562,
-                        left: 36,
-                        child: ReactionRow(
-                          onChanged: (reaction) {
-                            final message = switch (reaction) {
-                              ReactionState.like => 'Liked',
-                              ReactionState.unlike => 'Marked as unlike',
-                              ReactionState.none => 'Reaction cleared',
-                            };
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text(message)));
-                          },
-                        ),
-                      ),
-                      if (isSeries) ...[
-                        Positioned(
-                          top: 687,
-                          left: 0,
-                          right: 0,
-                          child: EpisodeList(
-                            onEpisodeSelected: (episode) =>
+          FutureBuilder<TmdbDetail?>(
+            future: detailFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || snapshot.data == null) {
+                return Center(
+                  child: IconButton(
+                    onPressed: () => setState(() {
+                      detailFuture = _loadDetail();
+                    }),
+                    icon: const Icon(Icons.refresh, size: 28),
+                  ),
+                );
+              }
+
+              final detail = snapshot.data!;
+              final item = detail.item;
+              final trailer = detail.videos.isNotEmpty
+                  ? detail.videos.first
+                  : null;
+              final related = _loopItems(detail.related, 10);
+              final seasons = detail.seasons;
+
+              if (widget.isSeries &&
+                  selectedSeasonNumber == null &&
+                  seasons.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  setState(() {
+                    selectedSeasonNumber = seasons.first.number;
+                    episodesFuture = _loadEpisodes(
+                      item.id,
+                      seasons.first.number,
+                    );
+                  });
+                });
+              }
+
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DetailBackdrop(
+                    item: item,
+                    child: SizedBox(
+                      height: widget.isSeries ? 1125 : 760,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 125,
+                            left: 15,
+                            right: 15,
+                            child: _TopIconRow(item: item),
+                          ),
+                          Positioned(
+                            top: 155,
+                            left: 15,
+                            right: 15,
+                            child: Text(
+                              item.title,
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                          ),
+                          Positioned(
+                            top: 211,
+                            left: 0,
+                            right: 0,
+                            child: WatchVideoPlayer(
+                              item: item,
+                              video: trailer,
+                              onPlay: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Playing ${episode.title}'),
+                                    content: Text(
+                                      trailer == null
+                                          ? 'No trailer available'
+                                          : 'Trailer: ${trailer.name}',
+                                    ),
                                   ),
-                                ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        Positioned(
-                          top: 607,
-                          left: 0,
-                          right: 0,
-                          child: SeasonDropdownTile(
-                            seasons: const ['Season 1', 'Season 2', 'Season 3'],
+                          Positioned(
+                            top: 495,
+                            left: 38,
+                            right: 38,
+                            child: ReactionRow(
+                              onChanged: (reaction) {
+                                final message = switch (reaction) {
+                                  ReactionState.like => 'Liked',
+                                  ReactionState.unlike => 'Marked as unlike',
+                                  ReactionState.none => 'Reaction cleared',
+                                };
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(message)),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                      Positioned(
-                        top: 464,
-                        left: 21,
-                        child: ServerSelector(
-                          onServerSelected: (server) =>
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('$server selected')),
+                          if (widget.isSeries && seasons.isNotEmpty) ...[
+                            Positioned(
+                              top: 580,
+                              left: 0,
+                              right: 0,
+                              child: SeasonDropdownTile(
+                                seasons: seasons,
+                                selectedSeasonNumber:
+                                    selectedSeasonNumber ??
+                                    seasons.first.number,
+                                onSelected: (season) {
+                                  setState(() {
+                                    selectedSeasonNumber = season.number;
+                                    episodesFuture = _loadEpisodes(
+                                      item.id,
+                                      season.number,
+                                    );
+                                  });
+                                },
                               ),
-                        ),
+                            ),
+                            Positioned(
+                              top: 650,
+                              left: 0,
+                              right: 0,
+                              child: FutureBuilder<List<Episode>>(
+                                future: episodesFuture,
+                                builder: (context, episodeSnapshot) {
+                                  if (episodeSnapshot.connectionState !=
+                                      ConnectionState.done) {
+                                    return const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 40,
+                                      ),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+
+                                  final episodes =
+                                      episodeSnapshot.data ?? const <Episode>[];
+                                  return EpisodeList(
+                                    episodes: _loopItems(episodes, 8),
+                                    onEpisodeSelected: (episode) =>
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Playing ${episode.title}',
+                                            ),
+                                          ),
+                                        ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: HorizontalPosterSection(
-                  title: 'You may also like',
-                  items: movies,
-                  onItemTap: (item) => openDetailForItem(context, item),
-                ),
-              ),
-              const SizedBox(height: 36),
-              const FooterDetails(),
-            ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: HorizontalPosterSection(
+                      title: 'You may also like',
+                      items: related,
+                      itemCount: 10,
+                      onItemTap: (item) => openDetailForItem(context, item),
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  const FooterDetails(),
+                ],
+              );
+            },
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
         ],
       ),
     );
   }
+
+  Future<TmdbDetail?> _loadDetail() async {
+    final item = widget.item;
+    if (item == null || item.id == 0) {
+      return null;
+    }
+
+    return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
+  }
+
+  Future<List<Episode>> _loadEpisodes(int tvId, int seasonNumber) {
+    return TmdbRepository(
+      config: AppConfig.fromEnv(),
+    ).tvSeasonEpisodes(tvId: tvId, seasonNumber: seasonNumber);
+  }
 }
 
 class WatchVideoPlayer extends StatelessWidget {
-  const WatchVideoPlayer({required this.item, required this.onPlay, super.key});
+  const WatchVideoPlayer({
+    required this.item,
+    required this.onPlay,
+    this.video,
+    super.key,
+  });
 
   final MovieItem item;
   final VoidCallback onPlay;
+  final TmdbVideo? video;
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +377,7 @@ class WatchVideoPlayer extends StatelessWidget {
                   const Icon(Icons.hd, color: AppColors.primary, size: 16),
                   const SizedBox(width: 6),
                   Text(
-                    '${item.quality} Stream',
+                    video == null ? '${item.quality} Stream' : video!.name,
                     style: AppTextStyles.small.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -438,26 +545,31 @@ class _ServerSelectorState extends State<ServerSelector> {
 }
 
 class SeasonDropdownTile extends StatefulWidget {
-  const SeasonDropdownTile({required this.seasons, super.key});
+  const SeasonDropdownTile({
+    required this.seasons,
+    required this.selectedSeasonNumber,
+    required this.onSelected,
+    super.key,
+  });
 
-  final List<String> seasons;
+  final List<TmdbSeason> seasons;
+  final int selectedSeasonNumber;
+  final ValueChanged<TmdbSeason> onSelected;
 
   @override
   State<SeasonDropdownTile> createState() => _SeasonDropdownTileState();
 }
 
 class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
-  late String selectedSeason;
   bool opened = false;
 
   @override
-  void initState() {
-    super.initState();
-    selectedSeason = widget.seasons.first;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final selectedSeason = widget.seasons.firstWhere(
+      (season) => season.number == widget.selectedSeasonNumber,
+      orElse: () => widget.seasons.first,
+    );
+
     return SizedBox(
       height: opened ? 190 : 70,
       child: Stack(
@@ -472,7 +584,7 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
                   left: 18,
                   top: 17,
                   child: _SeasonDropdownButton(
-                    label: selectedSeason,
+                    label: selectedSeason.name,
                     opened: opened,
                     onTap: () => setState(() => opened = !opened),
                   ),
@@ -483,7 +595,7 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
                   bottom: 0,
                   child: Center(
                     child: Text(
-                      'Episode 1',
+                      'Episode ${selectedSeason.episodeCount}',
                       style: AppTextStyles.normal.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -503,10 +615,8 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
                 seasons: widget.seasons,
                 selectedSeason: selectedSeason,
                 onSelected: (season) {
-                  setState(() {
-                    selectedSeason = season;
-                    opened = false;
-                  });
+                  setState(() => opened = false);
+                  widget.onSelected(season);
                 },
               ),
             ),
@@ -572,9 +682,9 @@ class _SeasonDropdownMenu extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<String> seasons;
-  final String selectedSeason;
-  final ValueChanged<String> onSelected;
+  final List<TmdbSeason> seasons;
+  final TmdbSeason selectedSeason;
+  final ValueChanged<TmdbSeason> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -603,9 +713,9 @@ class _SeasonDropdownMenu extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: Text(
-                    season,
+                    season.name,
                     style: AppTextStyles.normal.copyWith(
-                      color: selectedSeason == season
+                      color: selectedSeason.number == season.number
                           ? AppColors.primary
                           : Colors.white,
                       fontSize: 14,
@@ -623,8 +733,13 @@ class _SeasonDropdownMenu extends StatelessWidget {
 }
 
 class EpisodeList extends StatefulWidget {
-  const EpisodeList({required this.onEpisodeSelected, super.key});
+  const EpisodeList({
+    required this.episodes,
+    required this.onEpisodeSelected,
+    super.key,
+  });
 
+  final List<Episode> episodes;
   final ValueChanged<Episode> onEpisodeSelected;
 
   @override
@@ -641,31 +756,20 @@ class _EpisodeListState extends State<EpisodeList> {
       child: ListView.separated(
         padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: 8,
+        itemCount: widget.episodes.length,
         separatorBuilder: (context, index) => const SizedBox(height: 2),
         itemBuilder: (context, index) => EpisodeTile(
-          episode: episodes[index % episodes.length],
+          episode: widget.episodes[index],
           displayNumber: index + 1,
-          subtitle: _episodeSubtitle(index),
+          subtitle: widget.episodes[index].title,
           selected: index == selectedEpisode,
           onTap: () {
             setState(() => selectedEpisode = index);
-            widget.onEpisodeSelected(episodes[index % episodes.length]);
+            widget.onEpisodeSelected(widget.episodes[index]);
           },
         ),
       ),
     );
-  }
-
-  String _episodeSubtitle(int index) {
-    const subtitles = [
-      'The rise of episodes',
-      'The gathering storm',
-      'The turning tide',
-      'The final confrontation',
-    ];
-
-    return subtitles[index % subtitles.length];
   }
 }
 
@@ -748,6 +852,13 @@ class EpisodeTile extends StatelessWidget {
       ),
     );
   }
+}
+
+List<T> _loopItems<T>(List<T> items, int count) {
+  if (items.isEmpty) {
+    return items;
+  }
+  return List.generate(count, (index) => items[index % items.length]);
 }
 
 class _TopIconRow extends StatefulWidget {

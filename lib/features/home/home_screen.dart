@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
 import '../../core/config/app_config.dart';
-import '../../core/data/mock_data.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/navigation/content_navigation.dart';
 import '../../core/services/tmdb_repository.dart';
@@ -24,7 +23,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int trendingTab = 0;
   final watchlistedItems = <String>{};
-  late final Future<_HomeData> homeData = _loadHomeData();
+  late Future<_HomeData> homeData;
+
+  @override
+  void initState() {
+    super.initState();
+    homeData = _loadHomeData();
+  }
 
   bool _isWatchlisted(MovieItem item) =>
       watchlistedItems.contains(_itemKey(item));
@@ -49,9 +54,22 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           FutureBuilder<_HomeData>(
             future: homeData,
-            initialData: _HomeData.fallback(),
             builder: (context, snapshot) {
-              final data = snapshot.data ?? _HomeData.fallback();
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || snapshot.data == null) {
+                return Center(
+                  child: IconButton(
+                    onPressed: () => setState(() {
+                      homeData = _loadHomeData();
+                    }),
+                    icon: const Icon(Icons.refresh, size: 28),
+                  ),
+                );
+              }
+
+              final data = snapshot.data!;
               final trendingItems = trendingTab == 0
                   ? data.trendingMovies
                   : data.trendingSeries;
@@ -59,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _HeroCarousel(items: data.heroItems),
+                  _HeroCarousel(items: _loopItems(data.heroItems, 10)),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(5, 18, 5, 0),
                     child: SectionHeader(
@@ -74,8 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(5, 8, 5, 0),
                     child: PosterGrid(
-                      items: trendingItems,
-                      itemCount: 4,
+                      items: _loopItems(trendingItems, 10),
+                      itemCount: 10,
                       isWatchlisted: _isWatchlisted,
                       onWatchlistChanged: _setWatchlisted,
                     ),
@@ -83,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 18),
                   HorizontalPosterSection(
                     title: 'Latest Movies',
-                    items: data.latestMovies,
+                    items: _loopItems(data.latestMovies, 10),
+                    itemCount: 10,
                     onMore: () =>
                         Navigator.pushNamed(context, AppRoutes.movies),
                     isWatchlisted: _isWatchlisted,
@@ -92,7 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 18),
                   HorizontalPosterSection(
                     title: 'Latest TV Series',
-                    items: data.latestSeries,
+                    items: _loopItems(data.latestSeries, 10),
+                    itemCount: 10,
                     onMore: () =>
                         Navigator.pushNamed(context, AppRoutes.series),
                     isWatchlisted: _isWatchlisted,
@@ -111,23 +131,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<_HomeData> _loadHomeData() async {
-    try {
-      final repository = TmdbRepository(config: AppConfig.fromEnv());
-      final trendingMovies = await repository.trendingMovies();
-      final trendingSeries = await repository.trendingSeries();
-      final latestMovies = await repository.latestMovies();
-      final latestSeries = await repository.latestSeries();
+    final repository = TmdbRepository(config: AppConfig.fromEnv());
+    final trendingMovies = await repository.trendingMovies();
+    final trendingSeries = await repository.trendingSeries();
+    final latestMovies = await repository.latestMovies();
+    final latestSeries = await repository.latestSeries();
 
-      return _HomeData(
-        heroItems: trendingMovies.take(3).toList(),
-        trendingMovies: trendingMovies,
-        trendingSeries: trendingSeries,
-        latestMovies: latestMovies,
-        latestSeries: latestSeries,
-      ).withFallbacks();
-    } catch (_) {
-      return _HomeData.fallback();
-    }
+    return _HomeData(
+      heroItems: trendingMovies.take(10).toList(),
+      trendingMovies: trendingMovies,
+      trendingSeries: trendingSeries,
+      latestMovies: latestMovies,
+      latestSeries: latestSeries,
+    );
   }
 }
 
@@ -333,34 +349,16 @@ class _HomeData {
     required this.latestSeries,
   });
 
-  factory _HomeData.fallback() {
-    return _HomeData(
-      heroItems: [heroMovie, movies[1], series[1]],
-      trendingMovies: movies,
-      trendingSeries: series,
-      latestMovies: movies,
-      latestSeries: series,
-    );
-  }
-
   final List<MovieItem> heroItems;
   final List<MovieItem> trendingMovies;
   final List<MovieItem> trendingSeries;
   final List<MovieItem> latestMovies;
   final List<MovieItem> latestSeries;
+}
 
-  _HomeData withFallbacks() {
-    final fallback = _HomeData.fallback();
-    return _HomeData(
-      heroItems: heroItems.isEmpty ? fallback.heroItems : heroItems,
-      trendingMovies: trendingMovies.isEmpty
-          ? fallback.trendingMovies
-          : trendingMovies,
-      trendingSeries: trendingSeries.isEmpty
-          ? fallback.trendingSeries
-          : trendingSeries,
-      latestMovies: latestMovies.isEmpty ? fallback.latestMovies : latestMovies,
-      latestSeries: latestSeries.isEmpty ? fallback.latestSeries : latestSeries,
-    );
+List<MovieItem> _loopItems(List<MovieItem> items, int count) {
+  if (items.isEmpty) {
+    return items;
   }
+  return List.generate(count, (index) => items[index % items.length]);
 }

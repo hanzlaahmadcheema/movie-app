@@ -125,17 +125,17 @@ class FooterDetails extends StatelessWidget {
           Text('About Us', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           Text(
-            '1HD is free tv shows streaming website with zero ads, it allows you in high quality for free. You can also download full tv shows and watch it later if you want.',
+            'MovieApp is a TMDB-powered catalog for movies, series, cast, genres, countries, and production browsing.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 10),
           Text(
-            'This site does not store any files on our server, we only linked to the media which is hosted on 3rd party services.',
+            'This product uses the TMDB API but is not endorsed or certified by TMDB.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 10),
           Text(
-            'Movie metadata and images are provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+            'Movie metadata and images are provided by TMDB.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 18),

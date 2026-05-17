@@ -1,6 +1,10 @@
 import '../config/app_config.dart';
 import '../models/detail_item.dart';
 import '../models/movie_item.dart';
+import '../models/tmdb_person.dart';
+import '../models/tmdb_option.dart';
+import '../models/tmdb_season.dart';
+import '../models/tmdb_video.dart';
 import 'tmdb_api_client.dart';
 
 class TmdbDetail {
@@ -8,11 +12,15 @@ class TmdbDetail {
     required this.item,
     required this.info,
     required this.related,
+    required this.videos,
+    required this.seasons,
   });
 
   final MovieItem item;
   final List<DetailInfo> info;
   final List<MovieItem> related;
+  final List<TmdbVideo> videos;
+  final List<TmdbSeason> seasons;
 }
 
 class TmdbRepository {
@@ -41,6 +49,54 @@ class TmdbRepository {
   Future<List<MovieItem>> discoverSeries() =>
       _list('/discover/tv', fallbackMediaType: MediaType.tv);
 
+  Future<List<MovieItem>> discoverMovieBrowse({
+    int? genreId,
+    String? country,
+    int? companyId,
+    int? year,
+    String? certification,
+    String sortBy = 'popularity.desc',
+  }) {
+    return _list(
+      '/discover/movie',
+      fallbackMediaType: MediaType.movie,
+      query: {
+        'with_genres': genreId?.toString(),
+        'with_origin_country': country,
+        'with_companies': companyId?.toString(),
+        'primary_release_year': year?.toString(),
+        'certification_country':
+            certification != null && certification.isNotEmpty ? 'US' : null,
+        'certification.lte': certification,
+        'sort_by': sortBy,
+      },
+    );
+  }
+
+  Future<List<MovieItem>> discoverSeriesBrowse({
+    int? genreId,
+    String? country,
+    int? companyId,
+    int? year,
+    String? certification,
+    String sortBy = 'popularity.desc',
+  }) {
+    return _list(
+      '/discover/tv',
+      fallbackMediaType: MediaType.tv,
+      query: {
+        'with_genres': genreId?.toString(),
+        'with_origin_country': country,
+        'with_companies': companyId?.toString(),
+        'first_air_date_year': year?.toString(),
+        'certification_country':
+            certification != null && certification.isNotEmpty ? 'US' : null,
+        'certification.lte': certification,
+        'sort_by': sortBy,
+      },
+    );
+  }
+
   Future<List<MovieItem>> search(String query) async {
     if (query.trim().isEmpty) {
       return trendingMovies();
@@ -48,10 +104,60 @@ class TmdbRepository {
     return _list('/search/multi', query: {'query': query.trim()});
   }
 
+  Future<List<MovieItem>> searchMovies(String query) async {
+    if (query.trim().isEmpty) {
+      return trendingMovies();
+    }
+    return _list('/search/movie', query: {'query': query.trim()});
+  }
+
+  Future<List<MovieItem>> searchSeries(String query) async {
+    if (query.trim().isEmpty) {
+      return trendingSeries();
+    }
+    return _list('/search/tv', query: {'query': query.trim()});
+  }
+
+  Future<List<MovieItem>> searchPeople(String query) async {
+    if (query.trim().isEmpty) {
+      return const [];
+    }
+    return _list('/search/person', query: {'query': query.trim()});
+  }
+
+  Future<List<TmdbOption>> searchCompanies(String query) async {
+    if (query.trim().isEmpty) {
+      return const [];
+    }
+    final data = await _client.get(
+      '/search/company',
+      query: {'query': query.trim()},
+    );
+    final results = data['results'];
+    if (results is! List) {
+      return const [];
+    }
+    return results
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (item) => TmdbOption(
+            id: (item['id'] ?? '').toString(),
+            label: (item['name'] ?? '').toString(),
+          ),
+        )
+        .where((option) => option.id.isNotEmpty && option.label.isNotEmpty)
+        .toList();
+  }
+
   Future<TmdbDetail> detail(MovieItem seed) async {
     final mediaType = seed.mediaType == MediaType.tv ? 'tv' : 'movie';
-    final data = await _client.get('/$mediaType/${seed.id}');
-    final credits = await _client.get('/$mediaType/${seed.id}/credits');
+    final data = await _client.get(
+      '/$mediaType/${seed.id}',
+      query: {'append_to_response': 'credits,videos'},
+    );
+    final credits = data['credits'] is Map<String, dynamic>
+        ? data['credits'] as Map<String, dynamic>
+        : await _client.get('/$mediaType/${seed.id}/credits');
     final similar = await _list(
       '/$mediaType/${seed.id}/similar',
       fallbackMediaType: seed.mediaType,
@@ -64,6 +170,117 @@ class TmdbRepository {
       ),
       info: _detailInfo(data, credits, item),
       related: similar.isEmpty ? [seed] : similar,
+      videos: _videosFromDetail(data),
+      seasons: _seasonsFromDetail(data),
+    );
+  }
+
+  Future<List<TmdbOption>> movieGenres() async {
+    return _options('/genre/movie/list');
+  }
+
+  Future<List<TmdbOption>> tvGenres() async {
+    return _options('/genre/tv/list');
+  }
+
+  Future<List<String>> movieCertifications() async {
+    return _certifications('/certification/movie/list');
+  }
+
+  Future<List<String>> tvCertifications() async {
+    return _certifications('/certification/tv/list');
+  }
+
+  Future<List<TmdbOption>> countries() async {
+    final data = await _client.get('/configuration/countries');
+    final raw = data['results'] ?? data['countries'];
+    if (raw is! List) {
+      return const [];
+    }
+    return raw
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (item) => TmdbOption(
+            id: (item['iso_3166_1'] ?? '').toString(),
+            label: (item['english_name'] ?? item['native_name'] ?? '')
+                .toString(),
+          ),
+        )
+        .where((option) => option.id.isNotEmpty && option.label.isNotEmpty)
+        .toList();
+  }
+
+  Future<TmdbOption?> companyFromQuery(String query) async {
+    final results = await searchCompanies(query);
+    if (results.isEmpty) {
+      return null;
+    }
+    final item = results.first;
+    return TmdbOption(id: item.id, label: item.label);
+  }
+
+  Future<List<Episode>> tvSeasonEpisodes({
+    required int tvId,
+    required int seasonNumber,
+  }) async {
+    final data = await _client.get('/tv/$tvId/season/$seasonNumber');
+    final results = data['episodes'];
+    if (results is! List) {
+      return const [];
+    }
+
+    return results
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (episode) => Episode(
+            number: episode['episode_number'] is int
+                ? episode['episode_number'] as int
+                : 0,
+            title: (episode['name'] ?? '').toString(),
+            duration: episode['runtime'] is int
+                ? '${episode['runtime']}min'
+                : 'N/A',
+          ),
+        )
+        .toList();
+  }
+
+  Future<TmdbPerson?> personByQuery(String query) async {
+    final results = await _client.get(
+      '/search/person',
+      query: {'query': query},
+    );
+    final list = results['results'];
+    if (list is! List || list.isEmpty) {
+      return null;
+    }
+    final firstItems = list.whereType<Map<String, dynamic>>();
+    if (firstItems.isEmpty) {
+      return null;
+    }
+    final first = firstItems.first;
+
+    final personId = first['id'];
+    if (personId is! int) {
+      return null;
+    }
+
+    final data = await _client.get(
+      '/person/$personId',
+      query: {'append_to_response': 'combined_credits'},
+    );
+    final credits = data['combined_credits'] is Map<String, dynamic>
+        ? data['combined_credits'] as Map<String, dynamic>
+        : const <String, dynamic>{};
+
+    return TmdbPerson(
+      id: personId,
+      name: (data['name'] ?? first['name'] ?? '').toString(),
+      biography: (data['biography'] ?? '').toString(),
+      profilePath: (data['profile_path'] ?? '').toString(),
+      birthday: (data['birthday'] ?? '').toString(),
+      placeOfBirth: (data['place_of_birth'] ?? '').toString(),
+      knownFor: _combinedCreditsToItems(credits),
     );
   }
 
@@ -85,6 +302,45 @@ class TmdbRepository {
           (json) => _itemFromJson(json, fallbackMediaType: fallbackMediaType),
         )
         .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<TmdbOption>> _options(String path) async {
+    final data = await _client.get(path);
+    final results = data['genres'];
+    if (results is! List) {
+      return const [];
+    }
+    return results
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (item) => TmdbOption(
+            id: (item['id'] ?? '').toString(),
+            label: (item['name'] ?? '').toString(),
+          ),
+        )
+        .where((option) => option.id.isNotEmpty && option.label.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<String>> _certifications(String path) async {
+    final data = await _client.get(path);
+    final map = data['certifications'];
+    if (map is! Map<String, dynamic>) {
+      return const [];
+    }
+
+    final region = map['US'];
+    final items = region is List
+        ? region.whereType<Map<String, dynamic>>().toList()
+        : map.values
+              .whereType<List>()
+              .expand((value) => value.whereType<Map<String, dynamic>>())
+              .toList();
+
+    return items
+        .map((item) => (item['certification'] ?? '').toString())
+        .where((value) => value.isNotEmpty)
         .toList();
   }
 
@@ -200,5 +456,90 @@ class TmdbRepository {
         value: companies.isEmpty ? 'N/A' : companies,
       ),
     ];
+  }
+
+  List<TmdbVideo> _videosFromDetail(Map<String, dynamic> data) {
+    final videos = data['videos'];
+    final results = videos is Map<String, dynamic> ? videos['results'] : null;
+    if (results is! List) {
+      return const [];
+    }
+
+    return results
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (video) => TmdbVideo(
+            name: (video['name'] ?? '').toString(),
+            key: (video['key'] ?? '').toString(),
+            site: (video['site'] ?? '').toString(),
+            type: (video['type'] ?? '').toString(),
+            official: video['official'] == true,
+          ),
+        )
+        .where((video) => video.key.isNotEmpty && video.site.isNotEmpty)
+        .toList();
+  }
+
+  List<TmdbSeason> _seasonsFromDetail(Map<String, dynamic> data) {
+    final seasons = data['seasons'];
+    if (seasons is! List) {
+      return const [];
+    }
+
+    return seasons
+        .whereType<Map<String, dynamic>>()
+        .map(
+          (season) => TmdbSeason(
+            number: season['season_number'] is int
+                ? season['season_number'] as int
+                : 0,
+            name: (season['name'] ?? '').toString(),
+            episodeCount: season['episode_count'] is int
+                ? season['episode_count'] as int
+                : 0,
+          ),
+        )
+        .where((season) => season.number > 0)
+        .toList();
+  }
+
+  List<MovieItem> _combinedCreditsToItems(Map<String, dynamic> data) {
+    final credits = <Map<String, dynamic>>[];
+    for (final key in ['cast', 'crew']) {
+      final entries = data[key];
+      if (entries is List) {
+        credits.addAll(entries.whereType<Map<String, dynamic>>());
+      }
+    }
+
+    return credits
+        .map(_itemFromCredit)
+        .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
+        .toList();
+  }
+
+  MovieItem _itemFromCredit(Map<String, dynamic> json) {
+    final mediaType = _mediaType(json['media_type'] as String?, null);
+    final title = (json['title'] ?? json['name'] ?? '').toString();
+    final releaseDate = (json['release_date'] ?? json['first_air_date'] ?? '')
+        .toString();
+    return MovieItem(
+      id: json['id'] is int ? json['id'] as int : 0,
+      title: title,
+      type: mediaType == MediaType.tv ? 'Series' : 'Movie',
+      mediaType: mediaType,
+      year: releaseDate.length >= 4 ? releaseDate.substring(0, 4) : 'N/A',
+      quality: 'HD',
+      posterUrl: _config.posterUrl(json['poster_path']?.toString()),
+      backdropUrl: _config.backdropUrl(json['backdrop_path']?.toString()),
+      posterPath: json['poster_path']?.toString(),
+      backdropPath: json['backdrop_path']?.toString(),
+      genreIds: const [],
+      releaseDate: releaseDate,
+      description: (json['overview'] ?? '').toString(),
+      rating: ((json['vote_average'] as num?) ?? 0).toStringAsFixed(1),
+      voteAverage: ((json['vote_average'] as num?) ?? 0).toDouble(),
+      duration: 'N/A',
+    );
   }
 }

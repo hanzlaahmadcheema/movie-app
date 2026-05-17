@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
-import '../../core/data/mock_data.dart';
+import '../../core/constants/app_assets.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/auth_widgets.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/network_art.dart';
-import '../../widgets/poster_widgets.dart';
 import '../../widgets/snackbar_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -407,20 +406,7 @@ class _AuthScaffold extends StatelessWidget {
               imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
               child: Opacity(
                 opacity: 0.75,
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: 353,
-                      child: NetworkArt(url: heroMovie.posterUrl),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(5, 22, 5, 0),
-                      child: PosterGrid(items: movies, itemCount: 4),
-                    ),
-                  ],
-                ),
+                child: NetworkArt(url: AppAssets.hero),
               ),
             ),
           ),

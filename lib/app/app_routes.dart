@@ -31,13 +31,6 @@ class AppRoutes {
       home: (_) => const HomeScreen(),
       movies: (_) => const CatalogScreen(kind: CatalogKind.movies),
       series: (_) => const CatalogScreen(kind: CatalogKind.series),
-      castDetail: (_) => const CastDetailScreen(),
-      movieWatch: (_) => const MovieWatchScreen(),
-      seriesWatch: (_) => const SeriesWatchScreen(),
-      search: (_) => const SearchResultScreen(title: 'searched keyword'),
-      genre: (_) => const SearchResultScreen(title: 'Sci-Fi & Fantasy'),
-      country: (_) => const SearchResultScreen(title: 'Pakistan'),
-      production: (_) => const SearchResultScreen(title: 'Television 360'),
       login: (_) => const LoginScreen(),
       register: (_) => const RegisterScreen(),
       resetPassword: (_) => const ResetPasswordScreen(),
@@ -58,6 +51,41 @@ class AppRoutes {
       seriesDetail => MaterialPageRoute<void>(
         settings: settings,
         builder: (_) => SeriesDetailScreen(item: item),
+      ),
+      movieWatch => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => MovieWatchScreen(item: item),
+      ),
+      seriesWatch => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => SeriesWatchScreen(item: item),
+      ),
+      castDetail => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => CastDetailScreen(query: settings.arguments as String?),
+      ),
+      search => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const SearchResultScreen(title: 'Search'),
+      ),
+      genre => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) =>
+            const SearchResultScreen(title: 'Genres', mode: ExploreMode.genre),
+      ),
+      country => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const SearchResultScreen(
+          title: 'Countries',
+          mode: ExploreMode.country,
+        ),
+      ),
+      production => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const SearchResultScreen(
+          title: 'Production',
+          mode: ExploreMode.production,
+        ),
       ),
       _ => null,
     };

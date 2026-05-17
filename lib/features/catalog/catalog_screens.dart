@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
-import '../../core/data/mock_data.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
@@ -20,12 +19,18 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
-  late final Future<List<MovieItem>> catalogItems = _loadCatalog();
+  late Future<List<MovieItem>> catalogItems;
+  FilterSelection? selection;
+
+  @override
+  void initState() {
+    super.initState();
+    catalogItems = _loadCatalogForSelection(null);
+  }
 
   @override
   Widget build(BuildContext context) {
     final title = widget.kind == CatalogKind.movies ? 'Movies' : 'TV Series';
-    final fallbackItems = widget.kind == CatalogKind.movies ? movies : series;
 
     return Scaffold(
       body: ListView(
@@ -36,21 +41,40 @@ class _CatalogScreenState extends State<CatalogScreen> {
             padding: const EdgeInsets.fromLTRB(17, 43, 17, 0),
             child: Text(title, style: Theme.of(context).textTheme.titleLarge),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(17, 26, 17, 0),
-            child: FilterPanel(),
+            child: FilterPanel(
+              onApply: (value) {
+                setState(() {
+                  selection = value;
+                  catalogItems = _loadCatalogForSelection(value);
+                });
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(5, 40, 5, 0),
             child: FutureBuilder<List<MovieItem>>(
               future: catalogItems,
-              initialData: fallbackItems,
               builder: (context, snapshot) {
-                final items = snapshot.data?.isNotEmpty == true
-                    ? snapshot.data!
-                    : fallbackItems;
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: IconButton(
+                      onPressed: () => setState(() {
+                        catalogItems = _loadCatalogForSelection(selection);
+                      }),
+                      icon: const Icon(Icons.refresh, size: 28),
+                    ),
+                  );
+                }
 
-                return PosterGrid(items: items, itemCount: 8);
+                return PosterGrid(items: snapshot.data!, itemCount: 10);
               },
             ),
           ),
@@ -61,14 +85,26 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Future<List<MovieItem>> _loadCatalog() async {
-    try {
-      final repository = TmdbRepository(config: AppConfig.fromEnv());
-      return widget.kind == CatalogKind.movies
-          ? repository.discoverMovies()
-          : repository.discoverSeries();
-    } catch (_) {
-      return widget.kind == CatalogKind.movies ? movies : series;
+  Future<List<MovieItem>> _loadCatalogForSelection(
+    FilterSelection? selection,
+  ) async {
+    final repository = TmdbRepository(config: AppConfig.fromEnv());
+    final year = int.tryParse(selection?.releaseYear ?? '');
+
+    if (widget.kind == CatalogKind.movies) {
+      return repository.discoverMovieBrowse(
+        genreId: int.tryParse(selection?.genreId ?? ''),
+        country: selection?.countryCode,
+        year: year,
+        certification: selection?.rating,
+      );
     }
+
+    return repository.discoverSeriesBrowse(
+      genreId: int.tryParse(selection?.genreId ?? ''),
+      country: selection?.countryCode,
+      year: year,
+      certification: selection?.rating,
+    );
   }
 }

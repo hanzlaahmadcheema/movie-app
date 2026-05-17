@@ -21,12 +21,57 @@ void openDetailForItem(BuildContext context, MovieItem item) {
 }
 
 void openWatchForItem(BuildContext context, MovieItem item) {
-  Navigator.pushNamed(context, watchRouteForItem(item));
+  Navigator.pushNamed(context, watchRouteForItem(item), arguments: item);
 }
 
 void openSearchResult(BuildContext context, String title) {
   Navigator.push(
     context,
-    MaterialPageRoute<void>(builder: (_) => SearchResultScreen(title: title)),
+    MaterialPageRoute<void>(
+      builder: (_) => SearchResultScreen(title: title, query: title),
+    ),
   );
+}
+
+void openGenreBrowse(BuildContext context, String title) {
+  Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (_) => SearchResultScreen(
+        title: title,
+        mode: ExploreMode.genre,
+        query: title,
+      ),
+    ),
+  );
+}
+
+void openCountryBrowse(BuildContext context, String title) {
+  Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (_) => SearchResultScreen(
+        title: title,
+        mode: ExploreMode.country,
+        query: title,
+      ),
+    ),
+  );
+}
+
+void openProductionBrowse(BuildContext context, String title) {
+  Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (_) => SearchResultScreen(
+        title: title,
+        mode: ExploreMode.production,
+        query: title,
+      ),
+    ),
+  );
+}
+
+void openCastDetail(BuildContext context, String query) {
+  Navigator.pushNamed(context, AppRoutes.castDetail, arguments: query);
 }

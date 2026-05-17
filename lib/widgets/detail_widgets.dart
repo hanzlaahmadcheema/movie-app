@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../app/app_routes.dart';
 import '../app/app_theme.dart';
 import '../core/models/detail_item.dart';
 import '../core/models/movie_item.dart';
@@ -35,7 +34,11 @@ class DetailHero extends StatelessWidget {
               imageFilter: ImageFilter.blur(sigmaX: 35, sigmaY: 35),
               child: Opacity(
                 opacity: 0.22,
-                child: NetworkArt(url: item.posterUrl),
+                child: NetworkArt(
+                  url: item.backdropUrl.isEmpty
+                      ? item.posterUrl
+                      : item.backdropUrl,
+                ),
               ),
             ),
             DecoratedBox(
@@ -124,7 +127,11 @@ class DetailBackdrop extends StatelessWidget {
             imageFilter: ImageFilter.blur(sigmaX: 35, sigmaY: 35),
             child: Opacity(
               opacity: 0.24,
-              child: NetworkArt(url: item.posterUrl),
+              child: NetworkArt(
+                url: item.backdropUrl.isEmpty
+                    ? item.posterUrl
+                    : item.backdropUrl,
+              ),
             ),
           ),
         ),
@@ -302,19 +309,20 @@ class DetailInfoCarousel extends StatelessWidget {
   void _handleInfoTap(BuildContext context, DetailInfo item) {
     final label = item.label.toLowerCase();
     if (label.contains('cast')) {
-      Navigator.pushNamed(context, AppRoutes.castDetail);
+      final firstCast = item.value.split(',').first.trim();
+      openCastDetail(context, firstCast);
       return;
     }
     if (label.contains('genre')) {
-      openSearchResult(context, item.value);
+      openGenreBrowse(context, item.value);
       return;
     }
     if (label.contains('country')) {
-      Navigator.pushNamed(context, AppRoutes.country);
+      openCountryBrowse(context, item.value);
       return;
     }
     if (label.contains('production')) {
-      Navigator.pushNamed(context, AppRoutes.production);
+      openProductionBrowse(context, item.value);
       return;
     }
     openSearchResult(context, item.value);

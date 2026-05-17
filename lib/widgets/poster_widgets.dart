@@ -138,6 +138,7 @@ class HorizontalPosterSection extends StatelessWidget {
   const HorizontalPosterSection({
     required this.title,
     required this.items,
+    this.itemCount,
     this.onMore,
     this.onItemTap,
     this.onWatchlistTap,
@@ -148,6 +149,7 @@ class HorizontalPosterSection extends StatelessWidget {
 
   final String title;
   final List<MovieItem> items;
+  final int? itemCount;
   final VoidCallback? onMore;
   final ValueChanged<MovieItem>? onItemTap;
   final ValueChanged<MovieItem>? onWatchlistTap;
@@ -169,22 +171,25 @@ class HorizontalPosterSection extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             scrollDirection: Axis.horizontal,
-            itemCount: items.length,
+            itemCount: itemCount ?? items.length,
             separatorBuilder: (context, index) => const SizedBox(width: 6),
             itemBuilder: (context, index) => SizedBox(
               width: 195,
               child: MoviePosterCard(
-                item: items[index],
-                watchlisted: isWatchlisted?.call(items[index]),
+                item: items[index % items.length],
+                watchlisted: isWatchlisted?.call(items[index % items.length]),
                 onTap: onItemTap == null
                     ? null
-                    : () => onItemTap!(items[index]),
+                    : () => onItemTap!(items[index % items.length]),
                 onWatchlistTap: onWatchlistTap == null
                     ? null
-                    : () => onWatchlistTap!(items[index]),
+                    : () => onWatchlistTap!(items[index % items.length]),
                 onWatchlistChanged: onWatchlistChanged == null
                     ? null
-                    : (active) => onWatchlistChanged!(items[index], active),
+                    : (active) => onWatchlistChanged!(
+                        items[index % items.length],
+                        active,
+                      ),
               ),
             ),
           ),

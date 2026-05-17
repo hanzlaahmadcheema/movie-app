@@ -4,8 +4,8 @@ import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/config/app_config.dart';
-import '../../core/data/mock_data.dart';
 import '../../core/models/movie_item.dart';
+import '../../core/models/tmdb_person.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
@@ -20,7 +20,7 @@ class MovieDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailPage(
-      item: item ?? movies[1],
+      item: item,
       watchRoute: AppRoutes.movieWatch,
       isSeries: false,
     );
@@ -35,7 +35,7 @@ class SeriesDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailPage(
-      item: item ?? series[2],
+      item: item,
       watchRoute: AppRoutes.seriesWatch,
       isSeries: true,
     );
@@ -49,7 +49,7 @@ class _DetailPage extends StatefulWidget {
     required this.isSeries,
   });
 
-  final MovieItem item;
+  final MovieItem? item;
   final String watchRoute;
   final bool isSeries;
 
@@ -58,11 +58,13 @@ class _DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<_DetailPage> {
-  late final Future<TmdbDetail?> tmdbDetail = _loadDetail();
+  late Future<TmdbDetail?> tmdbDetail = _loadDetail();
 
   @override
   Widget build(BuildContext context) {
-    final fallbackRelated = widget.isSeries ? series : movies;
+    if (widget.item == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       body: Stack(
@@ -70,12 +72,24 @@ class _DetailPageState extends State<_DetailPage> {
           FutureBuilder<TmdbDetail?>(
             future: tmdbDetail,
             builder: (context, snapshot) {
-              final detail = snapshot.data;
-              final item = detail?.item ?? widget.item;
-              final info = detail?.info ?? detailInfo;
-              final related = detail?.related.isNotEmpty == true
-                  ? detail!.related
-                  : fallbackRelated;
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || snapshot.data == null) {
+                return Center(
+                  child: IconButton(
+                    onPressed: () => setState(() {
+                      tmdbDetail = _loadDetail();
+                    }),
+                    icon: const Icon(Icons.refresh, size: 28),
+                  ),
+                );
+              }
+
+              final detail = snapshot.data!;
+              final item = detail.item;
+              final info = detail.info;
+              final related = detail.related;
 
               return ListView(
                 padding: EdgeInsets.zero,
@@ -87,8 +101,11 @@ class _DetailPageState extends State<_DetailPage> {
                         DetailHero(
                           item: item,
                           showBackground: false,
-                          onWatch: () =>
-                              Navigator.pushNamed(context, widget.watchRoute),
+                          onWatch: () => Navigator.pushNamed(
+                            context,
+                            widget.watchRoute,
+                            arguments: item,
+                          ),
                         ),
                         Transform.translate(
                           offset: const Offset(0, -12),
@@ -105,7 +122,11 @@ class _DetailPageState extends State<_DetailPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 13),
-                    child: RelatedPosterSection(items: related),
+                    child: HorizontalPosterSection(
+                      title: 'You may also like',
+                      items: related,
+                      itemCount: 10,
+                    ),
                   ),
                   const SizedBox(height: 36),
                   const FooterDetails(),
@@ -120,117 +141,145 @@ class _DetailPageState extends State<_DetailPage> {
   }
 
   Future<TmdbDetail?> _loadDetail() async {
-    if (widget.item.id == 0) {
+    final item = widget.item;
+    if (item == null || item.id == 0) {
       return null;
     }
 
     try {
-      return TmdbRepository(config: AppConfig.fromEnv()).detail(widget.item);
+      return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
     } catch (_) {
       return null;
     }
   }
 }
 
-class CastDetailScreen extends StatelessWidget {
-  const CastDetailScreen({super.key});
+class CastDetailScreen extends StatefulWidget {
+  const CastDetailScreen({this.query, super.key});
+
+  final String? query;
+
+  @override
+  State<CastDetailScreen> createState() => _CastDetailScreenState();
+}
+
+class _CastDetailScreenState extends State<CastDetailScreen> {
+  late Future<TmdbPerson?> personFuture = _loadPerson();
 
   @override
   Widget build(BuildContext context) {
+    if (widget.query == null || widget.query!.trim().isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: Stack(
         children: [
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              SizedBox(
-                height: 888,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          image: const DecorationImage(
-                            image: AssetImage(AppAssets.cast),
-                            fit: BoxFit.cover,
-                            opacity: 0.14,
+          FutureBuilder<TmdbPerson?>(
+            future: personFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || snapshot.data == null) {
+                return Center(
+                  child: IconButton(
+                    onPressed: () => setState(() {
+                      personFuture = _loadPerson();
+                    }),
+                    icon: const Icon(Icons.refresh, size: 28),
+                  ),
+                );
+              }
+
+              final person = snapshot.data!;
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  SizedBox(
+                    height: 888,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              image: const DecorationImage(
+                                image: AssetImage(AppAssets.cast),
+                                fit: BoxFit.cover,
+                                opacity: 0.14,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const Positioned(
-                      top: 127,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: NetworkArt(
-                          url: AppAssets.cast,
-                          width: 167,
-                          height: 250,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 414,
-                      left: 16,
-                      right: 16,
-                      child: Text(
-                        'Peter Dinklage',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    Positioned(
-                      top: 463,
-                      left: 71,
-                      right: 71,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          5,
-                          (index) => const Icon(
-                            Icons.star,
-                            color: AppColors.primary,
-                            size: 28,
+                        Positioned(
+                          top: 127,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: NetworkArt(
+                              url: person.profilePath.isEmpty
+                                  ? AppAssets.cast
+                                  : 'https://image.tmdb.org/t/p/w342${person.profilePath}',
+                              width: 167,
+                              height: 250,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 536,
-                      left: 13,
-                      right: 13,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Biography', style: AppTextStyles.medium),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Peter Hayden Dinklage is an American actor. Portraying Tyrion Lannister on the HBO television series Game of Thrones, Dinklage won the Primetime Emmy Award for Outstanding Supporting Actor in a Drama Series a record four times.',
-                            style: AppTextStyles.normal,
+                        Positioned(
+                          top: 414,
+                          left: 16,
+                          right: 16,
+                          child: Text(
+                            person.name,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
-                        ],
-                      ),
+                        ),
+                        Positioned(
+                          top: 536,
+                          left: 13,
+                          right: 13,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Biography', style: AppTextStyles.medium),
+                              const SizedBox(height: 12),
+                              Text(
+                                person.biography.isEmpty
+                                    ? 'No biography available.'
+                                    : person.biography,
+                                style: AppTextStyles.normal,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: SectionHeader(title: 'Known For'),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
-                child: PosterGrid(items: series, itemCount: 8),
-              ),
-              const SizedBox(height: 32),
-              const FooterDetails(),
-            ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: SectionHeader(title: 'Known For'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
+                    child: PosterGrid(items: person.knownFor, itemCount: 10),
+                  ),
+                  const SizedBox(height: 32),
+                  const FooterDetails(),
+                ],
+              );
+            },
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
         ],
       ),
     );
+  }
+
+  Future<TmdbPerson?> _loadPerson() {
+    return TmdbRepository(
+      config: AppConfig.fromEnv(),
+    ).personByQuery(widget.query!.trim());
   }
 }
