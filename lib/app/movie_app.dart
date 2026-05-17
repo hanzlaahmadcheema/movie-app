@@ -14,6 +14,7 @@ class MovieApp extends StatelessWidget {
       theme: AppTheme.dark,
       initialRoute: AppRoutes.home,
       routes: AppRoutes.routes,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }
 }

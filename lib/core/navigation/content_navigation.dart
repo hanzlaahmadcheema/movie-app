@@ -17,7 +17,7 @@ String watchRouteForItem(MovieItem item) {
 }
 
 void openDetailForItem(BuildContext context, MovieItem item) {
-  Navigator.pushNamed(context, detailRouteForItem(item));
+  Navigator.pushNamed(context, detailRouteForItem(item), arguments: item);
 }
 
 void openWatchForItem(BuildContext context, MovieItem item) {

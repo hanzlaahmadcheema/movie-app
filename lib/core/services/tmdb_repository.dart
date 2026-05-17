@@ -23,17 +23,23 @@ class TmdbRepository {
   final AppConfig _config;
   final TmdbApiClient _client;
 
-  Future<List<MovieItem>> trendingMovies() => _list('/trending/movie/week');
+  Future<List<MovieItem>> trendingMovies() =>
+      _list('/trending/movie/week', fallbackMediaType: MediaType.movie);
 
-  Future<List<MovieItem>> trendingSeries() => _list('/trending/tv/week');
+  Future<List<MovieItem>> trendingSeries() =>
+      _list('/trending/tv/week', fallbackMediaType: MediaType.tv);
 
-  Future<List<MovieItem>> latestMovies() => _list('/movie/now_playing');
+  Future<List<MovieItem>> latestMovies() =>
+      _list('/movie/now_playing', fallbackMediaType: MediaType.movie);
 
-  Future<List<MovieItem>> latestSeries() => _list('/tv/on_the_air');
+  Future<List<MovieItem>> latestSeries() =>
+      _list('/tv/on_the_air', fallbackMediaType: MediaType.tv);
 
-  Future<List<MovieItem>> discoverMovies() => _list('/discover/movie');
+  Future<List<MovieItem>> discoverMovies() =>
+      _list('/discover/movie', fallbackMediaType: MediaType.movie);
 
-  Future<List<MovieItem>> discoverSeries() => _list('/discover/tv');
+  Future<List<MovieItem>> discoverSeries() =>
+      _list('/discover/tv', fallbackMediaType: MediaType.tv);
 
   Future<List<MovieItem>> search(String query) async {
     if (query.trim().isEmpty) {
@@ -46,7 +52,10 @@ class TmdbRepository {
     final mediaType = seed.mediaType == MediaType.tv ? 'tv' : 'movie';
     final data = await _client.get('/$mediaType/${seed.id}');
     final credits = await _client.get('/$mediaType/${seed.id}/credits');
-    final similar = await _list('/$mediaType/${seed.id}/similar');
+    final similar = await _list(
+      '/$mediaType/${seed.id}/similar',
+      fallbackMediaType: seed.mediaType,
+    );
     final item = _itemFromJson(data, fallbackMediaType: seed.mediaType);
 
     return TmdbDetail(
@@ -61,6 +70,7 @@ class TmdbRepository {
   Future<List<MovieItem>> _list(
     String path, {
     Map<String, String?> query = const {},
+    MediaType fallbackMediaType = MediaType.movie,
   }) async {
     final data = await _client.get(path, query: query);
     final results = data['results'];
@@ -70,7 +80,10 @@ class TmdbRepository {
 
     return results
         .whereType<Map<String, dynamic>>()
-        .map(_itemFromJson)
+        .where((json) => json['media_type'] != 'person')
+        .map(
+          (json) => _itemFromJson(json, fallbackMediaType: fallbackMediaType),
+        )
         .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
         .toList();
   }

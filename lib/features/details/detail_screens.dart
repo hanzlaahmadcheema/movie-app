@@ -3,20 +3,24 @@ import 'package:flutter/material.dart';
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
 import '../../core/constants/app_assets.dart';
+import '../../core/config/app_config.dart';
 import '../../core/data/mock_data.dart';
 import '../../core/models/movie_item.dart';
+import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
 import '../../widgets/network_art.dart';
 import '../../widgets/poster_widgets.dart';
 
 class MovieDetailScreen extends StatelessWidget {
-  const MovieDetailScreen({super.key});
+  const MovieDetailScreen({this.item, super.key});
+
+  final MovieItem? item;
 
   @override
   Widget build(BuildContext context) {
     return _DetailPage(
-      item: movies[1],
+      item: item ?? movies[1],
       watchRoute: AppRoutes.movieWatch,
       isSeries: false,
     );
@@ -24,19 +28,21 @@ class MovieDetailScreen extends StatelessWidget {
 }
 
 class SeriesDetailScreen extends StatelessWidget {
-  const SeriesDetailScreen({super.key});
+  const SeriesDetailScreen({this.item, super.key});
+
+  final MovieItem? item;
 
   @override
   Widget build(BuildContext context) {
     return _DetailPage(
-      item: series[2],
+      item: item ?? series[2],
       watchRoute: AppRoutes.seriesWatch,
       isSeries: true,
     );
   }
 }
 
-class _DetailPage extends StatelessWidget {
+class _DetailPage extends StatefulWidget {
   const _DetailPage({
     required this.item,
     required this.watchRoute,
@@ -48,47 +54,81 @@ class _DetailPage extends StatelessWidget {
   final bool isSeries;
 
   @override
+  State<_DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<_DetailPage> {
+  late final Future<TmdbDetail?> tmdbDetail = _loadDetail();
+
+  @override
   Widget build(BuildContext context) {
+    final fallbackRelated = widget.isSeries ? series : movies;
+
     return Scaffold(
       body: Stack(
         children: [
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DetailBackdrop(
-                item: item,
-                child: Column(
-                  children: [
-                    DetailHero(
-                      item: item,
-                      showBackground: false,
-                      onWatch: () => Navigator.pushNamed(context, watchRoute),
+          FutureBuilder<TmdbDetail?>(
+            future: tmdbDetail,
+            builder: (context, snapshot) {
+              final detail = snapshot.data;
+              final item = detail?.item ?? widget.item;
+              final info = detail?.info ?? detailInfo;
+              final related = detail?.related.isNotEmpty == true
+                  ? detail!.related
+                  : fallbackRelated;
+
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DetailBackdrop(
+                    item: item,
+                    child: Column(
+                      children: [
+                        DetailHero(
+                          item: item,
+                          showBackground: false,
+                          onWatch: () =>
+                              Navigator.pushNamed(context, widget.watchRoute),
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -12),
+                          child: DetailBody(
+                            item: item,
+                            info: info,
+                            moreLikeThis: related,
+                            includeRelated: false,
+                          ),
+                        ),
+                        const SizedBox(height: 42),
+                      ],
                     ),
-                    Transform.translate(
-                      offset: const Offset(0, -12),
-                      child: DetailBody(
-                        item: item,
-                        info: detailInfo,
-                        moreLikeThis: isSeries ? series : movies,
-                        includeRelated: false,
-                      ),
-                    ),
-                    const SizedBox(height: 42),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 13),
-                child: RelatedPosterSection(items: isSeries ? series : movies),
-              ),
-              const SizedBox(height: 36),
-              const FooterDetails(),
-            ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 13),
+                    child: RelatedPosterSection(items: related),
+                  ),
+                  const SizedBox(height: 36),
+                  const FooterDetails(),
+                ],
+              );
+            },
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
         ],
       ),
     );
+  }
+
+  Future<TmdbDetail?> _loadDetail() async {
+    if (widget.item.id == 0) {
+      return null;
+    }
+
+    try {
+      return TmdbRepository(config: AppConfig.fromEnv()).detail(widget.item);
+    } catch (_) {
+      return null;
+    }
   }
 }
 

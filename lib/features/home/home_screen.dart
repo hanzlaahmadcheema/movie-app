@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
+import '../../core/config/app_config.dart';
 import '../../core/data/mock_data.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/navigation/content_navigation.dart';
+import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/network_art.dart';
@@ -22,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int trendingTab = 0;
   final watchlistedItems = <String>{};
+  late final Future<_HomeData> homeData = _loadHomeData();
 
   bool _isWatchlisted(MovieItem item) =>
       watchlistedItems.contains(_itemKey(item));
@@ -41,63 +44,97 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final trendingItems = trendingTab == 0 ? movies : series;
-
     return Scaffold(
       body: Stack(
         children: [
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const _HeroCarousel(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 18, 5, 0),
-                child: SectionHeader(
-                  title: 'Trending',
-                  trailing: TogglePills(
-                    active: trendingTab,
-                    onChanged: (value) => setState(() => trendingTab = value),
+          FutureBuilder<_HomeData>(
+            future: homeData,
+            initialData: _HomeData.fallback(),
+            builder: (context, snapshot) {
+              final data = snapshot.data ?? _HomeData.fallback();
+              final trendingItems = trendingTab == 0
+                  ? data.trendingMovies
+                  : data.trendingSeries;
+
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _HeroCarousel(items: data.heroItems),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 18, 5, 0),
+                    child: SectionHeader(
+                      title: 'Trending',
+                      trailing: TogglePills(
+                        active: trendingTab,
+                        onChanged: (value) =>
+                            setState(() => trendingTab = value),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 8, 5, 0),
-                child: PosterGrid(
-                  items: trendingItems,
-                  itemCount: 4,
-                  isWatchlisted: _isWatchlisted,
-                  onWatchlistChanged: _setWatchlisted,
-                ),
-              ),
-              const SizedBox(height: 18),
-              HorizontalPosterSection(
-                title: 'Latest Movies',
-                items: movies,
-                onMore: () => Navigator.pushNamed(context, AppRoutes.movies),
-                isWatchlisted: _isWatchlisted,
-                onWatchlistChanged: _setWatchlisted,
-              ),
-              const SizedBox(height: 18),
-              HorizontalPosterSection(
-                title: 'Latest TV Series',
-                items: series,
-                onMore: () => Navigator.pushNamed(context, AppRoutes.series),
-                isWatchlisted: _isWatchlisted,
-                onWatchlistChanged: _setWatchlisted,
-              ),
-              const SizedBox(height: 22),
-              const FooterDetails(),
-            ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(5, 8, 5, 0),
+                    child: PosterGrid(
+                      items: trendingItems,
+                      itemCount: 4,
+                      isWatchlisted: _isWatchlisted,
+                      onWatchlistChanged: _setWatchlisted,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  HorizontalPosterSection(
+                    title: 'Latest Movies',
+                    items: data.latestMovies,
+                    onMore: () =>
+                        Navigator.pushNamed(context, AppRoutes.movies),
+                    isWatchlisted: _isWatchlisted,
+                    onWatchlistChanged: _setWatchlisted,
+                  ),
+                  const SizedBox(height: 18),
+                  HorizontalPosterSection(
+                    title: 'Latest TV Series',
+                    items: data.latestSeries,
+                    onMore: () =>
+                        Navigator.pushNamed(context, AppRoutes.series),
+                    isWatchlisted: _isWatchlisted,
+                    onWatchlistChanged: _setWatchlisted,
+                  ),
+                  const SizedBox(height: 22),
+                  const FooterDetails(),
+                ],
+              );
+            },
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
         ],
       ),
     );
   }
+
+  Future<_HomeData> _loadHomeData() async {
+    try {
+      final repository = TmdbRepository(config: AppConfig.fromEnv());
+      final trendingMovies = await repository.trendingMovies();
+      final trendingSeries = await repository.trendingSeries();
+      final latestMovies = await repository.latestMovies();
+      final latestSeries = await repository.latestSeries();
+
+      return _HomeData(
+        heroItems: trendingMovies.take(3).toList(),
+        trendingMovies: trendingMovies,
+        trendingSeries: trendingSeries,
+        latestMovies: latestMovies,
+        latestSeries: latestSeries,
+      ).withFallbacks();
+    } catch (_) {
+      return _HomeData.fallback();
+    }
+  }
 }
 
 class _HeroCarousel extends StatefulWidget {
-  const _HeroCarousel();
+  const _HeroCarousel({required this.items});
+
+  final List<MovieItem> items;
 
   @override
   State<_HeroCarousel> createState() => _HeroCarouselState();
@@ -106,7 +143,6 @@ class _HeroCarousel extends StatefulWidget {
 class _HeroCarouselState extends State<_HeroCarousel> {
   static const autoPlayDuration = Duration(milliseconds: 3500);
   final pageController = PageController();
-  final items = <MovieItem>[heroMovie, movies[1], series[1]];
   int activeIndex = 0;
   Timer? timer;
 
@@ -130,7 +166,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
         return;
       }
 
-      final nextIndex = (activeIndex + 1) % items.length;
+      final nextIndex = (activeIndex + 1) % widget.items.length;
       pageController.animateToPage(
         nextIndex,
         duration: const Duration(milliseconds: 450),
@@ -162,9 +198,10 @@ class _HeroCarouselState extends State<_HeroCarousel> {
         children: [
           PageView.builder(
             controller: pageController,
-            itemCount: items.length,
+            itemCount: widget.items.length,
             onPageChanged: _handlePageChanged,
-            itemBuilder: (context, index) => _HeroSlide(item: items[index]),
+            itemBuilder: (context, index) =>
+                _HeroSlide(item: widget.items[index]),
           ),
           Positioned(
             left: 15,
@@ -175,7 +212,8 @@ class _HeroCarouselState extends State<_HeroCarousel> {
               icon: Icons.play_arrow,
               height: 40,
               radius: 25,
-              onPressed: () => openDetailForItem(context, items[activeIndex]),
+              onPressed: () =>
+                  openDetailForItem(context, widget.items[activeIndex]),
             ),
           ),
           Positioned(
@@ -183,7 +221,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
             top: 161,
             child: Column(
               children: List.generate(
-                items.length,
+                widget.items.length,
                 (index) => Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: _Dot(
@@ -210,7 +248,9 @@ class _HeroSlide extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        NetworkArt(url: item.posterUrl),
+        NetworkArt(
+          url: item.backdropUrl.isEmpty ? item.posterUrl : item.backdropUrl,
+        ),
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -280,6 +320,47 @@ class _Dot extends StatelessWidget {
           shape: BoxShape.circle,
         ),
       ),
+    );
+  }
+}
+
+class _HomeData {
+  const _HomeData({
+    required this.heroItems,
+    required this.trendingMovies,
+    required this.trendingSeries,
+    required this.latestMovies,
+    required this.latestSeries,
+  });
+
+  factory _HomeData.fallback() {
+    return _HomeData(
+      heroItems: [heroMovie, movies[1], series[1]],
+      trendingMovies: movies,
+      trendingSeries: series,
+      latestMovies: movies,
+      latestSeries: series,
+    );
+  }
+
+  final List<MovieItem> heroItems;
+  final List<MovieItem> trendingMovies;
+  final List<MovieItem> trendingSeries;
+  final List<MovieItem> latestMovies;
+  final List<MovieItem> latestSeries;
+
+  _HomeData withFallbacks() {
+    final fallback = _HomeData.fallback();
+    return _HomeData(
+      heroItems: heroItems.isEmpty ? fallback.heroItems : heroItems,
+      trendingMovies: trendingMovies.isEmpty
+          ? fallback.trendingMovies
+          : trendingMovies,
+      trendingSeries: trendingSeries.isEmpty
+          ? fallback.trendingSeries
+          : trendingSeries,
+      latestMovies: latestMovies.isEmpty ? fallback.latestMovies : latestMovies,
+      latestSeries: latestSeries.isEmpty ? fallback.latestSeries : latestSeries,
     );
   }
 }

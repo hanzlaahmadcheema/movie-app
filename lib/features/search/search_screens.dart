@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/data/mock_data.dart';
+import '../../core/models/movie_item.dart';
+import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/poster_widgets.dart';
 
-class SearchResultScreen extends StatelessWidget {
+class SearchResultScreen extends StatefulWidget {
   const SearchResultScreen({required this.title, super.key});
 
   final String title;
+
+  @override
+  State<SearchResultScreen> createState() => _SearchResultScreenState();
+}
+
+class _SearchResultScreenState extends State<SearchResultScreen> {
+  late final Future<List<MovieItem>> searchItems = _loadSearch();
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +28,24 @@ class SearchResultScreen extends StatelessWidget {
           const MovieAppBar(dark: true),
           Padding(
             padding: const EdgeInsets.fromLTRB(5, 56, 5, 0),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            child: Text(
+              widget.title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(5, 46, 5, 0),
-            child: PosterGrid(items: series, itemCount: 8),
+            child: FutureBuilder<List<MovieItem>>(
+              future: searchItems,
+              initialData: series,
+              builder: (context, snapshot) {
+                final items = snapshot.data?.isNotEmpty == true
+                    ? snapshot.data!
+                    : series;
+
+                return PosterGrid(items: items, itemCount: 8);
+              },
+            ),
           ),
           const SizedBox(height: 30),
           const _Pagination(),
@@ -31,6 +54,14 @@ class SearchResultScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<List<MovieItem>> _loadSearch() async {
+    try {
+      return TmdbRepository(config: AppConfig.fromEnv()).search(widget.title);
+    } catch (_) {
+      return series;
+    }
   }
 }
 

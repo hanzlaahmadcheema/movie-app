@@ -133,6 +133,11 @@ class FooterDetails extends StatelessWidget {
             'This site does not store any files on our server, we only linked to the media which is hosted on 3rd party services.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          const SizedBox(height: 10),
+          Text(
+            'Movie metadata and images are provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: 18),
           Row(
             children: [
