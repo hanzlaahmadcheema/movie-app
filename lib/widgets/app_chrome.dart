@@ -14,10 +14,12 @@ class MovieAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: dark ? 55 : 60,
-      padding: EdgeInsets.only(top: dark ? 24 : 28, left: 18, right: 18),
+      height: 90,
+      padding: const EdgeInsets.only(bottom: 10, left: 18, right: 18),
+      alignment: Alignment.bottomCenter,
       color: dark ? AppColors.appBar : Colors.transparent,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
             onPressed: () => _showMenu(context),

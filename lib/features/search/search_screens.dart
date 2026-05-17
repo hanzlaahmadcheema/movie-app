@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_option.dart';
+import '../../core/models/tmdb_page.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/pagination.dart';
 import '../../widgets/poster_widgets.dart';
 
 enum ExploreMode { search, genre, country, production }
@@ -32,8 +34,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   final _controller = TextEditingController();
   Timer? _debounce;
 
-  Future<List<MovieItem>>? _itemsFuture;
+  Future<TmdbPage<MovieItem>>? _itemsFuture;
   String _currentQuery = '';
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -83,7 +86,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(5, 24, 5, 0),
-            child: FutureBuilder<List<MovieItem>>(
+            child: FutureBuilder<TmdbPage<MovieItem>>(
               future: _itemsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
@@ -101,7 +104,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   );
                 }
 
-                final items = snapshot.data ?? const <MovieItem>[];
+                final page = snapshot.data;
+                final items =
+                    page?.items.take(20).toList() ?? const <MovieItem>[];
                 if (items.isEmpty) {
                   return Center(
                     child: IconButton(
@@ -111,7 +116,19 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   );
                 }
 
-                return PosterGrid(items: items, itemCount: 10);
+                return Column(
+                  children: [
+                    PosterGrid(items: items, itemCount: items.length),
+                    if (page != null && page.hasMultiplePages) ...[
+                      const SizedBox(height: 28),
+                      PaginationBar(
+                        currentPage: _currentPage,
+                        totalPages: page.totalPages,
+                        onPageChanged: _goToPage,
+                      ),
+                    ],
+                  ],
+                );
               },
             ),
           ),
@@ -132,6 +149,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   void _runSearch(String value) {
     setState(() {
       _currentQuery = value.trim();
+      _currentPage = 1;
       _itemsFuture = _load();
     });
   }
@@ -142,11 +160,11 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     });
   }
 
-  Future<List<MovieItem>> _load() async {
+  Future<TmdbPage<MovieItem>> _load() async {
     final query = _currentQuery.trim();
     switch (widget.mode) {
       case ExploreMode.search:
-        return _repository.search(query);
+        return _repository.searchPage(query, page: _currentPage);
       case ExploreMode.genre:
         return _browseByGenre(query.isEmpty ? widget.title : query);
       case ExploreMode.country:
@@ -156,12 +174,12 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     }
   }
 
-  Future<List<MovieItem>> _browseByGenre(String label) async {
+  Future<TmdbPage<MovieItem>> _browseByGenre(String label) async {
     if (label.trim().isEmpty || label == 'Genres') {
-      return [
-        ...await _repository.discoverMovieBrowse(),
-        ...await _repository.discoverSeriesBrowse(),
-      ];
+      return _combinedPage(
+        await _repository.discoverMovieBrowsePage(page: _currentPage),
+        await _repository.discoverSeriesBrowsePage(page: _currentPage),
+      );
     }
     final options = <TmdbOption>[
       ...await _repository.movieGenres(),
@@ -169,58 +187,119 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     ];
     final matches = options.where((option) => option.label == label).toList();
     if (matches.isEmpty) {
-      return const [];
+      return _emptyPage();
     }
 
-    final results = <MovieItem>[];
+    TmdbPage<MovieItem>? combined;
     for (final match in matches) {
       final genreId = int.tryParse(match.id);
       if (genreId == null) continue;
-      final movies = await _repository.discoverMovieBrowse(genreId: genreId);
-      final series = await _repository.discoverSeriesBrowse(genreId: genreId);
-      results.addAll(movies);
-      results.addAll(series);
+      final movies = await _repository.discoverMovieBrowsePage(
+        genreId: genreId,
+        page: _currentPage,
+      );
+      final series = await _repository.discoverSeriesBrowsePage(
+        genreId: genreId,
+        page: _currentPage,
+      );
+      final page = _combinedPage(movies, series);
+      combined = combined == null ? page : _combinedPage(combined, page);
     }
-    return results;
+    return combined ?? _emptyPage();
   }
 
-  Future<List<MovieItem>> _browseByCountry(String label) async {
+  Future<TmdbPage<MovieItem>> _browseByCountry(String label) async {
     if (label.trim().isEmpty || label == 'Countries') {
-      return [
-        ...await _repository.discoverMovieBrowse(),
-        ...await _repository.discoverSeriesBrowse(),
-      ];
+      return _combinedPage(
+        await _repository.discoverMovieBrowsePage(page: _currentPage),
+        await _repository.discoverSeriesBrowsePage(page: _currentPage),
+      );
     }
     final options = await _repository.countries();
     final match = options.where((option) => option.label == label).toList();
     if (match.isEmpty) {
-      return const [];
+      return _emptyPage();
     }
     final code = match.first.id;
-    final movies = await _repository.discoverMovieBrowse(country: code);
-    final series = await _repository.discoverSeriesBrowse(country: code);
-    return [...movies, ...series];
+    final movies = await _repository.discoverMovieBrowsePage(
+      country: code,
+      page: _currentPage,
+    );
+    final series = await _repository.discoverSeriesBrowsePage(
+      country: code,
+      page: _currentPage,
+    );
+    return _combinedPage(movies, series);
   }
 
-  Future<List<MovieItem>> _browseByProduction(String label) async {
+  Future<TmdbPage<MovieItem>> _browseByProduction(String label) async {
     if (label.trim().isEmpty || label == 'Production') {
-      return [
-        ...await _repository.discoverMovieBrowse(),
-        ...await _repository.discoverSeriesBrowse(),
-      ];
+      return _combinedPage(
+        await _repository.discoverMovieBrowsePage(page: _currentPage),
+        await _repository.discoverSeriesBrowsePage(page: _currentPage),
+      );
     }
     final company = await _repository.companyFromQuery(label);
     if (company == null) {
-      return const [];
+      return _emptyPage();
     }
 
     final companyId = int.tryParse(company.id);
     if (companyId == null) {
-      return const [];
+      return _emptyPage();
     }
 
-    final movies = await _repository.discoverMovieBrowse(companyId: companyId);
-    final series = await _repository.discoverSeriesBrowse(companyId: companyId);
-    return [...movies, ...series];
+    final movies = await _repository.discoverMovieBrowsePage(
+      companyId: companyId,
+      page: _currentPage,
+    );
+    final series = await _repository.discoverSeriesBrowsePage(
+      companyId: companyId,
+      page: _currentPage,
+    );
+    return _combinedPage(movies, series);
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page;
+      _itemsFuture = _load();
+    });
+  }
+
+  TmdbPage<MovieItem> _combinedPage(
+    TmdbPage<MovieItem> first,
+    TmdbPage<MovieItem> second,
+  ) {
+    final merged = <MovieItem>[];
+    final maxLength = first.items.length > second.items.length
+        ? first.items.length
+        : second.items.length;
+    for (var index = 0; index < maxLength; index += 1) {
+      if (index < first.items.length) {
+        merged.add(first.items[index]);
+      }
+      if (index < second.items.length) {
+        merged.add(second.items[index]);
+      }
+    }
+
+    return TmdbPage<MovieItem>(
+      items: merged.take(20).toList(),
+      page: _currentPage,
+      totalPages: first.totalPages > second.totalPages
+          ? first.totalPages
+          : second.totalPages,
+      totalResults: first.totalResults + second.totalResults,
+    );
+  }
+
+  TmdbPage<MovieItem> _emptyPage() {
+    return TmdbPage<MovieItem>(
+      items: const [],
+      page: _currentPage,
+      totalPages: 1,
+      totalResults: 0,
+    );
   }
 }

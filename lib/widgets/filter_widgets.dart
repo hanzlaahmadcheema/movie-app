@@ -11,7 +11,7 @@ class FilterSelection {
     required this.type,
     required this.genre,
     required this.releaseYear,
-    required this.rating,
+    this.rating = '',
     required this.genreId,
     required this.countryCode,
   });
@@ -36,7 +36,7 @@ class FilterPanel extends StatefulWidget {
 class _FilterPanelState extends State<FilterPanel> {
   final _repository = TmdbRepository(config: AppConfig.fromEnv());
 
-  late final Future<_FilterData> _data = _load();
+  late Future<_FilterData> _data = _load();
 
   String type = 'Movies';
   String? genreId;
@@ -44,7 +44,6 @@ class _FilterPanelState extends State<FilterPanel> {
   String? countryCode;
   String country = '';
   String releaseYear = DateTime.now().year.toString();
-  String rating = '';
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +56,28 @@ class _FilterPanelState extends State<FilterPanel> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              children: [
+                Text(
+                  'Failed to load filter options.\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => setState(() {
+                    _data = _load();
+                  }),
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
         }
@@ -65,9 +86,6 @@ class _FilterPanelState extends State<FilterPanel> {
         final genreOptions = type == 'Movies'
             ? data.movieGenres
             : data.tvGenres;
-        final ratingOptions = type == 'Movies'
-            ? data.movieRatings
-            : data.tvRatings;
 
         genreId ??= genreOptions.isNotEmpty ? genreOptions.first.id : null;
         genre = genreOptions
@@ -89,9 +107,6 @@ class _FilterPanelState extends State<FilterPanel> {
                   : const TmdbOption(id: '', label: ''),
             )
             .label;
-        rating = ratingOptions.contains(rating)
-            ? rating
-            : (ratingOptions.isNotEmpty ? ratingOptions.first : '');
 
         final years = _yearOptions();
         if (!years.contains(releaseYear)) {
@@ -108,7 +123,6 @@ class _FilterPanelState extends State<FilterPanel> {
                 type = value;
                 genreId = null;
                 genre = '';
-                rating = '';
               }),
             ),
             const SizedBox(height: 10),
@@ -144,13 +158,6 @@ class _FilterPanelState extends State<FilterPanel> {
               options: years,
               onSelected: (value) => setState(() => releaseYear = value),
             ),
-            const SizedBox(height: 10),
-            FilterTile(
-              label: 'Rating',
-              value: rating.isEmpty ? 'Select rating' : rating,
-              options: ratingOptions,
-              onSelected: (value) => setState(() => rating = value),
-            ),
             const SizedBox(height: 14),
             PrimaryButton(
               label: 'Filter',
@@ -169,7 +176,7 @@ class _FilterPanelState extends State<FilterPanel> {
                   type: type,
                   genre: genre,
                   releaseYear: releaseYear,
-                  rating: rating,
+                  rating: '',
                   genreId: genreId,
                   countryCode: countryCode,
                 );
@@ -198,14 +205,10 @@ class _FilterPanelState extends State<FilterPanel> {
     final movieGenres = await _repository.movieGenres();
     final tvGenres = await _repository.tvGenres();
     final countries = await _repository.countries();
-    final movieRatings = await _repository.movieCertifications();
-    final tvRatings = await _repository.tvCertifications();
     return _FilterData(
       movieGenres: movieGenres,
       tvGenres: tvGenres,
       countries: countries,
-      movieRatings: movieRatings,
-      tvRatings: tvRatings,
     );
   }
 
@@ -317,13 +320,9 @@ class _FilterData {
     required this.movieGenres,
     required this.tvGenres,
     required this.countries,
-    required this.movieRatings,
-    required this.tvRatings,
   });
 
   final List<TmdbOption> movieGenres;
   final List<TmdbOption> tvGenres;
   final List<TmdbOption> countries;
-  final List<String> movieRatings;
-  final List<String> tvRatings;
 }

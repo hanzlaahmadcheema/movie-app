@@ -146,7 +146,6 @@ class _WatchPageState extends State<_WatchPage> {
                           Positioned(
                             top: 495,
                             left: 38,
-                            right: 38,
                             child: ReactionRow(
                               onChanged: (reaction) {
                                 final message = switch (reaction) {
@@ -203,7 +202,7 @@ class _WatchPageState extends State<_WatchPage> {
                                   final episodes =
                                       episodeSnapshot.data ?? const <Episode>[];
                                   return EpisodeList(
-                                    episodes: _loopItems(episodes, 8),
+                                    episodes: episodes,
                                     onEpisodeSelected: (episode) =>
                                         ScaffoldMessenger.of(
                                           context,
@@ -219,6 +218,19 @@ class _WatchPageState extends State<_WatchPage> {
                               ),
                             ),
                           ],
+                          Positioned(
+                            top: 495,
+                            right: 38,
+                            child: ServerSelector(
+                              onServerSelected: (server) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Switched to $server'),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -755,7 +767,6 @@ class _EpisodeListState extends State<EpisodeList> {
       height: 434,
       child: ListView.separated(
         padding: EdgeInsets.zero,
-        physics: const NeverScrollableScrollPhysics(),
         itemCount: widget.episodes.length,
         separatorBuilder: (context, index) => const SizedBox(height: 2),
         itemBuilder: (context, index) => EpisodeTile(

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../app/app_routes.dart';
@@ -10,6 +12,7 @@ import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
 import '../../widgets/network_art.dart';
+import '../../widgets/pagination.dart';
 import '../../widgets/poster_widgets.dart';
 
 class MovieDetailScreen extends StatelessWidget {
@@ -107,14 +110,12 @@ class _DetailPageState extends State<_DetailPage> {
                             arguments: item,
                           ),
                         ),
-                        Transform.translate(
-                          offset: const Offset(0, -12),
-                          child: DetailBody(
-                            item: item,
-                            info: info,
-                            moreLikeThis: related,
-                            includeRelated: false,
-                          ),
+                        const SizedBox(height: 12),
+                        DetailBody(
+                          item: item,
+                          info: info,
+                          moreLikeThis: related,
+                          includeRelated: false,
                         ),
                         const SizedBox(height: 42),
                       ],
@@ -165,6 +166,7 @@ class CastDetailScreen extends StatefulWidget {
 
 class _CastDetailScreenState extends State<CastDetailScreen> {
   late Future<TmdbPerson?> personFuture = _loadPerson();
+  int _knownForPage = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -201,13 +203,40 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                     child: Stack(
                       children: [
                         Positioned.fill(
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 35,
+                              sigmaY: 35,
+                            ),
+                            child: Opacity(
+                              opacity: 0.24,
+                              child: NetworkArt(
+                                url: person.profilePath.isEmpty
+                                    ? AppAssets.cast
+                                    : 'https://image.tmdb.org/t/p/w342${person.profilePath}',
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned.fill(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.05),
-                              image: const DecorationImage(
-                                image: AssetImage(AppAssets.cast),
-                                fit: BoxFit.cover,
-                                opacity: 0.14,
+                            ),
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  AppColors.background.withValues(alpha: 0.14),
+                                  AppColors.background,
+                                ],
+                                stops: const [0, 0.78, 1],
                               ),
                             ),
                           ),
@@ -261,10 +290,19 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: SectionHeader(title: 'Known For'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
-                    child: PosterGrid(items: person.knownFor, itemCount: 10),
-                  ),
+                  if (person.knownFor.isNotEmpty)
+                    _KnownForPage(
+                      items: person.knownFor,
+                      currentPage: _knownForPage,
+                      onPageChanged: (page) {
+                        setState(() => _knownForPage = page);
+                      },
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
                   const SizedBox(height: 32),
                   const FooterDetails(),
                 ],
@@ -281,5 +319,43 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
     return TmdbRepository(
       config: AppConfig.fromEnv(),
     ).personByQuery(widget.query!.trim());
+  }
+}
+
+class _KnownForPage extends StatelessWidget {
+  const _KnownForPage({
+    required this.items,
+    required this.currentPage,
+    required this.onPageChanged,
+  });
+
+  final List<MovieItem> items;
+  final int currentPage;
+  final ValueChanged<int> onPageChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    const pageSize = 20;
+    final totalPages = (items.length / pageSize).ceil().clamp(1, 500);
+    final normalizedPage = currentPage.clamp(1, totalPages);
+    final start = (normalizedPage - 1) * pageSize;
+    final pageItems = items.skip(start).take(pageSize).toList();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
+      child: Column(
+        children: [
+          PosterGrid(items: pageItems, itemCount: pageItems.length),
+          if (totalPages > 1) ...[
+            const SizedBox(height: 28),
+            PaginationBar(
+              currentPage: normalizedPage,
+              totalPages: totalPages,
+              onPageChanged: onPageChanged,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

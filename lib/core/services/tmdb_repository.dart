@@ -1,6 +1,7 @@
 import '../config/app_config.dart';
 import '../models/detail_item.dart';
 import '../models/movie_item.dart';
+import '../models/tmdb_page.dart';
 import '../models/tmdb_person.dart';
 import '../models/tmdb_option.dart';
 import '../models/tmdb_season.dart';
@@ -56,11 +57,31 @@ class TmdbRepository {
     int? year,
     String? certification,
     String sortBy = 'popularity.desc',
+  }) async {
+    return (await discoverMovieBrowsePage(
+      genreId: genreId,
+      country: country,
+      companyId: companyId,
+      year: year,
+      certification: certification,
+      sortBy: sortBy,
+    )).items;
+  }
+
+  Future<TmdbPage<MovieItem>> discoverMovieBrowsePage({
+    int? genreId,
+    String? country,
+    int? companyId,
+    int? year,
+    String? certification,
+    String sortBy = 'popularity.desc',
+    int page = 1,
   }) {
-    return _list(
+    return _pagedList(
       '/discover/movie',
       fallbackMediaType: MediaType.movie,
       query: {
+        'page': page.toString(),
         'with_genres': genreId?.toString(),
         'with_origin_country': country,
         'with_companies': companyId?.toString(),
@@ -80,11 +101,31 @@ class TmdbRepository {
     int? year,
     String? certification,
     String sortBy = 'popularity.desc',
+  }) async {
+    return (await discoverSeriesBrowsePage(
+      genreId: genreId,
+      country: country,
+      companyId: companyId,
+      year: year,
+      certification: certification,
+      sortBy: sortBy,
+    )).items;
+  }
+
+  Future<TmdbPage<MovieItem>> discoverSeriesBrowsePage({
+    int? genreId,
+    String? country,
+    int? companyId,
+    int? year,
+    String? certification,
+    String sortBy = 'popularity.desc',
+    int page = 1,
   }) {
-    return _list(
+    return _pagedList(
       '/discover/tv',
       fallbackMediaType: MediaType.tv,
       query: {
+        'page': page.toString(),
         'with_genres': genreId?.toString(),
         'with_origin_country': country,
         'with_companies': companyId?.toString(),
@@ -98,10 +139,21 @@ class TmdbRepository {
   }
 
   Future<List<MovieItem>> search(String query) async {
+    return (await searchPage(query)).items;
+  }
+
+  Future<TmdbPage<MovieItem>> searchPage(String query, {int page = 1}) async {
     if (query.trim().isEmpty) {
-      return trendingMovies();
+      return _pagedList(
+        '/trending/movie/week',
+        fallbackMediaType: MediaType.movie,
+        query: {'page': page.toString()},
+      );
     }
-    return _list('/search/multi', query: {'query': query.trim()});
+    return _pagedList(
+      '/search/multi',
+      query: {'query': query.trim(), 'page': page.toString()},
+    );
   }
 
   Future<List<MovieItem>> searchMovies(String query) async {
@@ -193,8 +245,13 @@ class TmdbRepository {
 
   Future<List<TmdbOption>> countries() async {
     final data = await _client.get('/configuration/countries');
-    final raw = data['results'] ?? data['countries'];
-    if (raw is! List) {
+    final List<dynamic> raw;
+    if (data is List) {
+      raw = data;
+    } else if (data is Map<String, dynamic>) {
+      raw =
+          (data['results'] ?? data['countries']) as List<dynamic>? ?? const [];
+    } else {
       return const [];
     }
     return raw
@@ -289,13 +346,38 @@ class TmdbRepository {
     Map<String, String?> query = const {},
     MediaType fallbackMediaType = MediaType.movie,
   }) async {
+    return (await _pagedList(
+      path,
+      query: query,
+      fallbackMediaType: fallbackMediaType,
+    )).items;
+  }
+
+  Future<TmdbPage<MovieItem>> _pagedList(
+    String path, {
+    Map<String, String?> query = const {},
+    MediaType fallbackMediaType = MediaType.movie,
+  }) async {
     final data = await _client.get(path, query: query);
+    if (data is! Map<String, dynamic>) {
+      return const TmdbPage<MovieItem>(
+        items: [],
+        page: 1,
+        totalPages: 1,
+        totalResults: 0,
+      );
+    }
     final results = data['results'];
     if (results is! List) {
-      return const [];
+      return TmdbPage<MovieItem>(
+        items: const [],
+        page: _asInt(data['page'], fallback: 1),
+        totalPages: _normalizedTotalPages(data['total_pages']),
+        totalResults: _asInt(data['total_results'], fallback: 0),
+      );
     }
 
-    return results
+    final items = results
         .whereType<Map<String, dynamic>>()
         .where((json) => json['media_type'] != 'person')
         .map(
@@ -303,6 +385,13 @@ class TmdbRepository {
         )
         .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
         .toList();
+
+    return TmdbPage<MovieItem>(
+      items: items,
+      page: _asInt(data['page'], fallback: 1),
+      totalPages: _normalizedTotalPages(data['total_pages']),
+      totalResults: _asInt(data['total_results'], fallback: items.length),
+    );
   }
 
   Future<List<TmdbOption>> _options(String path) async {
@@ -342,6 +431,24 @@ class TmdbRepository {
         .map((item) => (item['certification'] ?? '').toString())
         .where((value) => value.isNotEmpty)
         .toList();
+  }
+
+  int _asInt(Object? value, {required int fallback}) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return fallback;
+  }
+
+  int _normalizedTotalPages(Object? value) {
+    final total = _asInt(value, fallback: 1);
+    if (total < 1) {
+      return 1;
+    }
+    return total > 500 ? 500 : total;
   }
 
   MovieItem _itemFromJson(

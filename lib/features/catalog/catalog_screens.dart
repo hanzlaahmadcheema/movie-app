@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
+import '../../core/models/tmdb_page.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/filter_widgets.dart';
+import '../../widgets/pagination.dart';
 import '../../widgets/poster_widgets.dart';
 
 enum CatalogKind { movies, series }
@@ -19,8 +21,9 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
-  late Future<List<MovieItem>> catalogItems;
+  late Future<TmdbPage<MovieItem>> catalogItems;
   FilterSelection? selection;
+  int currentPage = 1;
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
               onApply: (value) {
                 setState(() {
                   selection = value;
+                  currentPage = 1;
                   catalogItems = _loadCatalogForSelection(value);
                 });
               },
@@ -54,7 +58,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(5, 40, 5, 0),
-            child: FutureBuilder<List<MovieItem>>(
+            child: FutureBuilder<TmdbPage<MovieItem>>(
               future: catalogItems,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
@@ -63,7 +67,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                final page = snapshot.data;
+                final items =
+                    page?.items.take(20).toList() ?? const <MovieItem>[];
+                if (page == null || items.isEmpty) {
                   return Center(
                     child: IconButton(
                       onPressed: () => setState(() {
@@ -74,7 +81,19 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   );
                 }
 
-                return PosterGrid(items: snapshot.data!, itemCount: 10);
+                return Column(
+                  children: [
+                    PosterGrid(items: items, itemCount: items.length),
+                    if (page.hasMultiplePages) ...[
+                      const SizedBox(height: 28),
+                      PaginationBar(
+                        currentPage: currentPage,
+                        totalPages: page.totalPages,
+                        onPageChanged: _goToPage,
+                      ),
+                    ],
+                  ],
+                );
               },
             ),
           ),
@@ -85,26 +104,35 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Future<List<MovieItem>> _loadCatalogForSelection(
+  Future<TmdbPage<MovieItem>> _loadCatalogForSelection(
     FilterSelection? selection,
   ) async {
     final repository = TmdbRepository(config: AppConfig.fromEnv());
     final year = int.tryParse(selection?.releaseYear ?? '');
 
     if (widget.kind == CatalogKind.movies) {
-      return repository.discoverMovieBrowse(
+      return repository.discoverMovieBrowsePage(
         genreId: int.tryParse(selection?.genreId ?? ''),
         country: selection?.countryCode,
         year: year,
         certification: selection?.rating,
+        page: currentPage,
       );
     }
 
-    return repository.discoverSeriesBrowse(
+    return repository.discoverSeriesBrowsePage(
       genreId: int.tryParse(selection?.genreId ?? ''),
       country: selection?.countryCode,
       year: year,
       certification: selection?.rating,
+      page: currentPage,
     );
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      currentPage = page;
+      catalogItems = _loadCatalogForSelection(selection);
+    });
   }
 }

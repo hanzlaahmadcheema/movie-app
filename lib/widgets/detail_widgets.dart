@@ -301,31 +301,39 @@ class DetailInfoCarousel extends StatelessWidget {
           item: items[index],
           wide: index == 0 || index == items.length - 1,
           onTap: () => _handleInfoTap(context, items[index]),
+          onSubItemTap: (subValue) =>
+              _handleInfoTap(context, items[index], subValue),
         ),
       ),
     );
   }
 
-  void _handleInfoTap(BuildContext context, DetailInfo item) {
+  void _handleInfoTap(
+    BuildContext context,
+    DetailInfo item, [
+    String? subValue,
+  ]) {
     final label = item.label.toLowerCase();
+    final valueToUse = subValue ?? item.value;
+
     if (label.contains('cast')) {
-      final firstCast = item.value.split(',').first.trim();
+      final firstCast = valueToUse.split(',').first.trim();
       openCastDetail(context, firstCast);
       return;
     }
     if (label.contains('genre')) {
-      openGenreBrowse(context, item.value);
+      openGenreBrowse(context, valueToUse.split(',').first.trim());
       return;
     }
     if (label.contains('country')) {
-      openCountryBrowse(context, item.value);
+      openCountryBrowse(context, valueToUse.split(',').first.trim());
       return;
     }
     if (label.contains('production')) {
-      openProductionBrowse(context, item.value);
+      openProductionBrowse(context, valueToUse.split(',').first.trim());
       return;
     }
-    openSearchResult(context, item.value);
+    openSearchResult(context, valueToUse.split(',').first.trim());
   }
 }
 
@@ -333,17 +341,28 @@ class _BlurInfoCard extends StatelessWidget {
   const _BlurInfoCard({
     required this.item,
     required this.wide,
-    required this.onTap,
+    this.onTap,
+    this.onSubItemTap,
   });
 
   final DetailInfo item;
   final bool wide;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final void Function(String)? onSubItemTap;
+
+  bool get _isClickable {
+    final label = item.label.toLowerCase();
+    return label.contains('cast') ||
+        label.contains('genre') ||
+        label.contains('country') ||
+        label.contains('production');
+  }
 
   @override
   Widget build(BuildContext context) {
+    final clickable = _isClickable;
     return InkWell(
-      onTap: onTap,
+      onTap: clickable ? onTap : null,
       borderRadius: BorderRadius.circular(10),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
@@ -359,14 +378,42 @@ class _BlurInfoCard extends StatelessWidget {
               children: [
                 Text(item.label, style: AppTextStyles.medium),
                 const SizedBox(height: 12),
-                Text(
-                  item.value,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.normal.copyWith(
-                    decoration: TextDecoration.underline,
+                if (clickable && item.value.contains(','))
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: () {
+                      final parts = item.value.split(',');
+                      return parts.asMap().entries.map((entry) {
+                        final isLast = entry.key == parts.length - 1;
+                        final trimmed = entry.value.trim();
+                        return GestureDetector(
+                          onTap: () {
+                            if (onSubItemTap != null) {
+                              onSubItemTap!(trimmed);
+                            }
+                          },
+                          child: Text(
+                            trimmed + (isLast ? '' : ','),
+                            style: AppTextStyles.normal.copyWith(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        );
+                      }).toList();
+                    }(),
+                  )
+                else
+                  Text(
+                    item.value,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.normal.copyWith(
+                      decoration: clickable
+                          ? TextDecoration.underline
+                          : TextDecoration.none,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

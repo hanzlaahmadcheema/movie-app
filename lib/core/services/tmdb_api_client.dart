@@ -22,7 +22,7 @@ class TmdbApiClient {
   final AppConfig _config;
   final http.Client _httpClient;
 
-  Future<Map<String, dynamic>> get(
+  Future<dynamic> get(
     String path, {
     Map<String, String?> query = const {},
   }) async {
@@ -51,7 +51,7 @@ class TmdbApiClient {
     }
 
     final decoded = jsonDecode(response.body);
-    if (decoded is Map<String, dynamic>) {
+    if (decoded is Map<String, dynamic> || decoded is List<dynamic>) {
       return decoded;
     }
 
