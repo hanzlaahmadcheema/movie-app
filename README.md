@@ -1,40 +1,50 @@
-# ABCloset Custom Shopify Theme
+# MovieApp Flutter
 
-Custom Shopify theme developed for ABCloset, a kids apparel e-commerce store. The theme focuses on a clean storefront, improved product presentation, responsive layouts, and a better shopping experience for customers browsing children’s clothing.
+Flutter mobile application for discovering movies and TV series using a modern dark-themed interface and TMDB API integration.
 
 ## Project Overview
 
-ABCloset Custom Shopify Theme is a storefront customization project built around Shopify theme development. The goal was to tailor the store design, collection pages, product presentation, and general customer-facing layout according to the ABCloset brand and product category.
+MovieApp is a Flutter-based movie discovery application built from a Figma-inspired mobile UI. The app allows users to browse trending movies, trending TV series, latest movies, latest TV series, cast details, search results, detail pages, and watch screens.
+
+The project uses a modular Flutter structure with separate layers for app routing, theme configuration, core services, models, reusable widgets, and feature-based screens.
 
 ## Key Features
 
-- Custom Shopify storefront theme
-- Responsive e-commerce layout for desktop and mobile screens
-- Product and collection page customization
-- Improved collection grid presentation
-- Brand-focused design for kids apparel
-- Shopify theme structure customization
-- Storefront UI/UX improvements
-- Custom styling and layout adjustments
+- Dark-themed responsive Flutter UI
+- Trending movies and trending TV series
+- Latest movies and latest TV series
+- Movie and series detail pages
+- Cast detail pages
+- Search functionality
+- Genre, country, and production browsing
+- Watch screens for movies and series
+- TMDB API integration
+- Environment-based API configuration
+- Reusable widgets and modular project structure
 
 ## Tech Stack
 
-- Shopify
-- Shopify Liquid
-- HTML
-- CSS
-- JavaScript
+- Flutter
+- Dart
+- TMDB API
+- REST API
+- HTTP
+- flutter_dotenv
+- Material UI
 - Git
 - GitHub
 
-## My Role
+## Project Structure
 
-I worked on customizing the Shopify theme structure, improving storefront layout, adjusting product and collection presentation, and refining the user interface to better match the business and customer needs of a kids apparel store.
+- `lib/app/` contains app bootstrap, routes, and theme configuration.
+- `lib/core/` contains config, constants, models, navigation, and services.
+- `lib/features/` contains feature screens such as home, catalog, details, search, watch, and auth.
+- `lib/widgets/` contains reusable UI components.
+- `assets/images/` contains local image assets.
 
-## Repository Purpose
+## Commands
 
-This repository stores the custom Shopify theme files and related storefront customizations for ABCloset.
-
-## Project Status
-
-The theme is under active customization and can be extended with additional sections, product page improvements, collection filters, promotional banners, and conversion-focused e-commerce features.
+```sh
+flutter analyze
+flutter test
+flutter build apk --debug
