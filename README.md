@@ -1,21 +1,40 @@
-# MovieApp Flutter
+# ABCloset Custom Shopify Theme
 
-Flutter mobile implementation of the MovieApp Figma design.
+Custom Shopify theme developed for ABCloset, a kids apparel e-commerce store. The theme focuses on a clean storefront, improved product presentation, responsive layouts, and a better shopping experience for customers browsing children’s clothing.
 
-## Structure
+## Project Overview
 
-- `lib/app/` contains theme, routes, and app bootstrap.
-- `lib/core/` contains design constants, models, and mock data.
-- `lib/widgets/` contains reusable UI widgets.
-- `lib/features/` contains screens composed from shared widgets.
-- `assets/images/` contains local image assets exported from Figma.
+ABCloset Custom Shopify Theme is a storefront customization project built around Shopify theme development. The goal was to tailor the store design, collection pages, product presentation, and general customer-facing layout according to the ABCloset brand and product category.
 
-## Commands
+## Key Features
 
-```sh
-flutter analyze
-flutter test
-flutter build apk --debug
-```
+- Custom Shopify storefront theme
+- Responsive e-commerce layout for desktop and mobile screens
+- Product and collection page customization
+- Improved collection grid presentation
+- Brand-focused design for kids apparel
+- Shopify theme structure customization
+- Storefront UI/UX improvements
+- Custom styling and layout adjustments
 
-The current build is UI-first with local mock data. Firebase integration points can be added next for auth, watchlist, likes, and catalog data.
+## Tech Stack
+
+- Shopify
+- Shopify Liquid
+- HTML
+- CSS
+- JavaScript
+- Git
+- GitHub
+
+## My Role
+
+I worked on customizing the Shopify theme structure, improving storefront layout, adjusting product and collection presentation, and refining the user interface to better match the business and customer needs of a kids apparel store.
+
+## Repository Purpose
+
+This repository stores the custom Shopify theme files and related storefront customizations for ABCloset.
+
+## Project Status
+
+The theme is under active customization and can be extended with additional sections, product page improvements, collection filters, promotional banners, and conversion-focused e-commerce features.
