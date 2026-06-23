@@ -19,9 +19,18 @@ ios/Runner.xcodeproj/xcuserdata/
 
 # IDE
 .idea/
+.vscode/
 *.iml
 
 # Environment and local files
 .env
+.env.*
+!.env.example
+android/key.properties
+*.jks
+*.keystore
 .DS_Store
 docs/
+firepit-log.txt
+google-services.json
+!android/app/google-services.json
