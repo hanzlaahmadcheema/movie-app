@@ -1,0 +1,592 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function userRole() {
+      return isSignedIn() && userDoc(request.auth.uid).data.role is string
+        ? userDoc(request.auth.uid).data.role
+        : 'user';
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userRole() in ['admin', 'super_admin'];
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && userRole() == 'super_admin';
+    }
+
+    function optionalString(data, field, maxLength) {
+      return !(field in data) ||
+        data[field] == null ||
+        (data[field] is string && data[field].size() <= maxLength);
+    }
+
+    function optionalTimestamp(data, field) {
+      return !(field in data) || data[field] is timestamp;
+    }
+
+    function optionalBool(data, field) {
+      return !(field in data) || data[field] is bool;
+    }
+
+    function optionalInt(data, field) {
+      return !(field in data) || data[field] is int;
+    }
+
+    function validContentKey(contentKey) {
+      return contentKey is string &&
+        (contentKey.matches('^movie_[0-9]+$') || contentKey.matches('^tv_[0-9]+$'));
+    }
+
+    function validContentSnapshot(data, contentKey) {
+      return data.contentKey == contentKey &&
+        validContentKey(data.contentKey) &&
+        data.tmdbId is int &&
+        data.tmdbId > 0 &&
+        data.mediaType in ['movie', 'tv'] &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.title.size() <= 200 &&
+        data.year is string &&
+        data.year.size() <= 20 &&
+        optionalString(data, 'posterPath', 300) &&
+        optionalString(data, 'backdropPath', 300) &&
+        data.posterUrl is string &&
+        data.posterUrl.size() <= 600 &&
+        data.backdropUrl is string &&
+        data.backdropUrl.size() <= 600 &&
+        data.voteAverage is number &&
+        data.voteAverage >= 0 &&
+        data.voteAverage <= 10;
+    }
+
+    function validProfileCreate(data, uid) {
+      return data.keys().hasOnly([
+        'uid',
+        'email',
+        'phoneNumber',
+        'displayName',
+        'photoUrl',
+        'providers',
+        'role',
+        'status',
+        'createdAt',
+        'lastLoginAt',
+        'updatedAt'
+      ]) &&
+        data.uid == uid &&
+        optionalString(data, 'email', 320) &&
+        optionalString(data, 'phoneNumber', 32) &&
+        optionalString(data, 'displayName', 120) &&
+        optionalString(data, 'photoUrl', 600) &&
+        (!('providers' in data) || data.providers is list) &&
+        (!('role' in data) || data.role == 'user') &&
+        (!('status' in data) || data.status == 'active') &&
+        optionalTimestamp(data, 'createdAt') &&
+        optionalTimestamp(data, 'lastLoginAt') &&
+        data.updatedAt is timestamp;
+    }
+
+    function validProfileUpdate(data, uid) {
+      return validProfileCreate(data, uid) &&
+        (!('createdAt' in resource.data) || data.createdAt == resource.data.createdAt) &&
+        data.role == resource.data.role &&
+        data.status == resource.data.status;
+    }
+
+    function validAdminManagedProfileUpdate(data, uid) {
+      return data.keys().hasOnly([
+        'uid',
+        'email',
+        'phoneNumber',
+        'displayName',
+        'photoUrl',
+        'providers',
+        'role',
+        'status',
+        'createdAt',
+        'lastLoginAt',
+        'updatedAt'
+      ]) &&
+        data.uid == uid &&
+        optionalString(data, 'email', 320) &&
+        optionalString(data, 'phoneNumber', 32) &&
+        optionalString(data, 'displayName', 120) &&
+        optionalString(data, 'photoUrl', 600) &&
+        (!('providers' in data) || data.providers is list) &&
+        data.role in ['user', 'admin', 'super_admin'] &&
+        data.status in ['active', 'blocked'] &&
+        optionalTimestamp(data, 'createdAt') &&
+        optionalTimestamp(data, 'lastLoginAt') &&
+        data.updatedAt is timestamp;
+    }
+
+    function validWatchlistWrite(data, contentKey) {
+      return data.keys().hasOnly([
+        'contentKey',
+        'tmdbId',
+        'mediaType',
+        'title',
+        'year',
+        'posterPath',
+        'backdropPath',
+        'posterUrl',
+        'backdropUrl',
+        'voteAverage',
+        'addedAt',
+        'updatedAt'
+      ]) &&
+        data.keys().hasAll([
+          'contentKey',
+          'tmdbId',
+          'mediaType',
+          'title',
+          'year',
+          'posterUrl',
+          'backdropUrl',
+          'voteAverage',
+          'addedAt',
+          'updatedAt'
+        ]) &&
+        validContentSnapshot(data, contentKey) &&
+        data.addedAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function validWatchedWrite(data, contentKey) {
+      return data.keys().hasOnly([
+        'contentKey',
+        'tmdbId',
+        'mediaType',
+        'title',
+        'year',
+        'posterPath',
+        'backdropPath',
+        'posterUrl',
+        'backdropUrl',
+        'voteAverage',
+        'watchedAt',
+        'updatedAt'
+      ]) &&
+        data.keys().hasAll([
+          'contentKey',
+          'tmdbId',
+          'mediaType',
+          'title',
+          'year',
+          'posterUrl',
+          'backdropUrl',
+          'voteAverage',
+          'watchedAt',
+          'updatedAt'
+        ]) &&
+        validContentSnapshot(data, contentKey) &&
+        data.watchedAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Expected activity shape:
+    // content snapshot + selectedServer/lastAction/progress fields + optional
+    // bounded playback metadata for Jellyfin/native/web resume.
+    function validActivityWrite(data, contentKey) {
+      return data.keys().hasOnly([
+        'contentKey',
+        'tmdbId',
+        'mediaType',
+        'title',
+        'year',
+        'posterPath',
+        'backdropPath',
+        'posterUrl',
+        'backdropUrl',
+        'voteAverage',
+        'lastAction',
+        'lastWatchedAt',
+        'startedAt',
+        'reaction',
+        'selectedServer',
+        'seasonNumber',
+        'episodeNumber',
+        'episodeTitle',
+        'positionSeconds',
+        'durationSeconds',
+        'providerId',
+        'jellyfinItemId',
+        'playbackMode',
+        'mediaSourceId',
+        'updatedAt'
+      ]) &&
+        data.keys().hasAll([
+          'contentKey',
+          'tmdbId',
+          'mediaType',
+          'title',
+          'year',
+          'posterUrl',
+          'backdropUrl',
+          'voteAverage',
+          'updatedAt'
+        ]) &&
+        validContentSnapshot(data, contentKey) &&
+        optionalString(data, 'lastAction', 40) &&
+        (!('lastAction' in data) || data.lastAction in [
+          'opened',
+          'played',
+          'reactionChanged',
+          'serverSelected',
+          'episodeSelected'
+        ]) &&
+        optionalTimestamp(data, 'lastWatchedAt') &&
+        optionalTimestamp(data, 'startedAt') &&
+        (!('reaction' in data) || data.reaction in ['like', 'unlike']) &&
+        optionalString(data, 'selectedServer', 120) &&
+        (!('seasonNumber' in data) || (data.seasonNumber is int && data.seasonNumber > 0)) &&
+        (!('episodeNumber' in data) || (data.episodeNumber is int && data.episodeNumber > 0)) &&
+        optionalString(data, 'episodeTitle', 200) &&
+        (!('positionSeconds' in data) || (data.positionSeconds is int && data.positionSeconds >= 0)) &&
+        (!('durationSeconds' in data) || (
+          data.durationSeconds is int &&
+          data.durationSeconds > 0 &&
+          data.durationSeconds <= 86400
+        )) &&
+        optionalString(data, 'providerId', 120) &&
+        optionalString(data, 'jellyfinItemId', 200) &&
+        (!('playbackMode' in data) || data.playbackMode in ['native', 'web']) &&
+        optionalString(data, 'mediaSourceId', 200) &&
+        data.updatedAt is timestamp;
+    }
+
+    function validFeaturedWrite(data) {
+      return data.keys().hasOnly([
+        'tmdbId',
+        'contentType',
+        'section',
+        'titleOverride',
+        'subtitle',
+        'order',
+        'enabled',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+        data.tmdbId is int &&
+        data.tmdbId > 0 &&
+        data.contentType in ['movie', 'series'] &&
+        data.section is string &&
+        data.section.size() > 0 &&
+        data.section.size() <= 40 &&
+        optionalString(data, 'titleOverride', 200) &&
+        optionalString(data, 'subtitle', 300) &&
+        data.order is int &&
+        data.enabled is bool &&
+        optionalTimestamp(data, 'createdAt') &&
+        data.updatedAt is timestamp;
+    }
+
+    function validBannerWrite(data) {
+      return data.keys().hasOnly([
+        'title',
+        'subtitle',
+        'tmdbId',
+        'contentType',
+        'imageUrl',
+        'buttonText',
+        'buttonAction',
+        'order',
+        'enabled',
+        'startAt',
+        'endAt',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.title.size() <= 200 &&
+        data.subtitle is string &&
+        data.subtitle.size() <= 400 &&
+        data.tmdbId is int &&
+        data.tmdbId > 0 &&
+        data.contentType in ['movie', 'series'] &&
+        optionalString(data, 'imageUrl', 1000) &&
+        data.buttonText is string &&
+        data.buttonText.size() > 0 &&
+        data.buttonText.size() <= 80 &&
+        data.buttonAction in ['watch', 'details'] &&
+        data.order is int &&
+        data.enabled is bool &&
+        optionalTimestamp(data, 'startAt') &&
+        optionalTimestamp(data, 'endAt') &&
+        optionalTimestamp(data, 'createdAt') &&
+        data.updatedAt is timestamp;
+    }
+
+    function validNoticeWrite(data) {
+      return data.keys().hasOnly([
+        'title',
+        'message',
+        'type',
+        'target',
+        'enabled',
+        'startAt',
+        'endAt',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.title.size() <= 200 &&
+        data.message is string &&
+        data.message.size() > 0 &&
+        data.message.size() <= 2000 &&
+        data.type in ['info', 'warning', 'danger', 'success'] &&
+        data.target in ['all', 'admins', 'users'] &&
+        data.enabled is bool &&
+        optionalTimestamp(data, 'startAt') &&
+        optionalTimestamp(data, 'endAt') &&
+        optionalTimestamp(data, 'createdAt') &&
+        data.updatedAt is timestamp;
+    }
+
+    function validProviderWrite(data, providerId) {
+      return data.keys().hasOnly([
+        'providerId',
+        'displayName',
+        'enabled',
+        'priority',
+        'maintenanceMode',
+        'statusMessage',
+        'fallbackAllowed',
+        'updatedAt'
+      ]) &&
+        data.providerId == providerId &&
+        data.displayName is string &&
+        data.displayName.size() > 0 &&
+        data.displayName.size() <= 120 &&
+        data.enabled is bool &&
+        data.priority is int &&
+        data.maintenanceMode is bool &&
+        optionalString(data, 'statusMessage', 300) &&
+        data.fallbackAllowed is bool &&
+        data.updatedAt is timestamp;
+    }
+
+    function validAppConfigWrite(data) {
+      return data.keys().hasOnly([
+        'maintenanceMode',
+        'maintenanceMessage',
+        'minimumAppVersion',
+        'forceUpdateEnabled',
+        'forceUpdateMessage',
+        'signupEnabled',
+        'googleLoginEnabled',
+        'phoneLoginEnabled',
+        'defaultPlaybackMode',
+        'contactEmail',
+        'supportWhatsapp',
+        'privacyPolicyUrl',
+        'termsUrl',
+        'defaultServerUrl',
+        'jellyfinEnabled',
+        'jellyfinNativeEnabled',
+        'jellyfinWebEnabled',
+        'tailscaleRequiredMessage',
+        'jellyfinSetupGuide',
+        'updatedAt'
+      ]) &&
+        optionalBool(data, 'maintenanceMode') &&
+        optionalString(data, 'maintenanceMessage', 1000) &&
+        optionalString(data, 'minimumAppVersion', 40) &&
+        optionalBool(data, 'forceUpdateEnabled') &&
+        optionalString(data, 'forceUpdateMessage', 1000) &&
+        optionalBool(data, 'signupEnabled') &&
+        optionalBool(data, 'googleLoginEnabled') &&
+        optionalBool(data, 'phoneLoginEnabled') &&
+        optionalString(data, 'defaultPlaybackMode', 32) &&
+        optionalString(data, 'contactEmail', 320) &&
+        optionalString(data, 'supportWhatsapp', 64) &&
+        optionalString(data, 'privacyPolicyUrl', 1000) &&
+        optionalString(data, 'termsUrl', 1000) &&
+        optionalString(data, 'defaultServerUrl', 1000) &&
+        optionalBool(data, 'jellyfinEnabled') &&
+        optionalBool(data, 'jellyfinNativeEnabled') &&
+        optionalBool(data, 'jellyfinWebEnabled') &&
+        optionalString(data, 'tailscaleRequiredMessage', 300) &&
+        optionalString(data, 'jellyfinSetupGuide', 4000) &&
+        data.updatedAt is timestamp;
+    }
+
+    function validContentRequestCreate(data) {
+      return data.keys().hasOnly([
+        'userId',
+        'userEmail',
+        'type',
+        'title',
+        'tmdbId',
+        'contentType',
+        'seasonNumber',
+        'episodeNumber',
+        'message',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+        data.userId == request.auth.uid &&
+        optionalString(data, 'userEmail', 320) &&
+        data.type in [
+          'request_movie',
+          'request_series',
+          'missing_episode',
+          'video_not_playing',
+          'subtitle_issue',
+          'wrong_content',
+          'other'
+        ] &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.title.size() <= 200 &&
+        optionalInt(data, 'tmdbId') &&
+        (!( 'contentType' in data) || data.contentType in ['movie', 'series']) &&
+        optionalInt(data, 'seasonNumber') &&
+        optionalInt(data, 'episodeNumber') &&
+        data.message is string &&
+        data.message.size() > 0 &&
+        data.message.size() <= 2000 &&
+        data.status == 'pending' &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function validContentRequestAdminUpdate() {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly([
+        'status',
+        'adminNote',
+        'updatedAt'
+      ]) &&
+        request.resource.data.status in [
+          'pending',
+          'in_progress',
+          'resolved',
+          'rejected'
+        ] &&
+        optionalString(request.resource.data, 'adminNote', 2000) &&
+        request.resource.data.updatedAt is timestamp;
+    }
+
+    function validPlaybackLogCreate(data) {
+      return data.keys().hasOnly([
+        'userId',
+        'contentType',
+        'tmdbId',
+        'seasonNumber',
+        'episodeNumber',
+        'providerId',
+        'playbackMode',
+        'errorType',
+        'errorMessageSafe',
+        'devicePlatform',
+        'appVersion',
+        'createdAt'
+      ]) &&
+        data.userId == request.auth.uid &&
+        data.contentType is string &&
+        data.contentType.size() <= 40 &&
+        optionalInt(data, 'tmdbId') &&
+        optionalInt(data, 'seasonNumber') &&
+        optionalInt(data, 'episodeNumber') &&
+        data.providerId is string &&
+        data.providerId.size() <= 120 &&
+        data.playbackMode is string &&
+        data.playbackMode.size() <= 40 &&
+        data.errorType is string &&
+        data.errorType.size() <= 120 &&
+        data.errorMessageSafe is string &&
+        data.errorMessageSafe.size() <= 1000 &&
+        data.devicePlatform is string &&
+        data.devicePlatform.size() <= 60 &&
+        data.appVersion is string &&
+        data.appVersion.size() <= 60 &&
+        data.createdAt is timestamp;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow delete: if isOwner(uid);
+      allow create: if isOwner(uid) && validProfileCreate(request.resource.data, uid);
+      allow update: if (isOwner(uid) && validProfileUpdate(request.resource.data, uid)) ||
+        (isSuperAdmin() && validAdminManagedProfileUpdate(request.resource.data, uid));
+
+      match /watchlist/{contentKey} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) &&
+          validWatchlistWrite(request.resource.data, contentKey);
+      }
+
+      match /activity/{contentKey} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) &&
+          validActivityWrite(request.resource.data, contentKey);
+      }
+
+
+      match /watched/{contentKey} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) &&
+          validWatchedWrite(request.resource.data, contentKey);
+      }
+    }
+
+    match /appConfig/main {
+      allow read: if true;
+      allow write: if isAdmin() && validAppConfigWrite(request.resource.data);
+    }
+
+    match /providers/{providerId} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        validProviderWrite(request.resource.data, providerId);
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin() && validBannerWrite(request.resource.data);
+    }
+
+    match /featuredContent/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin() && validFeaturedWrite(request.resource.data);
+    }
+
+    match /notices/{noticeId} {
+      allow read: if true;
+      allow write: if isAdmin() && validNoticeWrite(request.resource.data);
+    }
+
+    match /contentRequests/{requestId} {
+      allow create: if isSignedIn() && validContentRequestCreate(request.resource.data);
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update: if isAdmin() && validContentRequestAdminUpdate();
+      allow delete: if isAdmin();
+    }
+
+    match /playbackLogs/{logId} {
+      allow create: if isSignedIn() && validPlaybackLogCreate(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

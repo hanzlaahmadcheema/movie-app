@@ -56,6 +56,7 @@ class TmdbRepository {
     int? companyId,
     int? year,
     String? certification,
+    double? ratingGte,
     String sortBy = 'popularity.desc',
   }) async {
     return (await discoverMovieBrowsePage(
@@ -64,6 +65,7 @@ class TmdbRepository {
       companyId: companyId,
       year: year,
       certification: certification,
+      ratingGte: ratingGte,
       sortBy: sortBy,
     )).items;
   }
@@ -74,6 +76,7 @@ class TmdbRepository {
     int? companyId,
     int? year,
     String? certification,
+    double? ratingGte,
     String sortBy = 'popularity.desc',
     int page = 1,
   }) {
@@ -89,6 +92,7 @@ class TmdbRepository {
         'certification_country':
             certification != null && certification.isNotEmpty ? 'US' : null,
         'certification.lte': certification,
+        'vote_average.gte': ratingGte?.toStringAsFixed(1),
         'sort_by': sortBy,
       },
     );
@@ -100,6 +104,7 @@ class TmdbRepository {
     int? companyId,
     int? year,
     String? certification,
+    double? ratingGte,
     String sortBy = 'popularity.desc',
   }) async {
     return (await discoverSeriesBrowsePage(
@@ -108,6 +113,7 @@ class TmdbRepository {
       companyId: companyId,
       year: year,
       certification: certification,
+      ratingGte: ratingGte,
       sortBy: sortBy,
     )).items;
   }
@@ -118,6 +124,7 @@ class TmdbRepository {
     int? companyId,
     int? year,
     String? certification,
+    double? ratingGte,
     String sortBy = 'popularity.desc',
     int page = 1,
   }) {
@@ -133,6 +140,7 @@ class TmdbRepository {
         'certification_country':
             certification != null && certification.isNotEmpty ? 'US' : null,
         'certification.lte': certification,
+        'vote_average.gte': ratingGte?.toStringAsFixed(1),
         'sort_by': sortBy,
       },
     );
@@ -152,6 +160,34 @@ class TmdbRepository {
     }
     return _pagedList(
       '/search/multi',
+      query: {'query': query.trim(), 'page': page.toString()},
+    );
+  }
+
+  Future<TmdbPage<MovieItem>> searchMoviePage(
+    String query, {
+    int page = 1,
+  }) async {
+    if (query.trim().isEmpty) {
+      return discoverMovieBrowsePage(page: page);
+    }
+    return _pagedList(
+      '/search/movie',
+      fallbackMediaType: MediaType.movie,
+      query: {'query': query.trim(), 'page': page.toString()},
+    );
+  }
+
+  Future<TmdbPage<MovieItem>> searchSeriesPage(
+    String query, {
+    int page = 1,
+  }) async {
+    if (query.trim().isEmpty) {
+      return discoverSeriesBrowsePage(page: page);
+    }
+    return _pagedList(
+      '/search/tv',
+      fallbackMediaType: MediaType.tv,
       query: {'query': query.trim(), 'page': page.toString()},
     );
   }
@@ -225,6 +261,22 @@ class TmdbRepository {
       videos: _videosFromDetail(data),
       seasons: _seasonsFromDetail(data),
     );
+  }
+
+  Future<MovieItem?> movieById(int tmdbId) async {
+    if (tmdbId <= 0) {
+      return null;
+    }
+    final data = await _client.get('/movie/$tmdbId');
+    return _itemFromJson(data, fallbackMediaType: MediaType.movie);
+  }
+
+  Future<MovieItem?> seriesById(int tmdbId) async {
+    if (tmdbId <= 0) {
+      return null;
+    }
+    final data = await _client.get('/tv/$tmdbId');
+    return _itemFromJson(data, fallbackMediaType: MediaType.tv);
   }
 
   Future<List<TmdbOption>> movieGenres() async {

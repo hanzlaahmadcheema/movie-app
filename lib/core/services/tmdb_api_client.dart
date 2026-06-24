@@ -26,11 +26,11 @@ class TmdbApiClient {
     String path, {
     Map<String, String?> query = const {},
   }) async {
-    if (!_config.hasTmdbToken) {
-      throw const TmdbApiException('TMDB token is missing');
+    if (!_config.hasTmdbProxy) {
+      throw const TmdbApiException('TMDB proxy is not configured');
     }
 
-    final uri = Uri.parse('${_config.tmdbBaseUrl}$path').replace(
+    final uri = Uri.parse('${_config.tmdbProxyBaseUrl}$path').replace(
       queryParameters: {
         for (final entry in query.entries)
           if (entry.value != null && entry.value!.trim().isNotEmpty)
@@ -38,13 +38,9 @@ class TmdbApiClient {
       },
     );
 
-    final response = await _httpClient.get(
-      uri,
-      headers: {
-        'accept': 'application/json',
-        'authorization': 'Bearer ${_config.tmdbReadAccessToken}',
-      },
-    );
+    final response = await _httpClient
+        .get(uri, headers: {'accept': 'application/json'})
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw TmdbApiException(response.body, response.statusCode);

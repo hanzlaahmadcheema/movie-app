@@ -7,25 +7,35 @@ import '../core/models/detail_item.dart';
 import '../core/models/movie_item.dart';
 import '../core/navigation/content_navigation.dart';
 import 'buttons.dart';
+import 'firebase_posters.dart';
 import 'network_art.dart';
-import 'poster_widgets.dart';
 
 class DetailHero extends StatelessWidget {
   const DetailHero({
     required this.item,
     required this.onWatch,
+    this.watchlisted = false,
+    this.watched = false,
+    this.onWatchlistChanged,
+    this.onWatchedChanged,
+    this.onTrailer,
     this.showBackground = true,
     super.key,
   });
 
   final MovieItem item;
   final VoidCallback onWatch;
+  final bool watchlisted;
+  final bool watched;
+  final ValueChanged<bool>? onWatchlistChanged;
+  final ValueChanged<bool>? onWatchedChanged;
+  final VoidCallback? onTrailer;
   final bool showBackground;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 620,
+      height: 665,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -83,26 +93,34 @@ class DetailHero extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 584,
-            left: 32,
-            right: 32,
+            top: 575,
+            left: 18,
+            right: 18,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _DetailAction(
-                  icon: Icons.video_camera_back_outlined,
-                  label: 'Watch Trailer',
-                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Trailer playback is not wired yet'),
-                    ),
+                Expanded(
+                  child: _DetailAction(
+                    icon: Icons.video_camera_back_outlined,
+                    label: 'Trailer',
+                    onTap: onTrailer,
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                  child: VerticalDivider(color: Colors.white54),
+                Expanded(
+                  child: _DetailAction(
+                    icon: watched
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                    iconColor: watched ? AppColors.primary : null,
+                    label: watched ? 'Watched' : 'Watched?',
+                    onTap: () => onWatchedChanged?.call(!watched),
+                  ),
                 ),
-                const _DetailWatchlistAction(),
+                Expanded(
+                  child: _DetailWatchlistAction(
+                    active: watchlisted,
+                    onChanged: onWatchlistChanged,
+                  ),
+                ),
               ],
             ),
           ),
@@ -164,31 +182,20 @@ class DetailBackdrop extends StatelessWidget {
   }
 }
 
-class _DetailWatchlistAction extends StatefulWidget {
-  const _DetailWatchlistAction();
+class _DetailWatchlistAction extends StatelessWidget {
+  const _DetailWatchlistAction({required this.active, this.onChanged});
 
-  @override
-  State<_DetailWatchlistAction> createState() => _DetailWatchlistActionState();
-}
-
-class _DetailWatchlistActionState extends State<_DetailWatchlistAction> {
-  bool active = false;
+  final bool active;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return _DetailAction(
       icon: active ? Icons.bookmark : Icons.bookmark_border,
       iconColor: active ? AppColors.primary : null,
-      label: active ? 'In Watchlist' : 'Add to Watchlist',
+      label: active ? 'Saved' : 'Watchlist',
       onTap: () {
-        setState(() => active = !active);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              active ? 'Added to watchlist' : 'Removed from watchlist',
-            ),
-          ),
-        );
+        onChanged?.call(!active);
       },
     );
   }
@@ -212,12 +219,21 @@ class _DetailAction extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 18, color: iconColor),
-            const SizedBox(width: 7),
-            Text(label, style: AppTextStyles.medium.copyWith(fontSize: 14)),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.medium.copyWith(fontSize: 12),
+              ),
+            ),
           ],
         ),
       ),
@@ -257,7 +273,7 @@ class DetailBody extends StatelessWidget {
           DetailInfoCarousel(items: info),
           if (includeRelated) ...[
             const SizedBox(height: 52),
-            HorizontalPosterSection(
+            FirebaseHorizontalPosterSection(
               title: 'You may also like',
               items: moreLikeThis,
               onItemTap: (item) => openDetailForItem(context, item),
@@ -276,7 +292,7 @@ class RelatedPosterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HorizontalPosterSection(
+    return FirebaseHorizontalPosterSection(
       title: 'You may also like',
       items: items,
       onItemTap: (item) => openDetailForItem(context, item),

@@ -8,12 +8,17 @@ import '../../core/constants/app_assets.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_person.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/services/tmdb_repository.dart';
+import '../../core/services/user_activity_repository.dart';
+import '../../core/trailer/trailer_picker.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
+import '../../widgets/firebase_posters.dart';
 import '../../widgets/network_art.dart';
 import '../../widgets/pagination.dart';
 import '../../widgets/poster_widgets.dart';
+import '../../widgets/state_views.dart';
 
 class MovieDetailScreen extends StatelessWidget {
   const MovieDetailScreen({this.item, super.key});
@@ -22,11 +27,7 @@ class MovieDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _DetailPage(
-      item: item,
-      watchRoute: AppRoutes.movieWatch,
-      isSeries: false,
-    );
+    return _DetailPage(item: item, isSeries: false);
   }
 }
 
@@ -37,23 +38,14 @@ class SeriesDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _DetailPage(
-      item: item,
-      watchRoute: AppRoutes.seriesWatch,
-      isSeries: true,
-    );
+    return _DetailPage(item: item, isSeries: true);
   }
 }
 
 class _DetailPage extends StatefulWidget {
-  const _DetailPage({
-    required this.item,
-    required this.watchRoute,
-    required this.isSeries,
-  });
+  const _DetailPage({required this.item, required this.isSeries});
 
   final MovieItem? item;
-  final String watchRoute;
   final bool isSeries;
 
   @override
@@ -66,10 +58,13 @@ class _DetailPageState extends State<_DetailPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.item == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const InvalidRouteScreen(
+        message: 'Movie detail requires a valid movie item.',
+      );
     }
 
     return Scaffold(
+      bottomNavigationBar: const MovieBottomNavigation(),
       body: Stack(
         children: [
           FutureBuilder<TmdbDetail?>(
@@ -79,13 +74,14 @@ class _DetailPageState extends State<_DetailPage> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                  child: IconButton(
-                    onPressed: () => setState(() {
-                      tmdbDetail = _loadDetail();
-                    }),
-                    icon: const Icon(Icons.refresh, size: 28),
-                  ),
+                return AppErrorView(
+                  title: 'Could not load details',
+                  message: snapshot.hasError
+                      ? userMessageForError(snapshot.error)
+                      : 'This title was not found.',
+                  onRetry: () => setState(() {
+                    tmdbDetail = _loadDetail();
+                  }),
                 );
               }
 
@@ -93,45 +89,83 @@ class _DetailPageState extends State<_DetailPage> {
               final item = detail.item;
               final info = detail.info;
               final related = detail.related;
+              final trailer = TrailerPicker.pick(
+                detail.videos,
+                title: item.title,
+              );
 
-              return ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DetailBackdrop(
-                    item: item,
-                    child: Column(
-                      children: [
-                        DetailHero(
-                          item: item,
-                          showBackground: false,
-                          onWatch: () => Navigator.pushNamed(
-                            context,
-                            widget.watchRoute,
-                            arguments: item,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        DetailBody(
-                          item: item,
-                          info: info,
-                          moreLikeThis: related,
-                          includeRelated: false,
-                        ),
-                        const SizedBox(height: 42),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 13),
-                    child: HorizontalPosterSection(
-                      title: 'You may also like',
-                      items: related,
-                      itemCount: 10,
-                    ),
-                  ),
-                  const SizedBox(height: 36),
-                  const FooterDetails(),
-                ],
+              return StreamBuilder(
+                stream: AuthService.instance.authStateChanges,
+                builder: (context, authSnapshot) {
+                  final user = authSnapshot.data;
+                  return StreamBuilder<bool>(
+                    stream: UserActivityRepository.instance
+                        .watchlistStateStream(user, item),
+                    builder: (context, watchlistSnapshot) {
+                      final watchlisted = watchlistSnapshot.data ?? false;
+                      return StreamBuilder<bool>(
+                        stream: UserActivityRepository.instance
+                            .watchedStateStream(user, item),
+                        builder: (context, watchedSnapshot) {
+                          final watched = watchedSnapshot.data ?? false;
+                          return ListView(
+                            padding: EdgeInsets.zero,
+                            children: [
+                              DetailBackdrop(
+                                item: item,
+                                child: Column(
+                                  children: [
+                                    DetailHero(
+                                      item: item,
+                                      showBackground: false,
+                                      watchlisted: watchlisted,
+                                      watched: watched,
+                                      onWatchlistChanged: (active) =>
+                                          _setWatchlisted(item, active),
+                                      onWatchedChanged: (active) =>
+                                          _setWatched(item, active),
+                                      onTrailer: () =>
+                                          _openTrailer(context, trailer),
+                                      onWatch: () => widget.isSeries
+                                          ? Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.seriesWatch,
+                                              arguments: item,
+                                            )
+                                          : Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.movieWatch,
+                                              arguments: item,
+                                            ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    DetailBody(
+                                      item: item,
+                                      info: info,
+                                      moreLikeThis: related,
+                                      includeRelated: false,
+                                    ),
+                                    const SizedBox(height: 42),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 13,
+                                ),
+                                child: FirebaseHorizontalPosterSection(
+                                  title: 'You may also like',
+                                  items: related,
+                                  itemCount: 10,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               );
             },
           ),
@@ -147,10 +181,76 @@ class _DetailPageState extends State<_DetailPage> {
       return null;
     }
 
+    return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
+  }
+
+  void _openTrailer(BuildContext context, PlayableTrailer? trailer) {
+    if (trailer == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Trailer unavailable')));
+      return;
+    }
+    Navigator.pushNamed(
+      context,
+      AppRoutes.trailer,
+      arguments: trailer.toRouteArguments(),
+    );
+  }
+
+  Future<void> _setWatchlisted(MovieItem item, bool active) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login to use your watchlist')),
+      );
+      Navigator.pushNamed(context, AppRoutes.login);
+      return;
+    }
+
     try {
-      return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
+      await UserActivityRepository.instance.setWatchlisted(
+        user: user,
+        item: item,
+        active: active,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            active ? 'Added to watchlist' : 'Removed from watchlist',
+          ),
+        ),
+      );
     } catch (_) {
-      return null;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
+    }
+  }
+
+  Future<void> _setWatched(MovieItem item, bool active) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await UserActivityRepository.instance.setWatched(
+        user: user,
+        item: item,
+        active: active,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(active ? 'Marked as watched' : 'Removed from watched'),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
     }
   }
 }
@@ -171,10 +271,13 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.query == null || widget.query!.trim().isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const InvalidRouteScreen(
+        message: 'Cast detail requires a valid cast name.',
+      );
     }
 
     return Scaffold(
+      bottomNavigationBar: const MovieBottomNavigation(),
       body: Stack(
         children: [
           FutureBuilder<TmdbPerson?>(
@@ -184,13 +287,14 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                  child: IconButton(
-                    onPressed: () => setState(() {
-                      personFuture = _loadPerson();
-                    }),
-                    icon: const Icon(Icons.refresh, size: 28),
-                  ),
+                return AppErrorView(
+                  title: 'Could not load cast details',
+                  message: snapshot.hasError
+                      ? userMessageForError(snapshot.error)
+                      : 'This cast member was not found.',
+                  onRetry: () => setState(() {
+                    personFuture = _loadPerson();
+                  }),
                 );
               }
 
@@ -299,12 +403,12 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                       },
                     )
                   else
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: CircularProgressIndicator()),
+                    const AppEmptyState(
+                      title: 'No known titles',
+                      message:
+                          'No catalog titles are available for this cast member.',
+                      icon: Icons.movie_filter_outlined,
                     ),
-                  const SizedBox(height: 32),
-                  const FooterDetails(),
                 ],
               );
             },
@@ -345,7 +449,7 @@ class _KnownForPage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
       child: Column(
         children: [
-          PosterGrid(items: pageItems, itemCount: pageItems.length),
+          FirebasePosterGrid(items: pageItems, itemCount: pageItems.length),
           if (totalPages > 1) ...[
             const SizedBox(height: 28),
             PaginationBar(

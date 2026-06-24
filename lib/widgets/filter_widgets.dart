@@ -5,28 +5,103 @@ import '../core/config/app_config.dart';
 import '../core/models/tmdb_option.dart';
 import '../core/services/tmdb_repository.dart';
 import 'buttons.dart';
+import 'state_views.dart';
+
+enum FilterContentType { all, movies, series }
+
+extension FilterContentTypeLabel on FilterContentType {
+  String get label {
+    return switch (this) {
+      FilterContentType.all => 'All',
+      FilterContentType.movies => 'Movies',
+      FilterContentType.series => 'TV Series',
+    };
+  }
+}
 
 class FilterSelection {
   const FilterSelection({
-    required this.type,
-    required this.genre,
-    required this.releaseYear,
-    this.rating = '',
-    required this.genreId,
-    required this.countryCode,
+    this.type = FilterContentType.all,
+    this.genreId,
+    this.genreLabel,
+    this.countryCode,
+    this.countryLabel,
+    this.releaseYear,
+    this.ratingGte,
   });
 
-  final String type;
-  final String genre;
-  final String releaseYear;
-  final String rating;
+  final FilterContentType type;
   final String? genreId;
+  final String? genreLabel;
   final String? countryCode;
+  final String? countryLabel;
+  final int? releaseYear;
+  final double? ratingGte;
+
+  bool get hasActiveFilters =>
+      type != FilterContentType.all ||
+      genreId != null ||
+      countryCode != null ||
+      releaseYear != null ||
+      ratingGte != null;
+
+  String get genreDisplay => genreLabel ?? 'All genres';
+  String get countryDisplay => countryLabel ?? 'All countries';
+  String get yearDisplay => releaseYear?.toString() ?? 'All years';
+  String get ratingDisplay =>
+      ratingGte == null ? 'Any rating' : '${ratingGte!.toStringAsFixed(0)}+';
+
+  FilterSelection copyWith({
+    FilterContentType? type,
+    Object? genreId = _sentinel,
+    Object? genreLabel = _sentinel,
+    Object? countryCode = _sentinel,
+    Object? countryLabel = _sentinel,
+    Object? releaseYear = _sentinel,
+    Object? ratingGte = _sentinel,
+  }) {
+    return FilterSelection(
+      type: type ?? this.type,
+      genreId: identical(genreId, _sentinel)
+          ? this.genreId
+          : genreId as String?,
+      genreLabel: identical(genreLabel, _sentinel)
+          ? this.genreLabel
+          : genreLabel as String?,
+      countryCode: identical(countryCode, _sentinel)
+          ? this.countryCode
+          : countryCode as String?,
+      countryLabel: identical(countryLabel, _sentinel)
+          ? this.countryLabel
+          : countryLabel as String?,
+      releaseYear: identical(releaseYear, _sentinel)
+          ? this.releaseYear
+          : releaseYear as int?,
+      ratingGte: identical(ratingGte, _sentinel)
+          ? this.ratingGte
+          : ratingGte as double?,
+    );
+  }
+
+  FilterSelection lockedTo(FilterContentType type) => copyWith(type: type);
 }
 
-class FilterPanel extends StatefulWidget {
-  const FilterPanel({this.onApply, super.key});
+const Object _sentinel = Object();
 
+class FilterPanel extends StatefulWidget {
+  const FilterPanel({
+    this.initialSelection = const FilterSelection(),
+    this.allowedTypes = const [
+      FilterContentType.all,
+      FilterContentType.movies,
+      FilterContentType.series,
+    ],
+    this.onApply,
+    super.key,
+  });
+
+  final FilterSelection initialSelection;
+  final List<FilterContentType> allowedTypes;
   final ValueChanged<FilterSelection>? onApply;
 
   @override
@@ -37,13 +112,16 @@ class _FilterPanelState extends State<FilterPanel> {
   final _repository = TmdbRepository(config: AppConfig.fromEnv());
 
   late Future<_FilterData> _data = _load();
+  late FilterSelection selection = _normalized(widget.initialSelection);
 
-  String type = 'Movies';
-  String? genreId;
-  String genre = '';
-  String? countryCode;
-  String country = '';
-  String releaseYear = DateTime.now().year.toString();
+  @override
+  void didUpdateWidget(covariant FilterPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialSelection != widget.initialSelection ||
+        oldWidget.allowedTypes != widget.allowedTypes) {
+      selection = _normalized(widget.initialSelection);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,25 +135,10 @@ class _FilterPanelState extends State<FilterPanel> {
           );
         }
         if (snapshot.hasError) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              children: [
-                Text(
-                  'Failed to load filter options.\n${snapshot.error}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => setState(() {
-                    _data = _load();
-                  }),
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
+          return AppErrorView(
+            title: 'Could not load filters',
+            message: userMessageForError(snapshot.error),
+            onRetry: () => setState(() => _data = _load()),
           );
         }
         if (!snapshot.hasData) {
@@ -83,117 +146,131 @@ class _FilterPanelState extends State<FilterPanel> {
         }
 
         final data = snapshot.data!;
-        final genreOptions = type == 'Movies'
-            ? data.movieGenres
-            : data.tvGenres;
-
-        genreId ??= genreOptions.isNotEmpty ? genreOptions.first.id : null;
-        genre = genreOptions
-            .firstWhere(
-              (option) => option.id == genreId,
-              orElse: () => genreOptions.isNotEmpty
-                  ? genreOptions.first
-                  : const TmdbOption(id: '', label: ''),
-            )
-            .label;
-        countryCode ??= data.countries.isNotEmpty
-            ? data.countries.first.id
-            : null;
-        country = data.countries
-            .firstWhere(
-              (option) => option.id == countryCode,
-              orElse: () => data.countries.isNotEmpty
-                  ? data.countries.first
-                  : const TmdbOption(id: '', label: ''),
-            )
-            .label;
-
-        final years = _yearOptions();
-        if (!years.contains(releaseYear)) {
-          releaseYear = years.first;
-        }
+        final genreOptions = _genreOptionsFor(data);
+        final yearOptions = _yearOptions();
+        final ratingOptions = _ratingOptions();
 
         return Column(
           children: [
-            FilterTile(
-              label: 'Type',
-              value: type,
-              options: const ['Movies', 'TV Series'],
-              onSelected: (value) => setState(() {
-                type = value;
-                genreId = null;
-                genre = '';
-              }),
-            ),
-            const SizedBox(height: 10),
+            if (widget.allowedTypes.length > 1) ...[
+              FilterTile(
+                label: 'Type',
+                value: selection.type.label,
+                options: widget.allowedTypes.map((type) => type.label).toList(),
+                onSelected: (value) => setState(() {
+                  selection = selection.copyWith(
+                    type: _typeFromLabel(value),
+                    genreId: null,
+                    genreLabel: null,
+                  );
+                }),
+              ),
+              const SizedBox(height: 10),
+            ],
             FilterTile(
               label: 'Genre',
-              value: genre.isEmpty ? 'Select genre' : genre,
-              options: genreOptions.map((option) => option.label).toList(),
+              value: selection.genreDisplay,
+              options: const [
+                'All genres',
+              ].followedBy(genreOptions.map((option) => option.label)).toList(),
               onSelected: (value) => setState(() {
+                if (value == 'All genres') {
+                  selection = selection.copyWith(
+                    genreId: null,
+                    genreLabel: null,
+                  );
+                  return;
+                }
                 final option = genreOptions.firstWhere(
                   (item) => item.label == value,
                 );
-                genreId = option.id;
-                genre = option.label;
+                selection = selection.copyWith(
+                  genreId: option.id,
+                  genreLabel: option.label,
+                );
               }),
             ),
             const SizedBox(height: 10),
             FilterTile(
               label: 'Country',
-              value: country.isEmpty ? 'Select country' : country,
-              options: data.countries.map((option) => option.label).toList(),
+              value: selection.countryDisplay,
+              options: const ['All countries']
+                  .followedBy(data.countries.map((option) => option.label))
+                  .toList(),
               onSelected: (value) => setState(() {
+                if (value == 'All countries') {
+                  selection = selection.copyWith(
+                    countryCode: null,
+                    countryLabel: null,
+                  );
+                  return;
+                }
                 final option = data.countries.firstWhere(
                   (item) => item.label == value,
                 );
-                countryCode = option.id;
-                country = option.label;
+                selection = selection.copyWith(
+                  countryCode: option.id,
+                  countryLabel: option.label,
+                );
               }),
             ),
             const SizedBox(height: 10),
             FilterTile(
               label: 'Release Year',
-              value: releaseYear,
-              options: years,
-              onSelected: (value) => setState(() => releaseYear = value),
+              value: selection.yearDisplay,
+              options: yearOptions,
+              onSelected: (value) => setState(() {
+                selection = selection.copyWith(
+                  releaseYear: value == 'All years' ? null : int.parse(value),
+                );
+              }),
+            ),
+            const SizedBox(height: 10),
+            FilterTile(
+              label: 'Rating',
+              value: selection.ratingDisplay,
+              options: ratingOptions,
+              onSelected: (value) => setState(() {
+                selection = selection.copyWith(
+                  ratingGte: value == 'Any rating'
+                      ? null
+                      : double.parse(value.replaceAll('+', '')),
+                );
+              }),
             ),
             const SizedBox(height: 14),
-            PrimaryButton(
-              label: 'Filter',
-              icon: Icons.filter_alt,
-              height: 53,
-              radius: 25,
-              iconSize: 16,
-              textStyle: AppTextStyles.medium.copyWith(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
-              onPressed: () {
-                final selection = FilterSelection(
-                  type: type,
-                  genre: genre,
-                  releaseYear: releaseYear,
-                  rating: '',
-                  genreId: genreId,
-                  countryCode: countryCode,
-                );
-
-                if (widget.onApply != null) {
-                  widget.onApply!(selection);
-                  return;
-                }
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Filtering ${selection.type.toLowerCase()} by ${selection.genre}',
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => setState(() {
+                      selection = _normalized(const FilterSelection());
+                      widget.onApply?.call(selection);
+                    }),
+                    icon: const Icon(Icons.clear),
+                    label: const Text('Reset Filters'),
                   ),
-                );
-              },
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Filter',
+                    icon: Icons.filter_alt,
+                    height: 53,
+                    radius: 25,
+                    iconSize: 16,
+                    textStyle: AppTextStyles.medium.copyWith(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                    ),
+                    onPressed: () {
+                      widget.onApply?.call(selection);
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -212,10 +289,43 @@ class _FilterPanelState extends State<FilterPanel> {
     );
   }
 
+  FilterSelection _normalized(FilterSelection input) {
+    final allowedTypes = widget.allowedTypes.isEmpty
+        ? const [FilterContentType.all]
+        : widget.allowedTypes;
+    final type = allowedTypes.contains(input.type)
+        ? input.type
+        : allowedTypes.first;
+    return input.copyWith(type: type);
+  }
+
+  List<TmdbOption> _genreOptionsFor(_FilterData data) {
+    return switch (selection.type) {
+      FilterContentType.series => data.tvGenres,
+      FilterContentType.movies || FilterContentType.all => data.movieGenres,
+    };
+  }
+
+  FilterContentType _typeFromLabel(String label) {
+    return widget.allowedTypes.firstWhere(
+      (type) => type.label == label,
+      orElse: () => widget.allowedTypes.first,
+    );
+  }
+
   List<String> _yearOptions() {
     final current = DateTime.now().year;
-    return List.generate(10, (index) => (current - index).toString());
+    return ['All years', ...List.generate(10, (index) => '${current - index}')];
   }
+
+  List<String> _ratingOptions() => const [
+    'Any rating',
+    '5+',
+    '6+',
+    '7+',
+    '8+',
+    '9+',
+  ];
 }
 
 class FilterTile extends StatelessWidget {

@@ -79,11 +79,18 @@ class TagChip extends StatelessWidget {
 }
 
 class WatchlistButton extends StatefulWidget {
-  const WatchlistButton({this.active, this.onChanged, this.onTap, super.key});
+  const WatchlistButton({
+    this.active,
+    this.onChanged,
+    this.onTap,
+    this.showFeedback = true,
+    super.key,
+  });
 
   final bool? active;
   final ValueChanged<bool>? onChanged;
   final VoidCallback? onTap;
+  final bool showFeedback;
 
   @override
   State<WatchlistButton> createState() => _WatchlistButtonState();
@@ -115,12 +122,14 @@ class _WatchlistButtonState extends State<WatchlistButton> {
     widget.onChanged?.call(nextValue);
     widget.onTap?.call();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          nextValue ? 'Added to watchlist' : 'Removed from watchlist',
+    if (widget.showFeedback) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            nextValue ? 'Added to watchlist' : 'Removed from watchlist',
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

@@ -5,9 +5,10 @@ import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_page.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/firebase_posters.dart';
 import '../../widgets/filter_widgets.dart';
 import '../../widgets/pagination.dart';
-import '../../widgets/poster_widgets.dart';
+import '../../widgets/state_views.dart';
 
 enum CatalogKind { movies, series }
 
@@ -36,6 +37,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     final title = widget.kind == CatalogKind.movies ? 'Movies' : 'TV Series';
 
     return Scaffold(
+      bottomNavigationBar: const MovieBottomNavigation(),
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
@@ -47,11 +49,18 @@ class _CatalogScreenState extends State<CatalogScreen> {
           Padding(
             padding: EdgeInsets.fromLTRB(17, 26, 17, 0),
             child: FilterPanel(
+              initialSelection: _selectionForPanel,
+              allowedTypes: [
+                widget.kind == CatalogKind.movies
+                    ? FilterContentType.movies
+                    : FilterContentType.series,
+              ],
               onApply: (value) {
+                final locked = _lockSelection(value);
                 setState(() {
-                  selection = value;
+                  selection = locked;
                   currentPage = 1;
-                  catalogItems = _loadCatalogForSelection(value);
+                  catalogItems = _loadCatalogForSelection(locked);
                 });
               },
             ),
@@ -67,23 +76,37 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
+                if (snapshot.hasError) {
+                  return AppErrorView(
+                    title: 'Could not load $title',
+                    message: userMessageForError(snapshot.error),
+                    onRetry: () => setState(() {
+                      catalogItems = _loadCatalogForSelection(selection);
+                    }),
+                  );
+                }
                 final page = snapshot.data;
                 final items =
                     page?.items.take(20).toList() ?? const <MovieItem>[];
                 if (page == null || items.isEmpty) {
-                  return Center(
-                    child: IconButton(
-                      onPressed: () => setState(() {
-                        catalogItems = _loadCatalogForSelection(selection);
-                      }),
-                      icon: const Icon(Icons.refresh, size: 28),
-                    ),
+                  return AppEmptyState(
+                    title: 'No results',
+                    message: selection?.hasActiveFilters == true
+                        ? 'No titles match these filters.'
+                        : 'No catalog titles are available right now.',
+                    icon: Icons.movie_filter_outlined,
+                    actionLabel: 'Reset Filters',
+                    onAction: () => setState(() {
+                      selection = null;
+                      currentPage = 1;
+                      catalogItems = _loadCatalogForSelection(null);
+                    }),
                   );
                 }
 
                 return Column(
                   children: [
-                    PosterGrid(items: items, itemCount: items.length),
+                    FirebasePosterGrid(items: items, itemCount: items.length),
                     if (page.hasMultiplePages) ...[
                       const SizedBox(height: 28),
                       PaginationBar(
@@ -97,8 +120,6 @@ class _CatalogScreenState extends State<CatalogScreen> {
               },
             ),
           ),
-          const SizedBox(height: 34),
-          const FooterDetails(),
         ],
       ),
     );
@@ -108,24 +129,38 @@ class _CatalogScreenState extends State<CatalogScreen> {
     FilterSelection? selection,
   ) async {
     final repository = TmdbRepository(config: AppConfig.fromEnv());
-    final year = int.tryParse(selection?.releaseYear ?? '');
+    final activeSelection = selection == null
+        ? null
+        : _lockSelection(selection);
 
     if (widget.kind == CatalogKind.movies) {
       return repository.discoverMovieBrowsePage(
-        genreId: int.tryParse(selection?.genreId ?? ''),
-        country: selection?.countryCode,
-        year: year,
-        certification: selection?.rating,
+        genreId: int.tryParse(activeSelection?.genreId ?? ''),
+        country: activeSelection?.countryCode,
+        year: activeSelection?.releaseYear,
+        ratingGte: activeSelection?.ratingGte,
         page: currentPage,
       );
     }
 
     return repository.discoverSeriesBrowsePage(
-      genreId: int.tryParse(selection?.genreId ?? ''),
-      country: selection?.countryCode,
-      year: year,
-      certification: selection?.rating,
+      genreId: int.tryParse(activeSelection?.genreId ?? ''),
+      country: activeSelection?.countryCode,
+      year: activeSelection?.releaseYear,
+      ratingGte: activeSelection?.ratingGte,
       page: currentPage,
+    );
+  }
+
+  FilterSelection get _selectionForPanel {
+    return _lockSelection(selection ?? const FilterSelection());
+  }
+
+  FilterSelection _lockSelection(FilterSelection value) {
+    return value.lockedTo(
+      widget.kind == CatalogKind.movies
+          ? FilterContentType.movies
+          : FilterContentType.series,
     );
   }
 

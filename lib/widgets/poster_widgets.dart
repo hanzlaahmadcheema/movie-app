@@ -64,6 +64,7 @@ class MoviePosterCard extends StatelessWidget {
                     active: watchlisted,
                     onChanged: onWatchlistChanged,
                     onTap: onWatchlistTap,
+                    showFeedback: onWatchlistChanged == null,
                   ),
                 ),
                 Positioned(

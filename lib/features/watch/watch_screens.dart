@@ -1,44 +1,52 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/detail_item.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_season.dart';
-import '../../core/models/tmdb_video.dart';
+import '../../core/navigation/watch_page_request.dart';
+import '../../core/navigation/navigation_state_repository.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/services/tmdb_repository.dart';
+import '../../core/services/user_activity_repository.dart';
+import '../../core/streaming/streaming_embed_request.dart';
 import '../../core/navigation/content_navigation.dart';
+import 'widgets/embedded_watch_player_panel.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/detail_widgets.dart';
-import '../../widgets/network_art.dart';
-import '../../widgets/poster_widgets.dart';
+import '../../widgets/firebase_posters.dart';
+import '../../widgets/state_views.dart';
 
 class MovieWatchScreen extends StatelessWidget {
-  const MovieWatchScreen({this.item, super.key});
+  const MovieWatchScreen({this.request, super.key});
 
-  final MovieItem? item;
+  final WatchPageRequest? request;
 
   @override
   Widget build(BuildContext context) {
-    return _WatchPage(item: item, isSeries: false);
+    return _WatchPage(request: request, isSeries: false);
   }
 }
 
 class SeriesWatchScreen extends StatelessWidget {
-  const SeriesWatchScreen({this.item, super.key});
+  const SeriesWatchScreen({this.request, super.key});
 
-  final MovieItem? item;
+  final WatchPageRequest? request;
 
   @override
   Widget build(BuildContext context) {
-    return _WatchPage(item: item, isSeries: true);
+    return _WatchPage(request: request, isSeries: true);
   }
 }
 
 class _WatchPage extends StatefulWidget {
-  const _WatchPage({required this.item, required this.isSeries});
+  const _WatchPage({required this.request, required this.isSeries});
 
-  final MovieItem? item;
+  final WatchPageRequest? request;
   final bool isSeries;
 
   @override
@@ -49,14 +57,72 @@ class _WatchPageState extends State<_WatchPage> {
   late Future<TmdbDetail?> detailFuture = _loadDetail();
   int? selectedSeasonNumber;
   Future<List<Episode>>? episodesFuture;
+  String? _openedContentKey;
+  StreamingEmbedRequest? activeRequest;
+
+  MovieItem? get _item => widget.request?.item;
+
+  @override
+  void initState() {
+    super.initState();
+    _persistRouteState();
+    final request = widget.request;
+    if (widget.isSeries) {
+      selectedSeasonNumber = request?.seasonNumber;
+      if (request?.seasonNumber != null && _item != null) {
+        episodesFuture = _loadEpisodes(_item!.id, request!.seasonNumber!);
+      }
+      if (request?.autoPlay == true &&
+          request?.seasonNumber != null &&
+          request?.episodeNumber != null &&
+          _item != null) {
+        activeRequest =
+            StreamingEmbedRequest.episode(
+              item: _item!,
+              seasonNumber: request!.seasonNumber!,
+              episodeNumber: request.episodeNumber!,
+              episodeTitle: null,
+            ).copyWith(
+              preferredProviderId: request.selectedProviderId,
+              jellyfinPlaybackModeOverride: request.playbackMode,
+              resumePositionSeconds: request.resumePositionSeconds,
+              resumeDurationSeconds: request.resumeDurationSeconds,
+            );
+      }
+    } else if (_item != null) {
+      activeRequest = StreamingEmbedRequest.movie(_item!).copyWith(
+        preferredProviderId: request?.selectedProviderId,
+        jellyfinPlaybackModeOverride: request?.playbackMode,
+        resumePositionSeconds: request?.resumePositionSeconds,
+        resumeDurationSeconds: request?.resumeDurationSeconds,
+      );
+    }
+  }
+
+  void _persistRouteState() {
+    final request = widget.request;
+    final item = request?.item;
+    if (item == null) {
+      return;
+    }
+    unawaited(
+      NavigationStateRepository.instance.saveRouteState(
+        route: widget.isSeries ? AppRoutes.seriesWatch : AppRoutes.movieWatch,
+        arguments: request,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.item == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_item == null) {
+      return const InvalidRouteScreen(
+        message: 'Watch page requires a valid title.',
+      );
     }
 
     return Scaffold(
+      bottomNavigationBar: const MovieBottomNavigation(),
       body: Stack(
         children: [
           FutureBuilder<TmdbDetail?>(
@@ -66,23 +132,31 @@ class _WatchPageState extends State<_WatchPage> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                  child: IconButton(
-                    onPressed: () => setState(() {
-                      detailFuture = _loadDetail();
-                    }),
-                    icon: const Icon(Icons.refresh, size: 28),
-                  ),
+                return AppErrorView(
+                  title: 'Could not load watch page',
+                  message: snapshot.hasError
+                      ? userMessageForError(snapshot.error)
+                      : 'This title was not found.',
+                  onRetry: () => setState(() {
+                    detailFuture = _loadDetail();
+                  }),
                 );
               }
 
               final detail = snapshot.data!;
               final item = detail.item;
-              final trailer = detail.videos.isNotEmpty
-                  ? detail.videos.first
-                  : null;
               final related = _loopItems(detail.related, 10);
               final seasons = detail.seasons;
+              final currentUser = AuthService.instance.currentUser;
+              final contentKey = contentKeyFor(item);
+
+              if (currentUser != null && _openedContentKey != contentKey) {
+                _openedContentKey = contentKey;
+                UserActivityRepository.instance.markOpened(
+                  user: currentUser,
+                  item: item,
+                );
+              }
 
               if (widget.isSeries &&
                   selectedSeasonNumber == null &&
@@ -99,154 +173,280 @@ class _WatchPageState extends State<_WatchPage> {
                 });
               }
 
-              return ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DetailBackdrop(
-                    item: item,
-                    child: SizedBox(
-                      height: widget.isSeries ? 1125 : 760,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 125,
-                            left: 15,
-                            right: 15,
-                            child: _TopIconRow(item: item),
-                          ),
-                          Positioned(
-                            top: 155,
-                            left: 15,
-                            right: 15,
-                            child: Text(
-                              item.title,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                          Positioned(
-                            top: 211,
-                            left: 0,
-                            right: 0,
-                            child: WatchVideoPlayer(
-                              item: item,
-                              video: trailer,
-                              onPlay: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      trailer == null
-                                          ? 'No trailer available'
-                                          : 'Trailer: ${trailer.name}',
-                                    ),
-                                  ),
+              return StreamBuilder(
+                stream: AuthService.instance.authStateChanges,
+                builder: (context, authSnapshot) {
+                  final user = authSnapshot.data;
+                  return StreamBuilder<UserActivity>(
+                    stream: UserActivityRepository.instance.activityStream(
+                      user,
+                      item,
+                    ),
+                    builder: (context, activitySnapshot) {
+                      final activity =
+                          activitySnapshot.data ?? const UserActivity();
+                      return StreamBuilder<bool>(
+                        stream: UserActivityRepository.instance
+                            .watchlistStateStream(user, item),
+                        builder: (context, watchlistSnapshot) {
+                          final watchlisted = watchlistSnapshot.data ?? false;
+                          if (widget.isSeries &&
+                              activeRequest == null &&
+                              widget.request?.autoPlay != false &&
+                              activity.seasonNumber != null &&
+                              activity.episodeNumber != null &&
+                              selectedSeasonNumber == null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!mounted) return;
+                              setState(() {
+                                selectedSeasonNumber = activity.seasonNumber;
+                                episodesFuture = _loadEpisodes(
+                                  item.id,
+                                  activity.seasonNumber!,
                                 );
-                              },
-                            ),
-                          ),
-                          Positioned(
-                            top: 495,
-                            left: 38,
-                            child: ReactionRow(
-                              onChanged: (reaction) {
-                                final message = switch (reaction) {
-                                  ReactionState.like => 'Liked',
-                                  ReactionState.unlike => 'Marked as unlike',
-                                  ReactionState.none => 'Reaction cleared',
-                                };
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(message)),
-                                );
-                              },
-                            ),
-                          ),
-                          if (widget.isSeries && seasons.isNotEmpty) ...[
-                            Positioned(
-                              top: 580,
-                              left: 0,
-                              right: 0,
-                              child: SeasonDropdownTile(
-                                seasons: seasons,
-                                selectedSeasonNumber:
-                                    selectedSeasonNumber ??
-                                    seasons.first.number,
-                                onSelected: (season) {
-                                  setState(() {
-                                    selectedSeasonNumber = season.number;
-                                    episodesFuture = _loadEpisodes(
-                                      item.id,
-                                      season.number,
+                                activeRequest =
+                                    StreamingEmbedRequest.episode(
+                                      item: item,
+                                      seasonNumber: activity.seasonNumber!,
+                                      episodeNumber: activity.episodeNumber!,
+                                      episodeTitle: activity.episodeTitle,
+                                    ).copyWith(
+                                      preferredProviderId:
+                                          widget.request?.selectedProviderId,
+                                      jellyfinPlaybackModeOverride:
+                                          widget.request?.playbackMode,
+                                      resumePositionSeconds:
+                                          widget.request?.resumePositionSeconds,
+                                      resumeDurationSeconds:
+                                          widget.request?.resumeDurationSeconds,
                                     );
-                                  });
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              top: 650,
-                              left: 0,
-                              right: 0,
-                              child: FutureBuilder<List<Episode>>(
-                                future: episodesFuture,
-                                builder: (context, episodeSnapshot) {
-                                  if (episodeSnapshot.connectionState !=
-                                      ConnectionState.done) {
-                                    return const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 40,
-                                      ),
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-
-                                  final episodes =
-                                      episodeSnapshot.data ?? const <Episode>[];
-                                  return EpisodeList(
-                                    episodes: episodes,
-                                    onEpisodeSelected: (episode) =>
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Playing ${episode.title}',
+                              });
+                            });
+                          }
+                          return StreamBuilder<bool>(
+                            stream: UserActivityRepository.instance
+                                .watchedStateStream(user, item),
+                            builder: (context, watchedSnapshot) {
+                              final watched = watchedSnapshot.data ?? false;
+                              return ListView(
+                                padding: EdgeInsets.zero,
+                                children: [
+                                  DetailBackdrop(
+                                    item: item,
+                                    child: SizedBox(
+                                      height: widget.isSeries ? 1125 : 623,
+                                      child: Stack(
+                                        children: [
+                                          Positioned(
+                                            top: 125,
+                                            left: 15,
+                                            right: 15,
+                                            child: Text(
+                                              item.title,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleLarge,
                                             ),
                                           ),
-                                        ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                          Positioned(
-                            top: 495,
-                            right: 38,
-                            child: ServerSelector(
-                              onServerSelected: (server) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Switched to $server'),
+                                          Positioned(
+                                            top: 166,
+                                            left: 15,
+                                            right: 15,
+                                            child: _TopIconRow(
+                                              item: item,
+                                              watchlisted: watchlisted,
+                                              watched: watched,
+                                              onWatchlistChanged: (active) =>
+                                                  _setWatchlisted(item, active),
+                                              onWatchedChanged: (active) =>
+                                                  _setWatched(item, active),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 211,
+                                            left: 0,
+                                            right: 0,
+                                            child: EmbeddedWatchPlayerPanel(
+                                              request: activeRequest,
+                                              selectionPrompt: widget.isSeries
+                                                  ? 'Select an episode to start playback.'
+                                                  : 'Preparing player...',
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 562,
+                                            left: 38,
+                                            child: ReactionRow(
+                                              selected:
+                                                  _reactionStateFromActivity(
+                                                    activity.reaction,
+                                                  ),
+                                              onChanged: (reaction) async {
+                                                final saved =
+                                                    await _setReaction(
+                                                      item,
+                                                      reaction,
+                                                    );
+                                                if (!context.mounted ||
+                                                    !saved) {
+                                                  return;
+                                                }
+                                                final message =
+                                                    switch (reaction) {
+                                                      ReactionState.like =>
+                                                        'Liked',
+                                                      ReactionState.unlike =>
+                                                        'Marked as unlike',
+                                                      ReactionState.none =>
+                                                        'Reaction cleared',
+                                                    };
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(message),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          if (widget.isSeries &&
+                                              seasons.isNotEmpty) ...[
+                                            Positioned(
+                                              top: 677,
+                                              left: 0,
+                                              right: 0,
+                                              child: FutureBuilder<List<Episode>>(
+                                                future: episodesFuture,
+                                                builder: (context, episodeSnapshot) {
+                                                  if (episodeSnapshot
+                                                          .connectionState !=
+                                                      ConnectionState.done) {
+                                                    return const Padding(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            vertical: 40,
+                                                          ),
+                                                      child: Center(
+                                                        child:
+                                                            CircularProgressIndicator(),
+                                                      ),
+                                                    );
+                                                  }
+
+                                                  final episodes =
+                                                      episodeSnapshot.data ??
+                                                      const <Episode>[];
+                                                  if (episodeSnapshot
+                                                      .hasError) {
+                                                    return AppErrorView(
+                                                      title:
+                                                          'Could not load episodes',
+                                                      message:
+                                                          userMessageForError(
+                                                            episodeSnapshot
+                                                                .error,
+                                                          ),
+                                                      onRetry: () => setState(() {
+                                                        episodesFuture =
+                                                            _loadEpisodes(
+                                                              item.id,
+                                                              selectedSeasonNumber ??
+                                                                  seasons
+                                                                      .first
+                                                                      .number,
+                                                            );
+                                                      }),
+                                                    );
+                                                  }
+                                                  return EpisodeList(
+                                                    episodes: episodes,
+                                                    selectedEpisodeNumber:
+                                                        activity.episodeNumber,
+                                                    onEpisodeSelected:
+                                                        (
+                                                          episode,
+                                                        ) => _setEpisode(
+                                                          item,
+                                                          selectedSeasonNumber ??
+                                                              seasons
+                                                                  .first
+                                                                  .number,
+                                                          episode,
+                                                        ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 607,
+                                              left: 0,
+                                              right: 0,
+                                              child: SeasonDropdownTile(
+                                                seasons: seasons,
+                                                selectedSeasonNumber:
+                                                    selectedSeasonNumber ??
+                                                    seasons.first.number,
+                                                selectedEpisodeNumber:
+                                                    activity.episodeNumber ?? 1,
+                                                onSelected: (season) async {
+                                                  final episodesFutureLocal =
+                                                      _loadEpisodes(
+                                                        item.id,
+                                                        season.number,
+                                                      );
+                                                  setState(() {
+                                                    selectedSeasonNumber =
+                                                        season.number;
+                                                    activeRequest = null;
+                                                    episodesFuture =
+                                                        episodesFutureLocal;
+                                                  });
+                                                  await _setSeason(
+                                                    item,
+                                                    season.number,
+                                                  );
+                                                  try {
+                                                    final episodes =
+                                                        await episodesFutureLocal;
+                                                    if (episodes.isNotEmpty &&
+                                                        mounted) {
+                                                      await _setEpisode(
+                                                        item,
+                                                        season.number,
+                                                        episodes.first,
+                                                      );
+                                                    }
+                                                  } catch (_) {}
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: HorizontalPosterSection(
-                      title: 'You may also like',
-                      items: related,
-                      itemCount: 10,
-                      onItemTap: (item) => openDetailForItem(context, item),
-                    ),
-                  ),
-                  const SizedBox(height: 36),
-                  const FooterDetails(),
-                ],
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: FirebaseHorizontalPosterSection(
+                                      title: 'You may also like',
+                                      items: related,
+                                      itemCount: 10,
+                                      onItemTap: (item) =>
+                                          openDetailForItem(context, item),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               );
             },
           ),
@@ -257,7 +457,7 @@ class _WatchPageState extends State<_WatchPage> {
   }
 
   Future<TmdbDetail?> _loadDetail() async {
-    final item = widget.item;
+    final item = _item;
     if (item == null || item.id == 0) {
       return null;
     }
@@ -270,302 +470,180 @@ class _WatchPageState extends State<_WatchPage> {
       config: AppConfig.fromEnv(),
     ).tvSeasonEpisodes(tvId: tvId, seasonNumber: seasonNumber);
   }
-}
 
-class WatchVideoPlayer extends StatelessWidget {
-  const WatchVideoPlayer({
-    required this.item,
-    required this.onPlay,
-    this.video,
-    super.key,
-  });
+  Future<bool> _requireUser(String message) async {
+    if (AuthService.instance.currentUser != null) {
+      return true;
+    }
 
-  final MovieItem item;
-  final VoidCallback onPlay;
-  final TmdbVideo? video;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 232,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          NetworkArt(url: item.posterUrl),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.20),
-                  Colors.black.withValues(alpha: 0.55),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.symmetric(
-                horizontal: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 14,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '00:00',
-                      style: AppTextStyles.small.copyWith(
-                        color: Colors.white.withValues(alpha: 0.80),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          minHeight: 4,
-                          value: 0.32,
-                          backgroundColor: Colors.white.withValues(alpha: 0.20),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      item.duration,
-                      style: AppTextStyles.small.copyWith(
-                        color: Colors.white.withValues(alpha: 0.80),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _PlayerIconButton(icon: Icons.skip_previous, onTap: () {}),
-                    const SizedBox(width: 8),
-                    _PlayerIconButton(icon: Icons.replay_10, onTap: () {}),
-                    const Spacer(),
-                    _PrimaryPlayButton(onTap: onPlay),
-                    const Spacer(),
-                    _PlayerIconButton(icon: Icons.forward_10, onTap: () {}),
-                    const SizedBox(width: 8),
-                    _PlayerIconButton(
-                      icon: Icons.fullscreen,
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Fullscreen preview')),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 18,
-            top: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.52),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.hd, color: AppColors.primary, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    video == null ? '${item.quality} Stream' : video!.name,
-                    style: AppTextStyles.small.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+    await Navigator.pushNamed(context, AppRoutes.login);
+    return false;
   }
-}
 
-class _PrimaryPlayButton extends StatelessWidget {
-  const _PrimaryPlayButton({required this.onTap});
+  Future<void> _setWatchlisted(MovieItem item, bool active) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      await _requireUser('Login to use your watchlist');
+      return;
+    }
 
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(32),
-      child: Container(
-        width: 58,
-        height: 58,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.35),
-              blurRadius: 26,
-              spreadRadius: 2,
-            ),
-          ],
+    try {
+      await UserActivityRepository.instance.setWatchlisted(
+        user: user,
+        item: item,
+        active: active,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            active ? 'Added to watchlist' : 'Removed from watchlist',
+          ),
         ),
-        child: const Icon(Icons.play_arrow, color: Colors.black, size: 36),
-      ),
-    );
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
+    }
   }
-}
 
-class _PlayerIconButton extends StatelessWidget {
-  const _PlayerIconButton({required this.icon, required this.onTap});
+  Future<void> _setWatched(MovieItem item, bool active) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) return;
 
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.38),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+    try {
+      await UserActivityRepository.instance.setWatched(
+        user: user,
+        item: item,
+        active: active,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(active ? 'Marked as watched' : 'Removed from watched'),
         ),
-        child: Icon(icon, size: 19, color: Colors.white),
-      ),
-    );
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
+    }
+  }
+
+  Future<bool> _setReaction(MovieItem item, ReactionState reaction) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      await _requireUser('Login to save reactions');
+      return false;
+    }
+
+    final userReaction = switch (reaction) {
+      ReactionState.like => UserReaction.like,
+      ReactionState.unlike => UserReaction.unlike,
+      ReactionState.none => null,
+    };
+    try {
+      await UserActivityRepository.instance.setReaction(
+        user: user,
+        item: item,
+        reaction: userReaction,
+      );
+      return true;
+    } catch (_) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
+      return false;
+    }
+  }
+
+  Future<void> _setSeason(MovieItem item, int seasonNumber) async {
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      await _requireUser('Login to save episode progress');
+      return;
+    }
+
+    try {
+      await UserActivityRepository.instance.setSelectedSeason(
+        user: user,
+        item: item,
+        seasonNumber: seasonNumber,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save. Try again.')),
+      );
+    }
+  }
+
+  Future<void> _setEpisode(
+    MovieItem item,
+    int seasonNumber,
+    Episode episode,
+  ) async {
+    final user = AuthService.instance.currentUser;
+    if (user != null) {
+      try {
+        await UserActivityRepository.instance.setSelectedEpisode(
+          user: user,
+          item: item,
+          seasonNumber: seasonNumber,
+          episode: episode,
+        );
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save. Try again.')),
+        );
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      activeRequest =
+          StreamingEmbedRequest.episode(
+            item: item,
+            seasonNumber: seasonNumber,
+            episodeNumber: episode.number,
+            episodeTitle: episode.title,
+          ).copyWith(
+            preferredProviderId: activeRequest?.preferredProviderId,
+            jellyfinPlaybackModeOverride:
+                activeRequest?.jellyfinPlaybackModeOverride,
+          );
+    });
   }
 }
 
-class ServerSelector extends StatefulWidget {
-  const ServerSelector({required this.onServerSelected, super.key});
-
-  final ValueChanged<String> onServerSelected;
-
-  @override
-  State<ServerSelector> createState() => _ServerSelectorState();
-}
-
-class _ServerSelectorState extends State<ServerSelector> {
-  String selectedServer = 'Servers';
-  bool opened = false;
-  final servers = const ['Server 1', 'Server 2', 'Server 3'];
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 138,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => setState(() => opened = !opened),
-            child: Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(selectedServer, style: AppTextStyles.medium),
-                const SizedBox(width: 7),
-                Icon(
-                  opened ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-          if (opened) ...[
-            const SizedBox(height: 8),
-            Container(
-              width: 128,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black45,
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: servers
-                    .map(
-                      (server) => InkWell(
-                        onTap: () {
-                          setState(() {
-                            selectedServer = server;
-                            opened = false;
-                          });
-                          widget.onServerSelected(server);
-                        },
-                        child: Container(
-                          height: 36,
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            server,
-                            style: AppTextStyles.normal.copyWith(
-                              color: selectedServer == server
-                                  ? AppColors.primary
-                                  : Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+ReactionState _reactionStateFromActivity(UserReaction? reaction) {
+  return switch (reaction) {
+    UserReaction.like => ReactionState.like,
+    UserReaction.unlike => ReactionState.unlike,
+    null => ReactionState.none,
+  };
 }
 
 class SeasonDropdownTile extends StatefulWidget {
   const SeasonDropdownTile({
     required this.seasons,
     required this.selectedSeasonNumber,
+    required this.selectedEpisodeNumber,
     required this.onSelected,
     super.key,
   });
 
   final List<TmdbSeason> seasons;
   final int selectedSeasonNumber;
+  final int selectedEpisodeNumber;
   final ValueChanged<TmdbSeason> onSelected;
 
   @override
@@ -607,7 +685,7 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
                   bottom: 0,
                   child: Center(
                     child: Text(
-                      'Episode ${selectedSeason.episodeCount}',
+                      'Episode ${widget.selectedEpisodeNumber}',
                       style: AppTextStyles.normal.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -748,11 +826,13 @@ class EpisodeList extends StatefulWidget {
   const EpisodeList({
     required this.episodes,
     required this.onEpisodeSelected,
+    this.selectedEpisodeNumber,
     super.key,
   });
 
   final List<Episode> episodes;
   final ValueChanged<Episode> onEpisodeSelected;
+  final int? selectedEpisodeNumber;
 
   @override
   State<EpisodeList> createState() => _EpisodeListState();
@@ -760,6 +840,34 @@ class EpisodeList extends StatefulWidget {
 
 class _EpisodeListState extends State<EpisodeList> {
   int selectedEpisode = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSelection();
+  }
+
+  @override
+  void didUpdateWidget(covariant EpisodeList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedEpisodeNumber != oldWidget.selectedEpisodeNumber ||
+        widget.episodes != oldWidget.episodes) {
+      _syncSelection();
+    }
+  }
+
+  void _syncSelection() {
+    final selectedNumber = widget.selectedEpisodeNumber;
+    if (selectedNumber == null) {
+      return;
+    }
+    final index = widget.episodes.indexWhere(
+      (episode) => episode.number == selectedNumber,
+    );
+    if (index >= 0) {
+      selectedEpisode = index;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -873,71 +981,56 @@ List<T> _loopItems<T>(List<T> items, int count) {
 }
 
 class _TopIconRow extends StatefulWidget {
-  const _TopIconRow({required this.item});
+  const _TopIconRow({
+    required this.item,
+    required this.watchlisted,
+    required this.watched,
+    required this.onWatchlistChanged,
+    required this.onWatchedChanged,
+  });
 
   final MovieItem item;
+  final bool watchlisted;
+  final bool watched;
+  final ValueChanged<bool> onWatchlistChanged;
+  final ValueChanged<bool> onWatchedChanged;
 
   @override
   State<_TopIconRow> createState() => _TopIconRowState();
 }
 
 class _TopIconRowState extends State<_TopIconRow> {
-  bool watchlisted = false;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 16,
-      child: Stack(
-        clipBehavior: Clip.none,
+      height: 26,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Positioned(
-            left: 0,
-            child: _WatchTopIconAction(
-              icon: Icons.info,
-              label: 'Detail',
-              onTap: () => openDetailForItem(context, widget.item),
-            ),
+          _WatchTopIconAction(
+            icon: Icons.info,
+            label: 'Detail',
+            onTap: () => openDetailForItem(context, widget.item),
           ),
-          Positioned(
-            left: 80,
-            child: _WatchTopIconAction(
-              icon: Icons.send,
-              label: 'Share',
-              onTap: () => _showMessage('Share option selected'),
-            ),
+          const SizedBox(width: 24),
+          _WatchTopIconAction(
+            icon: widget.watched
+                ? Icons.check_circle
+                : Icons.check_circle_outline,
+            iconColor: widget.watched ? AppColors.primary : Colors.white,
+            label: widget.watched ? 'Watched' : 'Mark Watched',
+            onTap: () => widget.onWatchedChanged(!widget.watched),
           ),
-          Positioned(
-            left: 160,
-            child: _WatchTopIconAction(
-              icon: Icons.code,
-              label: 'Embed',
-              onTap: () => _showMessage('Embed option selected'),
-            ),
-          ),
-          Positioned(
-            left: 240,
-            child: _WatchTopIconAction(
-              icon: watchlisted ? Icons.bookmark : Icons.bookmark_border,
-              iconColor: watchlisted ? AppColors.primary : Colors.white,
-              label: 'Add to Watchlist',
-              onTap: () {
-                setState(() => watchlisted = !watchlisted);
-                _showMessage(
-                  watchlisted ? 'Added to watchlist' : 'Removed from watchlist',
-                );
-              },
-            ),
+          const SizedBox(width: 24),
+          _WatchTopIconAction(
+            icon: widget.watchlisted ? Icons.bookmark : Icons.bookmark_border,
+            iconColor: widget.watchlisted ? AppColors.primary : Colors.white,
+            label: widget.watchlisted ? 'Saved' : 'Watchlist',
+            onTap: () => widget.onWatchlistChanged(!widget.watchlisted),
           ),
         ],
       ),
     );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -959,22 +1052,25 @@ class _WatchTopIconAction extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 20,
+        height: 26,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 14, color: iconColor),
             const SizedBox(width: 6),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.visible,
-              softWrap: false,
-              style: AppTextStyles.normal.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                height: 1,
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: AppTextStyles.normal.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  height: 1,
+                ),
               ),
             ),
           ],
@@ -985,9 +1081,14 @@ class _WatchTopIconAction extends StatelessWidget {
 }
 
 class ReactionRow extends StatefulWidget {
-  const ReactionRow({required this.onChanged, super.key});
+  const ReactionRow({
+    required this.onChanged,
+    this.selected = ReactionState.none,
+    super.key,
+  });
 
   final ValueChanged<ReactionState> onChanged;
+  final ReactionState selected;
 
   @override
   State<ReactionRow> createState() => _ReactionRowState();
@@ -997,6 +1098,20 @@ enum ReactionState { none, like, unlike }
 
 class _ReactionRowState extends State<ReactionRow> {
   ReactionState selected = ReactionState.none;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = widget.selected;
+  }
+
+  @override
+  void didUpdateWidget(covariant ReactionRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected != oldWidget.selected) {
+      selected = widget.selected;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -108,13 +108,7 @@ class SocialButtons extends StatelessWidget {
       children: [
         Expanded(
           child: TextButton(
-            onPressed:
-                onGoogleTap ??
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Google sign-in tapped')),
-                  );
-                },
+            onPressed: onGoogleTap,
             style: TextButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
@@ -134,11 +128,15 @@ class SocialButtons extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Sign in with Google',
-                  style: AppTextStyles.medium.copyWith(
-                    color: Colors.black,
-                    fontSize: 14,
+                Flexible(
+                  child: Text(
+                    'Sign in with Google',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.medium.copyWith(
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ],
@@ -152,13 +150,7 @@ class SocialButtons extends StatelessWidget {
             label: '',
             icon: Icons.phone,
             height: 44,
-            onPressed:
-                onPhoneTap ??
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Phone sign-in tapped')),
-                  );
-                },
+            onPressed: onPhoneTap,
           ),
         ),
       ],

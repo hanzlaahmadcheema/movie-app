@@ -7,7 +7,7 @@ class PaginationBar extends StatelessWidget {
     required this.currentPage,
     required this.totalPages,
     required this.onPageChanged,
-    this.maxVisiblePages = 5,
+    this.maxVisiblePages = 3,
     super.key,
   });
 
@@ -37,6 +37,11 @@ class PaginationBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: _withSpacing([
             _PageIconButton(
+              icon: Icons.first_page,
+              enabled: normalizedCurrent > 1,
+              onTap: () => onPageChanged(1),
+            ),
+            _PageIconButton(
               icon: Icons.chevron_left,
               enabled: normalizedCurrent > 1,
               onTap: () => onPageChanged(normalizedCurrent - 1),
@@ -52,6 +57,11 @@ class PaginationBar extends StatelessWidget {
               icon: Icons.chevron_right,
               enabled: normalizedCurrent < normalizedTotal,
               onTap: () => onPageChanged(normalizedCurrent + 1),
+            ),
+            _PageIconButton(
+              icon: Icons.last_page,
+              enabled: normalizedCurrent < normalizedTotal,
+              onTap: () => onPageChanged(normalizedTotal),
             ),
           ]),
         ),
