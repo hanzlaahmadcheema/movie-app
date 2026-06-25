@@ -1,81 +1,122 @@
 # MovieApp Flutter
 
-MovieApp is an Android-first Flutter movie and series discovery app. It uses
-Firebase for accounts and user state, direct TMDB API access for catalog data,
+MovieApp is an Android-focused Flutter app for discovering movies and TV series.
+It uses Firebase for authentication and user data, TMDB for catalog metadata,
 and optional Jellyfin settings for private playback.
+
+The project is intended for source publication and APK distribution through
+GitHub Releases. It is not configured for Play Store publishing.
 
 ## Features
 
-- Email/password, Google, and phone authentication through Firebase Auth.
-- TMDB-backed home, catalog, search, filters, detail, cast, and trailer flows.
-- User watchlist, watched list, reactions, episode selection, and continue watching.
+- Email/password, Google, and phone authentication with Firebase Auth.
+- TMDB-powered home, catalog, search, filters, detail, cast, trailer, season,
+  episode, recommendation, and similar-content flows.
+- Watchlist, watched status, reactions, and continue-watching state.
 - Public streaming provider handoff through controlled WebView navigation.
-- Optional Jellyfin setup with local secure-token storage.
+- Optional Jellyfin native/web playback settings with local secure-token storage.
 - Admin screens for app config, providers, featured content, banners, notices,
   users, requests, and playback issue logs.
-- Route validation, not-found screens, empty/loading/error states, and local
-  recent-search persistence.
+- Local recent-search persistence with sqflite.
 
 ## Tech Stack
 
-- Flutter 3 / Dart
+- Flutter / Dart
 - Firebase Auth, Cloud Firestore, Firebase Core
-- Android native platform channel for sharing
-- WebView Flutter for provider/trailer pages
-- sqflite for local recent searches
-- flutter_secure_storage and shared_preferences for local Jellyfin settings
+- TMDB API
+- WebView Flutter
+- sqflite
+- flutter_secure_storage
+- shared_preferences
 
-## Supported Platform
+## Android Support
 
-The current release target is Android. Other Flutter platform folders may exist
-in the repository, but Firebase options and runtime behavior are only prepared
-for Android.
+Android is the primary supported platform. Other Flutter platform folders may be
+present, but Firebase configuration and runtime behavior should be verified on
+Android before publishing a release.
 
 ## Required Configuration
 
-Do not bundle `.env` into Flutter assets. The app calls TMDB directly and reads
-the TMDB v4 read access token from a dart-define:
+The app calls TMDB directly and reads the TMDB v4 read access token from a
+dart-define:
 
-```sh
+```bash
 flutter run --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
 ```
 
-The token must not be hardcoded, committed, logged, displayed in UI, or stored in
-Firestore. Because this app is distributed as an APK and uses direct TMDB access,
-the dart-defined token is still present in the built client and should be treated
-as extractable from distributed APKs.
+Do not hardcode the token in source code, commit it to Git, log it, display it
+in the UI, or store it in Firestore. Direct TMDB access means the token is
+included in distributed APK builds and should be treated as extractable from the
+client.
 
-`.env.example` documents safe placeholder values only. A local `.env` file may
-exist for notes or backend setup, but it is gitignored and is not bundled by
-`pubspec.yaml`.
+`.env` is ignored and is not bundled as a Flutter asset. Prefer dart-defines for
+local runs and GitHub Actions secrets for CI/release builds.
 
 ## Firebase Setup
 
 1. Create or select a Firebase project.
-2. Enable Firebase Auth providers needed by the app:
+2. Enable the Firebase Auth providers you want to support:
    - Email/Password
    - Google
    - Phone
-3. Add the Android app package:
+3. Add an Android app in Firebase with this package name:
 
 ```text
 com.hanzlaahmad.movie_app
 ```
 
-4. Place the Android Firebase config at:
+4. Download the Android Firebase config and place it at:
 
 ```text
 android/app/google-services.json
 ```
 
-5. Review `firestore.rules`, then deploy rules from an authenticated Firebase CLI:
+5. Review `firestore.rules`, then deploy rules with your Firebase project ID:
 
-```sh
-firebase deploy --only firestore:rules --project movie-app-cc2c1
+```bash
+firebase deploy --only firestore:rules --project YOUR_FIREBASE_PROJECT_ID
 ```
 
-For debugging Firestore data, use read-only Firebase CLI authenticated REST
+6. For Google Sign-In on release APKs, add the release keystore SHA-1 and
+   SHA-256 fingerprints in Firebase project settings, then download the updated
+   `google-services.json`.
+
+Get release keystore fingerprints with:
+
+```bash
+keytool -list -v -keystore release-keystore.jks
+```
+
+For Firestore debugging, use read-only Firebase CLI authenticated REST
 inspection. Do not print tokens or commit auth helper scripts.
+
+## Install And Run Locally
+
+```bash
+flutter pub get
+flutter run --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
+```
+
+Run on a specific device:
+
+```bash
+flutter devices
+flutter run -d DEVICE_ID --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
+```
+
+## Verification
+
+```bash
+flutter analyze
+flutter test
+flutter build apk --debug --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
+```
+
+For release builds, configure Android signing first:
+
+```bash
+flutter build apk --release --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
+```
 
 ## Android Release Signing
 
@@ -86,24 +127,19 @@ locally when preparing a signed release:
 storePassword=your-store-password
 keyPassword=your-key-password
 keyAlias=your-key-alias
-storeFile=/absolute/path/to/upload-keystore.jks
+storeFile=/absolute/path/to/release-keystore.jks
 ```
 
-`android/key.properties`, `*.jks`, and `*.keystore` are ignored by Git.
+Ignored signing files:
 
-## GitHub Releases
+- `android/key.properties`
+- `*.jks`
+- `*.keystore`
 
-This app is distributed through GitHub Releases as an Android APK. Normal
-commits and pull requests run CI only. Public downloadable APKs are published
-only when maintainers push version tags such as `v0.1.0` or `v1.0.0`.
+Never commit keystores or signing passwords. Back up the release keystore safely;
+future APK updates must use the same signing key.
 
-Users can download APK files from the repository's Releases page. Android may
-warn before installing APKs from outside the Play Store.
-
-The app requires a configured `TMDB_READ_ACCESS_TOKEN` secret for catalog data.
-Normal commits run CI only; version tags create public APK releases.
-
-## Required GitHub Actions configuration
+## GitHub Actions Configuration
 
 Repository secrets:
 
@@ -113,7 +149,7 @@ Repository secrets:
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
 
-Generate a release keystore locally:
+Generate a release keystore:
 
 ```bash
 keytool -genkey -v \
@@ -124,46 +160,47 @@ keytool -genkey -v \
   -alias movieapp
 ```
 
-Create the base64 value:
+Create the base64 value for GitHub Actions.
+
+Linux:
 
 ```bash
 base64 -w 0 release-keystore.jks
 ```
 
-On macOS:
+macOS:
 
 ```bash
 base64 -i release-keystore.jks
 ```
 
-Add the output as the `ANDROID_KEYSTORE_BASE64` GitHub Actions secret.
-Never commit the keystore file.
+Add the output as the `ANDROID_KEYSTORE_BASE64` secret.
 
-## Maintainer release process
+## GitHub Releases
 
-1. Make sure the working tree is clean.
+Normal commits and pull requests run CI only. Public APKs are published only
+when a maintainer pushes a version tag such as `v0.1.0`.
+
+Release process:
+
+1. Verify the working tree and local checks.
 
    ```bash
    git status
-   ```
-
-2. Run local verification.
-
-   ```bash
    flutter clean
    flutter pub get
    flutter analyze
    flutter test
-   flutter build apk --debug
+   flutter build apk --debug --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
    ```
 
-3. Update `pubspec.yaml`.
+2. Update `pubspec.yaml`.
 
    ```yaml
    version: 0.1.0+1
    ```
 
-4. Commit the version bump.
+3. Commit and push the version bump.
 
    ```bash
    git add pubspec.yaml
@@ -171,59 +208,43 @@ Never commit the keystore file.
    git push origin main
    ```
 
-5. Create and push the version tag.
+4. Create and push the version tag.
 
    ```bash
    git tag -a v0.1.0 -m "Movie App v0.1.0"
    git push origin v0.1.0
    ```
 
-6. GitHub Actions will build the signed release APK and publish it to GitHub
-   Releases.
+GitHub Actions will build the signed release APK, generate a SHA256 checksum,
+and publish both files to GitHub Releases.
 
-## Network Security
+## Troubleshooting
 
-The production Android manifest does not enable global cleartext traffic.
-Prefer HTTPS for Jellyfin. If you need private HTTP Jellyfin access for a local
-or Tailscale-only setup, treat that as a private build/network-security decision
-and do not enable broad cleartext traffic for public releases.
+If catalog screens show no movie data, confirm the APK was built with a valid
+`TMDB_READ_ACCESS_TOKEN`.
 
-## Install And Run
+If Google Sign-In works in debug but fails in the downloaded release APK, add
+the release keystore SHA-1 and SHA-256 fingerprints to Firebase and refresh
+`android/app/google-services.json`.
 
-```sh
-flutter pub get
-flutter run --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
+If the release workflow fails with a keystore alias error, make sure
+`ANDROID_KEY_ALIAS` exactly matches the alias inside the uploaded keystore:
+
+```bash
+keytool -list -v -keystore release-keystore.jks
 ```
 
-## Verification Commands
+## Security Notes
 
-```sh
-flutter analyze
-flutter test
-flutter build apk --debug --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
-```
-
-For release builds, configure Android release signing first:
-
-```sh
-flutter build apk --release --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
-```
-
-## Screenshots / Demo
-
-Screenshots and a demo link are not included yet. Add current Android screenshots
-before using the repository as a polished public portfolio project.
-
-## Repository Notes
-
-- `.env` is ignored and must not be published.
-- `android/app/google-services.json` is intentionally allowed because Firebase
-  client config is required by the Android app. Firestore rules and App Check
-  still matter for security.
-- Generated build output, Flutter caches, local IDE files, signing keys, and
-  private documentation folders are ignored.
-- Runtime WebView/provider playback and Jellyfin playback should be manually
-  verified on a real Android device before a production release.
+- Do not commit `.env`, real tokens, keystores, `android/key.properties`, APKs,
+  or generated build output.
+- Firebase client config is not a server secret, but Firestore rules and App
+  Check still matter for production security.
+- Direct TMDB access exposes the TMDB token to distributed clients. Use a backend
+  proxy instead if token confidentiality is required.
+- Verify Firebase rules, auth providers, TMDB data loading, streaming providers,
+  Jellyfin flows, and continue-watching behavior on a real Android device before
+  calling a release production-ready.
 
 ## License
 
