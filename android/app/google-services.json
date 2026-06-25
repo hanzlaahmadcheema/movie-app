@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "888171081165-h4rlppg17tf0q99p223f6korkthjdhj5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hanzlaahmad.movie_app",
+            "certificate_hash": "9a2b2f570fc14172800d856c0a6021e69f419619"
+          }
+        },
+        {
           "client_id": "888171081165-jtfv3p77esnh6333qn6sso21hj2si1cc.apps.googleusercontent.com",
           "client_type": 3
         }
