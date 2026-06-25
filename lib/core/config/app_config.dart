@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
   const AppConfig({
-    required this.tmdbProxyBaseUrl,
+    required this.tmdbReadAccessToken,
     required this.tmdbImageBaseUrl,
     required this.streamingVidSrcDomains,
     required this.streamingVidSrcEnabled,
@@ -15,12 +15,14 @@ class AppConfig {
   });
 
   factory AppConfig.fromEnv() {
-    const tmdbProxyBaseUrl = String.fromEnvironment('TMDB_PROXY_BASE_URL');
+    const tmdbReadAccessToken = String.fromEnvironment(
+      'TMDB_READ_ACCESS_TOKEN',
+    );
 
     return AppConfig(
-      tmdbProxyBaseUrl: _firstNonEmpty(
-        tmdbProxyBaseUrl,
-        dotenv.env['TMDB_PROXY_BASE_URL'],
+      tmdbReadAccessToken: _firstNonEmpty(
+        tmdbReadAccessToken,
+        dotenv.env['TMDB_READ_ACCESS_TOKEN'],
       ),
       tmdbImageBaseUrl:
           dotenv.env['TMDB_IMAGE_BASE_URL']?.trim() ??
@@ -57,7 +59,7 @@ class AppConfig {
     );
   }
 
-  final String tmdbProxyBaseUrl;
+  final String tmdbReadAccessToken;
   final String tmdbImageBaseUrl;
   final List<String> streamingVidSrcDomains;
   final bool streamingVidSrcEnabled;
@@ -68,7 +70,7 @@ class AppConfig {
   final List<String> streamingAllowedHosts;
   final int streamingTimeoutSeconds;
 
-  bool get hasTmdbProxy => tmdbProxyBaseUrl.isNotEmpty;
+  bool get hasTmdbReadAccessToken => tmdbReadAccessToken.isNotEmpty;
 
   String posterUrl(String? posterPath) => imageUrl('original', posterPath);
 

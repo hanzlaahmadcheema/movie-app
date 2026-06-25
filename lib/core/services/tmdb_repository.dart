@@ -44,6 +44,21 @@ class TmdbRepository {
   Future<List<MovieItem>> latestSeries() =>
       _list('/tv/on_the_air', fallbackMediaType: MediaType.tv);
 
+  Future<List<MovieItem>> popularMovies() =>
+      _list('/movie/popular', fallbackMediaType: MediaType.movie);
+
+  Future<List<MovieItem>> popularSeries() =>
+      _list('/tv/popular', fallbackMediaType: MediaType.tv);
+
+  Future<List<MovieItem>> upcomingMovies() =>
+      _list('/movie/upcoming', fallbackMediaType: MediaType.movie);
+
+  Future<List<MovieItem>> topRatedMovies() =>
+      _list('/movie/top_rated', fallbackMediaType: MediaType.movie);
+
+  Future<List<MovieItem>> topRatedSeries() =>
+      _list('/tv/top_rated', fallbackMediaType: MediaType.tv);
+
   Future<List<MovieItem>> discoverMovies() =>
       _list('/discover/movie', fallbackMediaType: MediaType.movie);
 
@@ -246,10 +261,15 @@ class TmdbRepository {
     final credits = data['credits'] is Map<String, dynamic>
         ? data['credits'] as Map<String, dynamic>
         : await _client.get('/$mediaType/${seed.id}/credits');
+    final recommendations = await _list(
+      '/$mediaType/${seed.id}/recommendations',
+      fallbackMediaType: seed.mediaType,
+    );
     final similar = await _list(
       '/$mediaType/${seed.id}/similar',
       fallbackMediaType: seed.mediaType,
     );
+    final related = _dedupeItems([...recommendations, ...similar]);
     final item = _itemFromJson(data, fallbackMediaType: seed.mediaType);
 
     return TmdbDetail(
@@ -257,7 +277,7 @@ class TmdbRepository {
         posterUrl: item.posterUrl.isEmpty ? seed.posterUrl : null,
       ),
       info: _detailInfo(data, credits, item),
-      related: similar.isEmpty ? [seed] : similar,
+      related: related.isEmpty ? [seed] : related,
       videos: _videosFromDetail(data),
       seasons: _seasonsFromDetail(data),
     );
@@ -675,6 +695,18 @@ class TmdbRepository {
         .map(_itemFromCredit)
         .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
         .toList();
+  }
+
+  List<MovieItem> _dedupeItems(List<MovieItem> items) {
+    final seen = <String>{};
+    final deduped = <MovieItem>[];
+    for (final item in items) {
+      final key = '${item.mediaType.name}:${item.id}';
+      if (seen.add(key)) {
+        deduped.add(item);
+      }
+    }
+    return deduped;
   }
 
   MovieItem _itemFromCredit(Map<String, dynamic> json) {

@@ -1,7 +1,7 @@
 # MovieApp Flutter
 
 MovieApp is an Android-first Flutter movie and series discovery app. It uses
-Firebase for accounts and user state, a server-side TMDB proxy for catalog data,
+Firebase for accounts and user state, direct TMDB API access for catalog data,
 and optional Jellyfin settings for private playback.
 
 ## Features
@@ -33,17 +33,17 @@ for Android.
 
 ## Required Configuration
 
-Do not bundle `.env` into Flutter assets. The app is configured to use a
-client-safe TMDB proxy URL:
+Do not bundle `.env` into Flutter assets. The app calls TMDB directly and reads
+the TMDB v4 read access token from a dart-define:
 
 ```sh
-flutter run --dart-define=TMDB_PROXY_BASE_URL=https://your-backend.example.com/tmdb
+flutter run --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
 ```
 
-The TMDB bearer token must live only on your backend/proxy, not in Flutter
-assets, dart-defines, committed files, or mobile app binaries. A proxy should
-validate/allowlist the TMDB paths the app needs, attach the server-side TMDB
-token, and return TMDB JSON to the client.
+The token must not be hardcoded, committed, logged, displayed in UI, or stored in
+Firestore. Because this app is distributed as an APK and uses direct TMDB access,
+the dart-defined token is still present in the built client and should be treated
+as extractable from distributed APKs.
 
 `.env.example` documents safe placeholder values only. A local `.env` file may
 exist for notes or backend setup, but it is gitignored and is not bundled by
@@ -100,17 +100,14 @@ only when maintainers push version tags such as `v0.1.0` or `v1.0.0`.
 Users can download APK files from the repository's Releases page. Android may
 warn before installing APKs from outside the Play Store.
 
-The app requires a configured `TMDB_PROXY_BASE_URL`. The TMDB bearer token must
-not be bundled into the Flutter app; it belongs only on the backend/proxy.
+The app requires a configured `TMDB_READ_ACCESS_TOKEN` secret for catalog data.
+Normal commits run CI only; version tags create public APK releases.
 
 ## Required GitHub Actions configuration
 
-Repository variable:
-
-- `TMDB_PROXY_BASE_URL`
-
 Repository secrets:
 
+- `TMDB_READ_ACCESS_TOKEN`
 - `ANDROID_KEYSTORE_BASE64`
 - `ANDROID_KEYSTORE_PASSWORD`
 - `ANDROID_KEY_ALIAS`
@@ -195,7 +192,7 @@ and do not enable broad cleartext traffic for public releases.
 
 ```sh
 flutter pub get
-flutter run --dart-define=TMDB_PROXY_BASE_URL=https://your-backend.example.com/tmdb
+flutter run --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
 ```
 
 ## Verification Commands
@@ -203,13 +200,13 @@ flutter run --dart-define=TMDB_PROXY_BASE_URL=https://your-backend.example.com/t
 ```sh
 flutter analyze
 flutter test
-flutter build apk --debug --dart-define=TMDB_PROXY_BASE_URL=https://your-backend.example.com/tmdb
+flutter build apk --debug --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
 ```
 
 For release builds, configure Android release signing first:
 
 ```sh
-flutter build apk --release --dart-define=TMDB_PROXY_BASE_URL=https://your-backend.example.com/tmdb
+flutter build apk --release --dart-define=TMDB_READ_ACCESS_TOKEN=xxxxx
 ```
 
 ## Screenshots / Demo

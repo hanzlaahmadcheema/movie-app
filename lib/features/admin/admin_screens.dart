@@ -600,9 +600,9 @@ class AdminSecurityScreen extends StatelessWidget {
             'Unable to verify from client. Confirm the deployed ruleset with Firebase tooling before release.',
           ),
           _SecurityTile(
-            'TMDB token boundary',
+            'TMDB token handling',
             SecurityStatus.warning,
-            'Flutter is configured for a TMDB proxy. Verify the backend keeps the TMDB bearer token server-side.',
+            'The app uses direct TMDB API access. Keep the token out of source control, logs, Firestore, and UI; APK-contained dart-defines can still be extracted.',
           ),
           _SecurityTile(
             'Firebase App Check',
