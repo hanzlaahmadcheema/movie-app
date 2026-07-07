@@ -43,7 +43,7 @@ class StreamingServerStatusBar extends StatelessWidget {
                   Text(
                     current == null
                         ? 'Stream unavailable'
-                        : '${current.server.displayName} - Server ${currentIndex + 1}',
+                        : current.server.displayName,
                     style: const TextStyle(color: Colors.white60, fontSize: 12),
                   ),
                 ],
@@ -58,9 +58,7 @@ class StreamingServerStatusBar extends StatelessWidget {
                   for (var index = 0; index < candidates.length; index++)
                     PopupMenuItem<int>(
                       value: index,
-                      child: Text(
-                        '${candidates[index].server.displayName} - Server ${index + 1}',
-                      ),
+                      child: Text(candidates[index].server.displayName),
                     ),
                 ],
                 icon: const Icon(Icons.dns_outlined),

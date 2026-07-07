@@ -9,6 +9,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/services/admin_repository.dart';
 import '../../core/services/auth_service.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/auth_widgets.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/network_art.dart';
@@ -68,6 +69,22 @@ class _LoginScreenState extends State<LoginScreen> {
           PrimaryButton(
             label: _submitting ? 'Logging in...' : 'Login',
             onPressed: _submitting ? null : _submit,
+          ),
+          const SizedBox(height: 14),
+          Center(
+            child: TextButton(
+              onPressed: _submitting
+                  ? null
+                  : () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.home,
+                      (route) => false,
+                    ),
+              child: Text(
+                'Continue as guest',
+                style: AppTextStyles.normal.copyWith(color: AppColors.primary),
+              ),
+            ),
           ),
           const SizedBox(height: 28),
           Center(
@@ -167,11 +184,14 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await action();
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.home,
-        (route) => false,
-      );
+      final route =
+          AuthService.instance.currentUser != null &&
+              AuthService.instance.requiresEmailVerification(
+                AuthService.instance.currentUser!,
+              )
+          ? AppRoutes.verifyEmail
+          : AppRoutes.home;
+      Navigator.pushNamedAndRemoveUntil(context, route, (route) => false);
     } on FirebaseAuthException catch (error) {
       if (mounted) _showMessage(_authMessage(error));
     } catch (_) {
@@ -354,11 +374,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await action();
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.home,
-        (route) => false,
-      );
+      final user = AuthService.instance.currentUser;
+      final route =
+          user != null && AuthService.instance.requiresEmailVerification(user)
+          ? AppRoutes.verifyEmail
+          : AppRoutes.home;
+      Navigator.pushNamedAndRemoveUntil(context, route, (route) => false);
+      if (route == AppRoutes.verifyEmail && mounted) {
+        _showMessage('Verification email sent. Check your inbox to continue.');
+      }
     } on FirebaseAuthException catch (error) {
       if (mounted) _showMessage(_authMessage(error));
     } catch (_) {
@@ -367,6 +391,129 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         setState(() => _submitting = false);
       }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class VerifyEmailScreen extends StatefulWidget {
+  const VerifyEmailScreen({super.key});
+
+  @override
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+}
+
+class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+  bool _resending = false;
+  bool _refreshing = false;
+  bool _signingOut = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
+    final email = user?.email?.trim();
+    return _AuthScaffold(
+      child: AuthPanel(
+        title: 'Verify your email',
+        children: [
+          Text(
+            email == null || email.isEmpty
+                ? 'Check your inbox for the verification link before continuing.'
+                : 'Check $email for the verification link before continuing.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.normal,
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'After opening the link, return here and refresh your account.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.normal.copyWith(color: Colors.white70),
+          ),
+          const SizedBox(height: 36),
+          PrimaryButton(
+            label: _refreshing ? 'Refreshing...' : 'I verified, refresh',
+            onPressed: _busy ? null : _refresh,
+          ),
+          const SizedBox(height: 14),
+          PrimaryButton(
+            label: _resending ? 'Sending...' : 'Resend email',
+            onPressed: _busy ? null : _resend,
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: TextButton(
+              onPressed: _busy ? null : _signOut,
+              child: Text(
+                _signingOut ? 'Signing out...' : 'Sign out',
+                style: AppTextStyles.normal.copyWith(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool get _busy => _resending || _refreshing || _signingOut;
+
+  Future<void> _resend() async {
+    setState(() => _resending = true);
+    try {
+      await AuthService.instance.sendEmailVerification();
+      if (!mounted) return;
+      _showMessage('Verification email sent. Check your inbox.');
+    } on FirebaseAuthException catch (error) {
+      if (mounted) _showMessage(_authMessage(error));
+    } catch (_) {
+      if (mounted) {
+        _showMessage('Could not send the verification email. Try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _resending = false);
+    }
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _refreshing = true);
+    try {
+      final user = await AuthService.instance.reloadCurrentUser();
+      if (!mounted) return;
+      if (user != null &&
+          !AuthService.instance.requiresEmailVerification(user)) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.home,
+          (route) => false,
+        );
+        return;
+      }
+      _showMessage('Email is not verified yet. Open the link, then refresh.');
+    } on FirebaseAuthException catch (error) {
+      if (mounted) _showMessage(_authMessage(error));
+    } catch (_) {
+      if (mounted) _showMessage('Could not refresh your account. Try again.');
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    setState(() => _signingOut = true);
+    try {
+      await AuthService.instance.signOut();
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
     }
   }
 
@@ -752,8 +899,16 @@ String _authMessage(FirebaseAuthException error) {
     'email-already-in-use' => 'An account already exists for this email.',
     'weak-password' => 'Password is too weak.',
     'network-request-failed' => 'Network error. Check your connection.',
+    'requires-login' => 'Sign in again to continue.',
+    'user-token-expired' => 'Your session expired. Sign in again.',
+    'invalid-user-token' => 'Your session is no longer valid. Sign in again.',
     'google-sign-in-unavailable' => 'Google sign-in is not available here.',
     'missing-google-id-token' => 'Google sign-in could not be completed.',
+    'popup-blocked' => 'Allow popups, then try Google sign-in again.',
+    'popup-closed-by-user' => 'Google sign-in was cancelled.',
+    'unauthorized-domain' =>
+      'This web domain is not authorized for Firebase sign-in.',
+    'operation-not-allowed' => 'This sign-in method is not enabled.',
     'invalid-verification-code' => 'The verification code is incorrect.',
     'invalid-phone-number' =>
       'Enter a valid phone number in international format.',
@@ -761,8 +916,9 @@ String _authMessage(FirebaseAuthException error) {
       'This app is not authorized for phone verification.',
     'quota-exceeded' => 'The SMS quota has been reached. Try again later.',
     'session-expired' => 'The verification code expired. Request a new code.',
-    'too-many-requests' => 'Too many attempts. Try again later.',
-    _ => error.message ?? 'Authentication failed. Please try again.',
+    'too-many-requests' =>
+      'Too many requests. Wait a few minutes, then try again.',
+    _ => 'Authentication failed. Please try again.',
   };
 }
 
@@ -773,8 +929,7 @@ class _AuthScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
+    return AppShell(
       body: Stack(
         children: [
           Positioned.fill(

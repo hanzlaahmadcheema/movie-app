@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
   final _navigatorKey = GlobalKey<NavigatorState>();
   late final AppNavigationObserver _navigationObserver =
       widget.navigationObserver ?? AppNavigationObserver();
+  late final String _initialRoute = _resolveInitialRoute();
 
   @override
   void initState() {
@@ -65,16 +67,32 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       navigatorObservers: [_navigationObserver],
-      initialRoute: AppRoutes.splash,
-      onGenerateInitialRoutes: (_) => [
-        MaterialPageRoute<void>(
-          settings: const RouteSettings(name: AppRoutes.splash),
-          builder: AppRoutes.routes[AppRoutes.splash]!,
-        ),
-      ],
+      initialRoute: _initialRoute,
+      onGenerateInitialRoutes: _generateInitialRoutes,
       routes: AppRoutes.routes,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       onUnknownRoute: AppRoutes.onUnknownRoute,
     );
+  }
+
+  String _resolveInitialRoute() {
+    final routeName = PlatformDispatcher.instance.defaultRouteName.trim();
+    if (routeName.isEmpty) {
+      return AppRoutes.home;
+    }
+    return routeName;
+  }
+
+  List<Route<dynamic>> _generateInitialRoutes(String initialRouteName) {
+    final builder = AppRoutes.routes[initialRouteName];
+    if (builder != null) {
+      return [
+        MaterialPageRoute<void>(
+          settings: RouteSettings(name: initialRouteName),
+          builder: builder,
+        ),
+      ];
+    }
+    return [AppRoutes.onGenerateRoute(RouteSettings(name: initialRouteName))];
   }
 }

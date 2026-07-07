@@ -21,6 +21,7 @@ class StreamingProviderDiagnostic {
   const StreamingProviderDiagnostic({
     required this.providerName,
     required this.host,
+    this.endpointId,
     this.loadStartedAt,
     this.loadFinishedAt,
     this.timeout = false,
@@ -32,6 +33,7 @@ class StreamingProviderDiagnostic {
 
   final String providerName;
   final String host;
+  final String? endpointId;
   final DateTime? loadStartedAt;
   final DateTime? loadFinishedAt;
   final bool timeout;
@@ -52,6 +54,7 @@ class StreamingProviderDiagnostic {
     return StreamingProviderDiagnostic(
       providerName: providerName,
       host: host,
+      endpointId: endpointId,
       loadStartedAt: loadStartedAt ?? this.loadStartedAt,
       loadFinishedAt: loadFinishedAt ?? this.loadFinishedAt,
       timeout: timeout ?? this.timeout,
@@ -66,6 +69,7 @@ class StreamingProviderDiagnostic {
   String toRedactedDebugString() {
     return [
       'provider=$providerName',
+      if (endpointId?.isNotEmpty == true) 'endpoint=$endpointId',
       'host=$host',
       if (loadStartedAt != null) 'started=${loadStartedAt!.toIso8601String()}',
       if (loadFinishedAt != null)
@@ -88,6 +92,7 @@ class StreamingPlayerController extends ChangeNotifier {
   List<StreamingEmbedResult> _candidates = const [];
   StreamingPlayerStatus _status = StreamingPlayerStatus.idle;
   int _currentIndex = -1;
+  int _currentEndpointIndex = 0;
   int _attempt = 0;
   int _progress = 0;
   String? _message;
@@ -99,6 +104,7 @@ class StreamingPlayerController extends ChangeNotifier {
   List<StreamingEmbedResult> get candidates => _candidates;
   StreamingPlayerStatus get status => _status;
   int get currentIndex => _currentIndex;
+  int get currentEndpointIndex => _currentEndpointIndex;
   int get attempt => _attempt;
   int get progress => _progress;
   String? get message => _message;
@@ -120,7 +126,9 @@ class StreamingPlayerController extends ChangeNotifier {
     if (_currentIndex < 0 || _currentIndex >= _candidates.length) {
       return null;
     }
-    return _candidates[_currentIndex];
+    return _candidates[_currentIndex].withResolvedEndpoint(
+      _currentEndpointIndex,
+    );
   }
 
   Future<void> initialize() async {
@@ -132,6 +140,14 @@ class StreamingPlayerController extends ChangeNotifier {
       _message = error.message;
       if (kDebugMode) {
         debugPrint('Streaming unavailable: ${error.message}');
+      }
+      notifyListeners();
+      return;
+    } catch (error, stack) {
+      _status = StreamingPlayerStatus.unavailable;
+      _message = 'Internal error: $error';
+      if (kDebugMode) {
+        debugPrint('Streaming internal error: $error\n$stack');
       }
       notifyListeners();
       return;
@@ -235,6 +251,13 @@ class StreamingPlayerController extends ChangeNotifier {
       ssl: ssl,
       blockedNavigationReason: blockedNavigationReason,
     );
+    final providerCandidate = _candidates[_currentIndex];
+    final nextEndpointIndex = _currentEndpointIndex + 1;
+    if (nextEndpointIndex < providerCandidate.resolvedEndpoints.length) {
+      _activateEndpoint(nextEndpointIndex, failureReason: reason);
+      return;
+    }
+
     final nextIndex = _currentIndex + 1;
     if (nextIndex >= _candidates.length) {
       _status = StreamingPlayerStatus.exhausted;
@@ -299,24 +322,50 @@ class StreamingPlayerController extends ChangeNotifier {
       _diagnostics.add(_currentDiagnostic!);
     }
     _currentIndex = index;
+    _currentEndpointIndex = 0;
+    _startAttempt(
+      initial: initial,
+      manual: manual,
+      failureReason: failureReason,
+    );
+  }
+
+  void _activateEndpoint(int endpointIndex, {String? failureReason}) {
+    _timeout?.cancel();
+    _readyGraceTimer?.cancel();
+    if (_currentDiagnostic != null) {
+      _diagnostics.add(_currentDiagnostic!);
+    }
+    _currentEndpointIndex = endpointIndex;
+    _startAttempt(failureReason: failureReason);
+  }
+
+  void _startAttempt({
+    bool initial = false,
+    bool manual = false,
+    String? failureReason,
+  }) {
     _attempt++;
     _progress = 0;
     _status = StreamingPlayerStatus.loading;
-    final candidate = _candidates[index];
+    final candidate = currentCandidate!;
     _currentDiagnostic = StreamingProviderDiagnostic(
       providerName: candidate.server.displayName,
       host: candidate.url.host,
+      endpointId: candidate.endpointId,
       loadStartedAt: DateTime.now(),
     );
-    final serverNumber = index + 1;
+    final serverNumber = _currentIndex + 1;
     final providerName = candidate.server.displayName;
     if (initial) {
       _message = 'Trying $providerName...';
     } else if (manual) {
       _message = 'Trying $providerName...';
     } else {
-      _message =
-          'Server ${serverNumber - 1} failed, switching to $providerName...';
+      final isInternalFallback = _currentEndpointIndex > 0;
+      _message = isInternalFallback
+          ? 'Trying $providerName...'
+          : 'Server ${serverNumber - 1} failed, switching to $providerName...';
       if (kDebugMode && failureReason != null) {
         debugPrint('Streaming fallback: $failureReason');
       }

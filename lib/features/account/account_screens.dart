@@ -7,7 +7,9 @@ import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/user_activity_repository.dart';
+import '../../core/responsive/adaptive_container.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/continue_watching.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/state_views.dart';
@@ -696,21 +698,24 @@ class _AccountScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      body: ListView(
+    return AppShell(
+      body: AdaptiveContainer(
+        maxWidth: 1100,
         padding: EdgeInsets.zero,
-        children: [
-          const MovieAppBar(dark: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(17, 43, 17, 24),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 13),
-            child: child,
-          ),
-        ],
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const MovieAppBar(dark: true),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 43, 17, 24),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 13),
+              child: child,
+            ),
+          ],
+        ),
       ),
     );
   }

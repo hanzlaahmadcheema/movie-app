@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'user_profile_repository.dart';
@@ -30,6 +31,19 @@ class AuthService {
       _auth?.userChanges() ?? Stream<User?>.value(null);
 
   Future<void> initializeGoogleSignIn() {
+    if (kIsWeb) {
+      return Future<void>.value();
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return Future<void>.value();
+    }
     return _googleInit ??= _googleSignIn.initialize();
   }
 
@@ -43,7 +57,7 @@ class AuthService {
     );
     final user = userCredential.user;
     if (user != null) {
-      await UserProfileRepository.instance.upsertProfile(user);
+      await _syncProfileIfPossible(user);
     }
     return userCredential;
   }
@@ -61,15 +75,54 @@ class AuthService {
     if (user != null) {
       await user.updateDisplayName(name.trim());
       await user.reload();
-      await UserProfileRepository.instance.upsertProfile(
-        _requireAuth().currentUser ?? user,
-      );
+      await _syncProfileIfPossible(_requireAuth().currentUser ?? user);
+      await (_requireAuth().currentUser ?? user).sendEmailVerification();
     }
     return credential;
   }
 
   Future<void> sendPasswordResetEmail(String email) {
     return _requireAuth().sendPasswordResetEmail(email: email.trim());
+  }
+
+  Future<void> sendEmailVerification() async {
+    final user = currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'requires-login',
+        message: 'Login is required to verify your email.',
+      );
+    }
+    await user.sendEmailVerification();
+  }
+
+  Future<User?> reloadCurrentUser() async {
+    final user = currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'requires-login',
+        message: 'Login is required to refresh your account.',
+      );
+    }
+    await user.reload();
+    final refreshedUser = _requireAuth().currentUser ?? user;
+    await _syncProfileIfPossible(refreshedUser);
+    return _requireAuth().currentUser;
+  }
+
+  bool requiresEmailVerification(User user) {
+    return requiresEmailVerificationForProviderIds(
+      providerIds: user.providerData.map((provider) => provider.providerId),
+      emailVerified: user.emailVerified,
+    );
+  }
+
+  static bool requiresEmailVerificationForProviderIds({
+    required Iterable<String> providerIds,
+    required bool emailVerified,
+  }) {
+    return !emailVerified &&
+        providerIds.contains(EmailAuthProvider.PROVIDER_ID);
   }
 
   Future<void> updateProfile({
@@ -89,7 +142,7 @@ class AuthService {
     await user.reload();
     final refreshedUser = _requireAuth().currentUser;
     if (refreshedUser != null) {
-      await UserProfileRepository.instance.upsertProfile(refreshedUser);
+      await _syncProfileIfPossible(refreshedUser);
     }
   }
 
@@ -148,6 +201,17 @@ class AuthService {
   }
 
   Future<UserCredential> signInWithGoogle() async {
+    if (kIsWeb) {
+      final provider = GoogleAuthProvider()
+        ..setCustomParameters({'prompt': 'select_account'});
+      final userCredential = await _requireAuth().signInWithPopup(provider);
+      final user = userCredential.user;
+      if (user != null) {
+        await _syncProfileIfPossible(user);
+      }
+      return userCredential;
+    }
+
     await initializeGoogleSignIn();
     if (!_googleSignIn.supportsAuthenticate()) {
       throw FirebaseAuthException(
@@ -171,7 +235,7 @@ class AuthService {
     );
     final user = userCredential.user;
     if (user != null) {
-      await UserProfileRepository.instance.upsertProfile(user);
+      await _syncProfileIfPossible(user);
     }
     return userCredential;
   }
@@ -202,7 +266,7 @@ class AuthService {
     );
     final user = userCredential.user;
     if (user != null) {
-      await UserProfileRepository.instance.upsertProfile(user);
+      await _syncProfileIfPossible(user);
     }
     return userCredential;
   }
@@ -254,9 +318,16 @@ class AuthService {
 
   Future<void> _refreshAndSyncProfile(User fallbackUser) async {
     await fallbackUser.reload();
-    await UserProfileRepository.instance.upsertProfile(
-      _requireAuth().currentUser ?? fallbackUser,
-    );
+    await _syncProfileIfPossible(_requireAuth().currentUser ?? fallbackUser);
+  }
+
+  Future<void> _syncProfileIfPossible(User user) async {
+    try {
+      await UserProfileRepository.instance.upsertProfile(user);
+    } on FirebaseException {
+      // Auth must remain usable even if the optional Firestore profile mirror
+      // is temporarily unavailable or deployed rules are stale.
+    }
   }
 
   FirebaseAuth _requireAuth() {

@@ -7,13 +7,18 @@ import '../../app/app_theme.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/navigation/content_navigation.dart';
+import '../../core/responsive/adaptive_container.dart';
+import '../../core/responsive/responsive_context.dart';
+import '../../core/services/local_image_cache_service.dart';
 import '../../core/services/admin_repository.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../core/services/user_activity_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/continue_watching.dart';
+import '../../widgets/filter_widgets.dart';
 import '../../widgets/network_art.dart';
 import '../../widgets/poster_widgets.dart';
 import '../../widgets/state_views.dart';
@@ -34,13 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    homeData = widget.dataLoader?.call() ?? _loadHomeData();
+    homeData = _createHomeDataFuture();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
+    return AppShell(
+      enablePullToRefresh: false,
       body: Stack(
         children: [
           StreamBuilder(
@@ -67,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? userMessageForError(snapshot.error)
                               : 'Home content is unavailable right now.',
                           onRetry: () => setState(() {
-                            homeData = widget.dataLoader?.call() ?? _loadHomeData();
+                            homeData = _createHomeDataFuture();
                           }),
                         );
                       }
@@ -80,89 +85,102 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? data.heroItems
                           : _loopItems(data.trendingMovies, 10);
 
-                      return ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          if (heroItems.isNotEmpty)
-                            _HeroCarousel(items: _loopItems(heroItems, 10))
-                          else
-                            const SizedBox(height: 220),
-                          const SizedBox(height: 18),
-                          const ContinueWatchingSection(),
-                          if (data.notices.isNotEmpty) ...[
-                            const SizedBox(height: 14),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 17,
-                              ),
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          final future = _createHomeDataFuture();
+                          setState(() {
+                            homeData = future;
+                          });
+                          await future;
+                        },
+                        edgeOffset: 90, // offset below the app bar
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: [
+                            if (heroItems.isNotEmpty)
+                              HeroCarouselSection(
+                                items: _loopItems(heroItems, 10),
+                              )
+                            else
+                              const SizedBox(height: 220),
+                            AdaptiveContainer(
                               child: Column(
-                                children: data.notices
-                                    .map((notice) => _NoticeCard(notice: notice))
-                                    .toList(growable: false),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 24),
+                                  const ContinueWatchingSection(),
+                                  if (data.notices.isNotEmpty) ...[
+                                    const SizedBox(height: 18),
+                                    Column(
+                                      children: data.notices
+                                          .map(
+                                            (notice) =>
+                                                _NoticeCard(notice: notice),
+                                          )
+                                          .toList(growable: false),
+                                    ),
+                                  ],
+                                  if (data.featuredItems.isNotEmpty) ...[
+                                    const SizedBox(height: 32),
+                                    HorizontalPosterSection(
+                                      title: 'Featured',
+                                      items: _loopItems(data.featuredItems, 10),
+                                      itemCount: data.featuredItems.length
+                                          .clamp(0, 10),
+                                      isWatchlisted: (item) => watchlistKeys
+                                          .contains(contentKeyFor(item)),
+                                      onWatchlistChanged: (item, active) =>
+                                          _setWatchlisted(item, active),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 34),
+                                  TrendingSection(
+                                    items: _loopItems(trendingItems, 10),
+                                    activeTab: trendingTab,
+                                    onTabChanged: (value) =>
+                                        setState(() => trendingTab = value),
+                                    isWatchlisted: (item) => watchlistKeys
+                                        .contains(contentKeyFor(item)),
+                                    onWatchlistChanged: (item, active) =>
+                                        _setWatchlisted(item, active),
+                                  ),
+                                  const SizedBox(height: 36),
+                                  GenreSection(
+                                    onSelected: (genre) =>
+                                        openGenreBrowse(context, genre),
+                                  ),
+                                  const SizedBox(height: 36),
+                                  LatestMoviesSection(
+                                    items: _loopItems(data.latestMovies, 10),
+                                    onMore: () => Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.movies,
+                                    ),
+                                    isWatchlisted: (item) => watchlistKeys
+                                        .contains(contentKeyFor(item)),
+                                    onWatchlistChanged: (item, active) =>
+                                        _setWatchlisted(item, active),
+                                  ),
+                                  const SizedBox(height: 36),
+                                  LatestSeriesSection(
+                                    items: _loopItems(data.latestSeries, 10),
+                                    onMore: () => Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.series,
+                                    ),
+                                    isWatchlisted: (item) => watchlistKeys
+                                        .contains(contentKeyFor(item)),
+                                    onWatchlistChanged: (item, active) =>
+                                        _setWatchlisted(item, active),
+                                  ),
+                                  const SizedBox(height: 40),
+                                  const HomeFooter(),
+                                  const SizedBox(height: 24),
+                                ],
                               ),
                             ),
                           ],
-                          if (data.featuredItems.isNotEmpty) ...[
-                            const SizedBox(height: 18),
-                            HorizontalPosterSection(
-                              title: 'Featured',
-                              items: _loopItems(data.featuredItems, 10),
-                              itemCount: data.featuredItems.length.clamp(0, 10),
-                              isWatchlisted: (item) => watchlistKeys.contains(
-                                contentKeyFor(item),
-                              ),
-                              onWatchlistChanged: (item, active) =>
-                                  _setWatchlisted(item, active),
-                            ),
-                          ],
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 18, 5, 0),
-                            child: SectionHeader(
-                              title: 'Trending',
-                              trailing: TogglePills(
-                                active: trendingTab,
-                                onChanged: (value) =>
-                                    setState(() => trendingTab = value),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 8, 5, 0),
-                            child: PosterGrid(
-                              items: _loopItems(trendingItems, 10),
-                              itemCount: 10,
-                              isWatchlisted: (item) =>
-                                  watchlistKeys.contains(contentKeyFor(item)),
-                              onWatchlistChanged: (item, active) =>
-                                  _setWatchlisted(item, active),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          HorizontalPosterSection(
-                            title: 'Latest Movies',
-                            items: _loopItems(data.latestMovies, 10),
-                            itemCount: 10,
-                            onMore: () =>
-                                Navigator.pushNamed(context, AppRoutes.movies),
-                            isWatchlisted: (item) =>
-                                watchlistKeys.contains(contentKeyFor(item)),
-                            onWatchlistChanged: (item, active) =>
-                                _setWatchlisted(item, active),
-                          ),
-                          const SizedBox(height: 18),
-                          HorizontalPosterSection(
-                            title: 'Latest TV Series',
-                            items: _loopItems(data.latestSeries, 10),
-                            itemCount: 10,
-                            onMore: () =>
-                                Navigator.pushNamed(context, AppRoutes.series),
-                            isWatchlisted: (item) =>
-                                watchlistKeys.contains(contentKeyFor(item)),
-                            onWatchlistChanged: (item, active) =>
-                                _setWatchlisted(item, active),
-                          ),
-                          const SizedBox(height: 18),
-                        ],
+                        ),
                       );
                     },
                   );
@@ -174,6 +192,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<HomeContentData> _createHomeDataFuture() {
+    final dataLoader = widget.dataLoader;
+    return Future<HomeContentData>.microtask(() {
+      if (dataLoader != null) {
+        return dataLoader();
+      }
+      return _loadHomeData();
+    });
   }
 
   Future<void> _setWatchlisted(MovieItem item, bool active) async {
@@ -214,8 +242,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<HomeContentData> _loadHomeData() async {
-    final repository = TmdbRepository(config: AppConfig.fromEnv());
+    final config = AppConfig.fromEnv();
     final adminRepository = AdminRepository.instance;
+    if (!config.hasTmdbReadAccessToken) {
+      final notices = await adminRepository.loadActiveNotices();
+      return HomeContentData(
+        heroItems: const [],
+        featuredItems: const [],
+        trendingMovies: const [],
+        trendingSeries: const [],
+        latestMovies: const [],
+        latestSeries: const [],
+        notices: notices,
+      );
+    }
+
+    final repository = TmdbRepository(config: config);
     final futures = await Future.wait<dynamic>([
       repository.trendingMovies(),
       repository.trendingSeries(),
@@ -237,22 +279,15 @@ class _HomeScreenState extends State<HomeScreen> {
       repository: repository,
       ids: banners
           .map(
-            (banner) => (
-              tmdbId: banner.tmdbId,
-              contentType: banner.contentType,
-            ),
+            (banner) =>
+                (tmdbId: banner.tmdbId, contentType: banner.contentType),
           )
           .toList(growable: false),
     );
     final featuredItems = await _resolveAdminItems(
       repository: repository,
       ids: featured
-          .map(
-            (item) => (
-              tmdbId: item.tmdbId,
-              contentType: item.contentType,
-            ),
-          )
+          .map((item) => (tmdbId: item.tmdbId, contentType: item.contentType))
           .toList(growable: false),
     );
 
@@ -284,13 +319,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HeroCarousel extends StatefulWidget {
-  const _HeroCarousel({required this.items});
+class HeroCarouselSection extends StatefulWidget {
+  const HeroCarouselSection({required this.items, super.key});
 
   final List<MovieItem> items;
 
   @override
-  State<_HeroCarousel> createState() => _HeroCarouselState();
+  State<HeroCarouselSection> createState() => _HeroCarouselState();
 }
 
 class _NoticeCard extends StatelessWidget {
@@ -344,7 +379,7 @@ class _NoticeCard extends StatelessWidget {
   }
 }
 
-class _HeroCarouselState extends State<_HeroCarousel> {
+class _HeroCarouselState extends State<HeroCarouselSection> {
   static const autoPlayDuration = Duration(milliseconds: 3500);
   final pageController = PageController();
   int activeIndex = 0;
@@ -396,7 +431,7 @@ class _HeroCarouselState extends State<_HeroCarousel> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 383,
+      height: context.isMobile ? 350 : (context.isTablet ? 470 : 610),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -408,26 +443,13 @@ class _HeroCarouselState extends State<_HeroCarousel> {
                 _HeroSlide(item: widget.items[index]),
           ),
           Positioned(
-            left: 15,
-            bottom: 42,
-            width: 125,
-            child: PrimaryButton(
-              label: 'Watch Now',
-              icon: Icons.play_arrow,
-              height: 40,
-              radius: 25,
-              onPressed: () =>
-                  openDetailForItem(context, widget.items[activeIndex]),
-            ),
-          ),
-          Positioned(
-            right: 21,
-            top: 161,
-            child: Column(
+            right: context.isMobile ? 18 : 32,
+            bottom: context.isMobile ? 14 : 42,
+            child: Row(
               children: List.generate(
-                widget.items.length,
+                widget.items.length.clamp(0, 10),
                 (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(left: 7),
                   child: _Dot(
                     active: activeIndex == index,
                     onTap: () => _goToSlide(index),
@@ -454,6 +476,9 @@ class _HeroSlide extends StatelessWidget {
       children: [
         NetworkArt(
           url: item.backdropUrl.isEmpty ? item.posterUrl : item.backdropUrl,
+          imageType: item.backdropUrl.isEmpty
+              ? LocalImageCacheService.imageTypePoster
+              : LocalImageCacheService.imageTypeBackdrop,
         ),
         const DecoratedBox(
           decoration: BoxDecoration(
@@ -470,36 +495,257 @@ class _HeroSlide extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 15,
-          right: 80,
-          bottom: 95,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  TagChip(label: item.quality),
-                  const SizedBox(width: 5),
-                  TagChip(label: item.type),
-                  const SizedBox(width: 5),
-                  TagChip(label: item.year),
-                ],
+          left: 0,
+          right: 0,
+          bottom: context.isMobile ? 34 : 48,
+          child: AdaptiveContainer(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                width: context.isMobile ? double.infinity : 640,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: [
+                        TagChip(label: item.quality),
+                        TagChip(label: item.type),
+                        TagChip(label: item.year),
+                      ],
+                    ),
+                    SizedBox(height: context.isMobile ? 10 : 18),
+                    Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.title.copyWith(
+                        fontSize: context.isMobile
+                            ? 24
+                            : (context.isTablet ? 36 : 48),
+                        height: 1.05,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      item.description.isEmpty
+                          ? 'Stream this title in high quality and add it to your list for later.'
+                          : item.description,
+                      maxLines: context.isMobile ? 2 : 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.normal.copyWith(
+                        color: Colors.white70,
+                        fontSize: context.isMobile ? 12 : 15,
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: context.isMobile ? 14 : 24),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: context.isMobile ? 126 : 154,
+                          child: PrimaryButton(
+                            label: 'Watch Now',
+                            icon: Icons.play_arrow,
+                            height: context.isMobile ? 40 : 48,
+                            radius: AppRadius.pill,
+                            onPressed: () => openWatchForItem(context, item),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton.icon(
+                          onPressed: () => openDetailForItem(context, item),
+                          icon: const Icon(Icons.info_outline, size: 18),
+                          label: const Text('Details'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(item.title, style: AppTextStyles.medium),
-              const SizedBox(height: 8),
-              Text(
-                item.description.isEmpty
-                    ? 'Stream this title in high quality and add it to your list for later.'
-                    : item.description,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.normal,
-              ),
-            ],
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class GenreSection extends StatelessWidget {
+  const GenreSection({required this.onSelected, super.key});
+
+  final ValueChanged<String> onSelected;
+
+  static const genres = [
+    'Action',
+    'Drama',
+    'Comedy',
+    'Thriller',
+    'Science Fiction',
+    'Animation',
+    'Horror',
+    'Romance',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(title: 'Browse Genres'),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final genre in genres)
+              GenreChip(
+                label: genre,
+                selected: false,
+                onSelected: () => onSelected(genre),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class TrendingSection extends StatelessWidget {
+  const TrendingSection({
+    required this.items,
+    required this.activeTab,
+    required this.onTabChanged,
+    required this.isWatchlisted,
+    required this.onWatchlistChanged,
+    super.key,
+  });
+
+  final List<MovieItem> items;
+  final int activeTab;
+  final ValueChanged<int> onTabChanged;
+  final bool Function(MovieItem item) isWatchlisted;
+  final void Function(MovieItem item, bool active) onWatchlistChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SectionHeader(
+          title: 'Trending',
+          trailing: TogglePills(active: activeTab, onChanged: onTabChanged),
+        ),
+        const SizedBox(height: 14),
+        PosterGrid(
+          items: items,
+          itemCount: 10,
+          isWatchlisted: isWatchlisted,
+          onWatchlistChanged: onWatchlistChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class LatestMoviesSection extends StatelessWidget {
+  const LatestMoviesSection({
+    required this.items,
+    required this.onMore,
+    required this.isWatchlisted,
+    required this.onWatchlistChanged,
+    super.key,
+  });
+
+  final List<MovieItem> items;
+  final VoidCallback onMore;
+  final bool Function(MovieItem item) isWatchlisted;
+  final void Function(MovieItem item, bool active) onWatchlistChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return HorizontalPosterSection(
+      title: 'Latest Movies',
+      items: items,
+      itemCount: 10,
+      onMore: onMore,
+      isWatchlisted: isWatchlisted,
+      onWatchlistChanged: onWatchlistChanged,
+    );
+  }
+}
+
+class LatestSeriesSection extends StatelessWidget {
+  const LatestSeriesSection({
+    required this.items,
+    required this.onMore,
+    required this.isWatchlisted,
+    required this.onWatchlistChanged,
+    super.key,
+  });
+
+  final List<MovieItem> items;
+  final VoidCallback onMore;
+  final bool Function(MovieItem item) isWatchlisted;
+  final void Function(MovieItem item, bool active) onWatchlistChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return HorizontalPosterSection(
+      title: 'Latest TV Series',
+      items: items,
+      itemCount: 10,
+      onMore: onMore,
+      isWatchlisted: isWatchlisted,
+      onWatchlistChanged: onWatchlistChanged,
+    );
+  }
+}
+
+class HomeFooter extends StatelessWidget {
+  const HomeFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          runSpacing: 16,
+          children: [
+            Text(
+              'MovieApp',
+              style: AppTextStyles.medium.copyWith(color: AppColors.primary),
+            ),
+            Wrap(
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.contact),
+                  child: const Text('Contact'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.terms),
+                  child: const Text('Terms'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRoutes.privacy),
+                  child: const Text('Privacy'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

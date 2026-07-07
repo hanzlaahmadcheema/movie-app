@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../core/services/local_image_cache_service.dart';
+import 'cached_tmdb_image.dart';
+
 class NetworkArt extends StatelessWidget {
   const NetworkArt({
     required this.url,
+    this.imageType,
     this.fit = BoxFit.cover,
     this.width,
     this.height,
@@ -11,6 +15,7 @@ class NetworkArt extends StatelessWidget {
   });
 
   final String url;
+  final String? imageType;
   final BoxFit fit;
   final double? width;
   final double? height;
@@ -25,13 +30,16 @@ class NetworkArt extends StatelessWidget {
       alignment: Alignment.center,
       child: const Icon(Icons.movie_creation_outlined),
     );
+    final effectiveImageType =
+        imageType ?? LocalImageCacheService.imageTypeForUrl(url);
     final image = url.startsWith('http')
-        ? Image.network(
-            url,
+        ? CachedTmdbImage(
+            url: url,
+            imageType: effectiveImageType,
             fit: fit,
             width: width,
             height: height,
-            errorBuilder: (context, error, stackTrace) => fallback,
+            fallback: fallback,
           )
         : Image.asset(
             url,

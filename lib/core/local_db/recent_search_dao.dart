@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'app_database.dart';
 
 class RecentSearch {
@@ -31,6 +32,7 @@ class RecentSearchDao {
   final AppDatabase _database;
 
   Future<List<RecentSearch>> list({int limit = 8}) async {
+    if (kIsWeb) return const [];
     final db = await _database.database;
     final rows = await db.query(
       AppDatabase.recentSearchesTable,
@@ -41,6 +43,7 @@ class RecentSearchDao {
   }
 
   Future<void> save(String query) async {
+    if (kIsWeb) return;
     final normalized = query.trim();
     if (normalized.isEmpty) {
       return;
@@ -71,6 +74,7 @@ WHERE id NOT IN (
   }
 
   Future<void> clear() async {
+    if (kIsWeb) return;
     final db = await _database.database;
     await db.delete(AppDatabase.recentSearchesTable);
   }

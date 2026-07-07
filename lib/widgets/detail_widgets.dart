@@ -6,6 +6,9 @@ import '../app/app_theme.dart';
 import '../core/models/detail_item.dart';
 import '../core/models/movie_item.dart';
 import '../core/navigation/content_navigation.dart';
+import '../core/responsive/adaptive_container.dart';
+import '../core/responsive/responsive_context.dart';
+import '../core/services/local_image_cache_service.dart';
 import 'buttons.dart';
 import 'firebase_posters.dart';
 import 'network_art.dart';
@@ -34,6 +37,17 @@ class DetailHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (context.isDesktop) {
+      return _DesktopDetailHero(
+        item: item,
+        onWatch: onWatch,
+        watchlisted: watchlisted,
+        watched: watched,
+        onWatchlistChanged: onWatchlistChanged,
+        onWatchedChanged: onWatchedChanged,
+        onTrailer: onTrailer,
+      );
+    }
     return SizedBox(
       height: 665,
       child: Stack(
@@ -48,6 +62,9 @@ class DetailHero extends StatelessWidget {
                   url: item.backdropUrl.isEmpty
                       ? item.posterUrl
                       : item.backdropUrl,
+                  imageType: item.backdropUrl.isEmpty
+                      ? LocalImageCacheService.imageTypePoster
+                      : LocalImageCacheService.imageTypeBackdrop,
                 ),
               ),
             ),
@@ -62,7 +79,12 @@ class DetailHero extends StatelessWidget {
             left: 0,
             right: 0,
             child: Center(
-              child: NetworkArt(url: item.posterUrl, width: 167, height: 250),
+              child: NetworkArt(
+                url: item.posterUrl,
+                imageType: LocalImageCacheService.imageTypePoster,
+                width: 167,
+                height: 250,
+              ),
             ),
           ),
           Positioned(
@@ -130,6 +152,141 @@ class DetailHero extends StatelessWidget {
   }
 }
 
+class _DesktopDetailHero extends StatelessWidget {
+  const _DesktopDetailHero({
+    required this.item,
+    required this.onWatch,
+    required this.watchlisted,
+    required this.watched,
+    this.onWatchlistChanged,
+    this.onWatchedChanged,
+    this.onTrailer,
+  });
+
+  final MovieItem item;
+  final VoidCallback onWatch;
+  final bool watchlisted;
+  final bool watched;
+  final ValueChanged<bool>? onWatchlistChanged;
+  final ValueChanged<bool>? onWatchedChanged;
+  final VoidCallback? onTrailer;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 570,
+      child: AdaptiveContainer(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 54),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AspectRatio(
+                aspectRatio: 2 / 3,
+                child: NetworkArt(
+                  url: item.posterUrl,
+                  imageType: LocalImageCacheService.imageTypePoster,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+              ),
+              const SizedBox(width: 48),
+              Expanded(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          TagChip(label: item.quality),
+                          TagChip(label: item.year),
+                          TagChip(label: item.type),
+                          TagChip(label: 'IMDb ${item.rating}'),
+                          TagChip(label: item.duration),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        item.title,
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: 46,
+                          height: 1.08,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        item.description.isEmpty
+                            ? 'No description is available for this title.'
+                            : item.description,
+                        maxLines: 5,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.normal.copyWith(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          height: 1.6,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          SizedBox(
+                            width: 160,
+                            child: PrimaryButton(
+                              label: 'Watch Now',
+                              icon: Icons.play_arrow,
+                              height: 50,
+                              radius: AppRadius.pill,
+                              onPressed: onWatch,
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: onTrailer,
+                            icon: const Icon(Icons.video_camera_back_outlined),
+                            label: const Text('Trailer'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                onWatchlistChanged?.call(!watchlisted),
+                            icon: Icon(
+                              watchlisted
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_border,
+                            ),
+                            label: Text(
+                              watchlisted ? 'In Watchlist' : 'Watchlist',
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: watched
+                                ? 'Remove watched status'
+                                : 'Mark as watched',
+                            onPressed: () => onWatchedChanged?.call(!watched),
+                            icon: Icon(
+                              watched
+                                  ? Icons.check_circle
+                                  : Icons.check_circle_outline,
+                              color: watched ? AppColors.primary : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class DetailBackdrop extends StatelessWidget {
   const DetailBackdrop({required this.item, required this.child, super.key});
 
@@ -149,6 +306,9 @@ class DetailBackdrop extends StatelessWidget {
                 url: item.backdropUrl.isEmpty
                     ? item.posterUrl
                     : item.backdropUrl,
+                imageType: item.backdropUrl.isEmpty
+                    ? LocalImageCacheService.imageTypePoster
+                    : LocalImageCacheService.imageTypeBackdrop,
               ),
             ),
           ),
@@ -257,8 +417,8 @@ class DetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 13),
+    return AdaptiveContainer(
+      maxWidth: 1100,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,7 +428,16 @@ class DetailBody extends StatelessWidget {
           const SizedBox(height: 34),
           Text('Description', style: AppTextStyles.medium),
           const SizedBox(height: 10),
-          Text(item.description, style: AppTextStyles.normal),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 850),
+            child: Text(
+              item.description,
+              style: AppTextStyles.normal.copyWith(
+                fontSize: context.isMobile ? 12 : 15,
+                height: 1.55,
+              ),
+            ),
+          ),
           const SizedBox(height: 26),
           DetailInfoCarousel(items: info),
           if (includeRelated) ...[

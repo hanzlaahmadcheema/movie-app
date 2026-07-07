@@ -10,6 +10,8 @@ import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_season.dart';
 import '../../core/navigation/watch_page_request.dart';
 import '../../core/navigation/navigation_state_repository.dart';
+import '../../core/responsive/adaptive_container.dart';
+import '../../core/responsive/responsive_context.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../core/services/user_activity_repository.dart';
@@ -17,6 +19,7 @@ import '../../core/streaming/streaming_embed_request.dart';
 import '../../core/navigation/content_navigation.dart';
 import 'widgets/embedded_watch_player_panel.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/detail_widgets.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/state_views.dart';
@@ -121,8 +124,7 @@ class _WatchPageState extends State<_WatchPage> {
       );
     }
 
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
+    return AppShell(
       body: Stack(
         children: [
           FutureBuilder<TmdbDetail?>(
@@ -228,17 +230,27 @@ class _WatchPageState extends State<_WatchPage> {
                                 .watchedStateStream(user, item),
                             builder: (context, watchedSnapshot) {
                               final watched = watchedSnapshot.data ?? false;
+                              if (context.isDesktop) {
+                                return _buildDesktopWatchPage(
+                                  item: item,
+                                  related: related,
+                                  seasons: seasons,
+                                  activity: activity,
+                                  watchlisted: watchlisted,
+                                  watched: watched,
+                                );
+                              }
                               return ListView(
                                 padding: EdgeInsets.zero,
                                 children: [
                                   DetailBackdrop(
                                     item: item,
                                     child: SizedBox(
-                                      height: widget.isSeries ? 1125 : 623,
+                                      height: widget.isSeries ? 1173 : 671,
                                       child: Stack(
                                         children: [
                                           Positioned(
-                                            top: 125,
+                                            top: 173,
                                             left: 15,
                                             right: 15,
                                             child: Text(
@@ -249,7 +261,7 @@ class _WatchPageState extends State<_WatchPage> {
                                             ),
                                           ),
                                           Positioned(
-                                            top: 166,
+                                            top: 214,
                                             left: 15,
                                             right: 15,
                                             child: _TopIconRow(
@@ -263,7 +275,7 @@ class _WatchPageState extends State<_WatchPage> {
                                             ),
                                           ),
                                           Positioned(
-                                            top: 211,
+                                            top: 259,
                                             left: 0,
                                             right: 0,
                                             child: EmbeddedWatchPlayerPanel(
@@ -274,7 +286,7 @@ class _WatchPageState extends State<_WatchPage> {
                                             ),
                                           ),
                                           Positioned(
-                                            top: 562,
+                                            top: 610,
                                             left: 38,
                                             child: ReactionRow(
                                               selected:
@@ -313,7 +325,7 @@ class _WatchPageState extends State<_WatchPage> {
                                           if (widget.isSeries &&
                                               seasons.isNotEmpty) ...[
                                             Positioned(
-                                              top: 677,
+                                              top: 725,
                                               left: 0,
                                               right: 0,
                                               child: FutureBuilder<List<Episode>>(
@@ -379,7 +391,7 @@ class _WatchPageState extends State<_WatchPage> {
                                               ),
                                             ),
                                             Positioned(
-                                              top: 607,
+                                              top: 655,
                                               left: 0,
                                               right: 0,
                                               child: SeasonDropdownTile(
@@ -454,6 +466,168 @@ class _WatchPageState extends State<_WatchPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildDesktopWatchPage({
+    required MovieItem item,
+    required List<MovieItem> related,
+    required List<TmdbSeason> seasons,
+    required UserActivity activity,
+    required bool watchlisted,
+    required bool watched,
+  }) {
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        AdaptiveContainer(
+          maxWidth: 1400,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 34, bottom: 44),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.title,
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: 32,
+                          height: 1.15,
+                        ),
+                      ),
+                    ),
+                    _TopIconRow(
+                      item: item,
+                      watchlisted: watchlisted,
+                      watched: watched,
+                      onWatchlistChanged: (active) =>
+                          _setWatchlisted(item, active),
+                      onWatchedChanged: (active) => _setWatched(item, active),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      child: EmbeddedWatchPlayerPanel(
+                        request: activeRequest,
+                        selectionPrompt: widget.isSeries
+                            ? 'Select an episode to start playback.'
+                            : 'Preparing player...',
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ReactionRow(
+                  selected: _reactionStateFromActivity(activity.reaction),
+                  onChanged: (reaction) => _setReaction(item, reaction),
+                ),
+                if (widget.isSeries && seasons.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  SeasonDropdownTile(
+                    seasons: seasons,
+                    selectedSeasonNumber:
+                        selectedSeasonNumber ?? seasons.first.number,
+                    selectedEpisodeNumber: activity.episodeNumber ?? 1,
+                    onSelected: (season) =>
+                        _selectSeason(item, seasons, season),
+                  ),
+                  FutureBuilder<List<Episode>>(
+                    future: episodesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return AppErrorView(
+                          title: 'Could not load episodes',
+                          message: userMessageForError(snapshot.error),
+                          onRetry: () => setState(() {
+                            episodesFuture = _loadEpisodes(
+                              item.id,
+                              selectedSeasonNumber ?? seasons.first.number,
+                            );
+                          }),
+                        );
+                      }
+                      final episodes = snapshot.data ?? const <Episode>[];
+                      return EpisodeList(
+                        episodes: episodes,
+                        selectedEpisodeNumber: activity.episodeNumber,
+                        onEpisodeSelected: (episode) => _setEpisode(
+                          item,
+                          selectedSeasonNumber ?? seasons.first.number,
+                          episode,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                const SizedBox(height: 34),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 850),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'About this title',
+                        style: AppTextStyles.sectionTitle(context),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        item.description.isEmpty
+                            ? 'No description is available for this title.'
+                            : item.description,
+                        style: AppTextStyles.normal.copyWith(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          height: 1.55,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                FirebaseHorizontalPosterSection(
+                  title: 'You may also like',
+                  items: related,
+                  itemCount: 10,
+                  onItemTap: (item) => openDetailForItem(context, item),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectSeason(
+    MovieItem item,
+    List<TmdbSeason> seasons,
+    TmdbSeason season,
+  ) async {
+    final future = _loadEpisodes(item.id, season.number);
+    setState(() {
+      selectedSeasonNumber = season.number;
+      activeRequest = null;
+      episodesFuture = future;
+    });
+    await _setSeason(item, season.number);
+    try {
+      final episodes = await future;
+      if (episodes.isNotEmpty && mounted) {
+        await _setEpisode(item, season.number, episodes.first);
+      }
+    } catch (_) {}
   }
 
   Future<TmdbDetail?> _loadDetail() async {
@@ -651,6 +825,11 @@ class SeasonDropdownTile extends StatefulWidget {
 }
 
 class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
+  static const double _collapsedHeight = 70;
+  static const double _menuTop = 58;
+  static const double _menuItemHeight = 35;
+  static const int _maxVisibleSeasonRows = 8;
+
   bool opened = false;
 
   @override
@@ -659,14 +838,19 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
       (season) => season.number == widget.selectedSeasonNumber,
       orElse: () => widget.seasons.first,
     );
+    final visibleSeasonRows = widget.seasons.length
+        .clamp(1, _maxVisibleSeasonRows)
+        .toDouble();
+    final menuHeight = visibleSeasonRows * _menuItemHeight;
+    final expandedHeight = _menuTop + menuHeight;
 
     return SizedBox(
-      height: opened ? 190 : 70,
+      height: opened ? expandedHeight : _collapsedHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
-            height: 70,
+            height: _collapsedHeight,
             color: Colors.black.withValues(alpha: 0.30),
             child: Stack(
               children: [
@@ -674,7 +858,7 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
                   left: 18,
                   top: 17,
                   child: _SeasonDropdownButton(
-                    label: selectedSeason.name,
+                    label: _seasonDropdownLabel(selectedSeason),
                     opened: opened,
                     onTap: () => setState(() => opened = !opened),
                   ),
@@ -700,10 +884,11 @@ class _SeasonDropdownTileState extends State<SeasonDropdownTile> {
           if (opened)
             Positioned(
               left: 18,
-              top: 58,
+              top: _menuTop,
               child: _SeasonDropdownMenu(
                 seasons: widget.seasons,
                 selectedSeason: selectedSeason,
+                height: menuHeight,
                 onSelected: (season) {
                   setState(() => opened = false);
                   widget.onSelected(season);
@@ -769,17 +954,20 @@ class _SeasonDropdownMenu extends StatelessWidget {
   const _SeasonDropdownMenu({
     required this.seasons,
     required this.selectedSeason,
+    required this.height,
     required this.onSelected,
   });
 
   final List<TmdbSeason> seasons;
   final TmdbSeason selectedSeason;
+  final double height;
   final ValueChanged<TmdbSeason> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 130,
+      height: height,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(7),
@@ -792,35 +980,40 @@ class _SeasonDropdownMenu extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: seasons
-            .map(
-              (season) => InkWell(
-                onTap: () => onSelected(season),
-                child: Container(
-                  height: 35,
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Text(
-                    season.name,
-                    style: AppTextStyles.normal.copyWith(
-                      color: selectedSeason.number == season.number
-                          ? AppColors.primary
-                          : Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 1,
-                    ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(7),
+        child: ListView.builder(
+          padding: EdgeInsets.zero,
+          itemExtent: _SeasonDropdownTileState._menuItemHeight,
+          itemCount: seasons.length,
+          itemBuilder: (context, index) {
+            final season = seasons[index];
+            return InkWell(
+              onTap: () => onSelected(season),
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Text(
+                  _seasonDropdownLabel(season),
+                  style: AppTextStyles.normal.copyWith(
+                    color: selectedSeason.number == season.number
+                        ? AppColors.primary
+                        : Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1,
                   ),
                 ),
               ),
-            )
-            .toList(),
+            );
+          },
+        ),
       ),
     );
   }
 }
+
+String _seasonDropdownLabel(TmdbSeason season) => 'Season ${season.number}';
 
 class EpisodeList extends StatefulWidget {
   const EpisodeList({

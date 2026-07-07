@@ -17,38 +17,138 @@ class StreamingProviderRegistry {
     final timeout = Duration(seconds: config.streamingTimeoutSeconds);
     final servers = <StreamingServer>[];
 
-    for (var index = 0; index < config.streamingVidSrcDomains.length; index++) {
-      final baseUri = _httpsUri(config.streamingVidSrcDomains[index]);
-      if (baseUri == null) continue;
+    final videasyEndpoints = _endpointsFor(
+      providerId: 'videasy',
+      domains: config.streamingVideasyDomains,
+    );
+    if (videasyEndpoints.isNotEmpty) {
       servers.add(
         StreamingServer(
-          id: 'vidsrc-${index + 1}',
-          providerId: 'vidsrc',
-          displayName: 'VidSrc',
-          priority: index,
-          baseUri: baseUri,
+          id: 'videasy',
+          providerId: 'videasy',
+          displayName: 'Videasy',
+          priority: 200,
+          baseUri: videasyEndpoints.first.url,
           supportedContentTypes: StreamingContentType.values.toSet(),
-          urlBuilderStrategy: StreamingUrlBuilderStrategy.vidSrc,
-          enabled: config.streamingVidSrcEnabled,
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
+          enabled:
+              config.streamingVideasyEnabled &&
+              config.streamingVideasyMovieTemplate.trim().isNotEmpty &&
+              config.streamingVideasyEpisodeTemplate.trim().isNotEmpty,
           timeout: timeout,
+          movieTemplate: config.streamingVideasyMovieTemplate,
+          episodeTemplate: config.streamingVideasyEpisodeTemplate,
+          endpoints: videasyEndpoints,
         ),
       );
     }
 
-    for (
-      var index = 0;
-      index < config.streamingTwoEmbedDomains.length;
-      index++
-    ) {
-      final baseUri = _httpsUri(config.streamingTwoEmbedDomains[index]);
-      if (baseUri == null) continue;
+    final streamVaultEndpoints = _endpointsFor(
+      providerId: 'streamvault',
+      domains: config.streamingStreamVaultDomains,
+    );
+    if (streamVaultEndpoints.isNotEmpty) {
       servers.add(
         StreamingServer(
-          id: '2embed-${index + 1}',
+          id: 'streamvault',
+          providerId: 'streamvault',
+          displayName: 'StreamVault',
+          priority: 300,
+          baseUri: streamVaultEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
+          enabled:
+              config.streamingStreamVaultEnabled &&
+              config.streamingStreamVaultMovieTemplate.trim().isNotEmpty &&
+              config.streamingStreamVaultEpisodeTemplate.trim().isNotEmpty,
+          timeout: timeout,
+          movieTemplate: config.streamingStreamVaultMovieTemplate,
+          episodeTemplate: config.streamingStreamVaultEpisodeTemplate,
+          endpoints: streamVaultEndpoints,
+        ),
+      );
+    }
+
+    final oneElevenMoviesEndpoints = _endpointsFor(
+      providerId: '111movies',
+      domains: config.streamingOneElevenMoviesDomains,
+    );
+    if (oneElevenMoviesEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: '111movies',
+          providerId: '111movies',
+          displayName: '111Movies',
+          priority: 400,
+          baseUri: oneElevenMoviesEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
+          enabled:
+              config.streamingOneElevenMoviesEnabled &&
+              config.streamingOneElevenMoviesMovieTemplate.trim().isNotEmpty &&
+              config.streamingOneElevenMoviesEpisodeTemplate.trim().isNotEmpty,
+          timeout: timeout,
+          movieTemplate: config.streamingOneElevenMoviesMovieTemplate,
+          episodeTemplate: config.streamingOneElevenMoviesEpisodeTemplate,
+          endpoints: oneElevenMoviesEndpoints,
+        ),
+      );
+    }
+
+    final hindiPlayerEndpoints = _endpointsFor(
+      providerId: 'hindi_player',
+      domains: config.streamingHindiPlayerDomains,
+    );
+    if (hindiPlayerEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: 'hindi_player',
+          providerId: 'hindi_player',
+          displayName: 'Hindi Player',
+          priority: 500,
+          baseUri: hindiPlayerEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.indStream,
+          enabled: config.streamingHindiPlayerEnabled,
+          timeout: timeout,
+          endpoints: hindiPlayerEndpoints,
+        ),
+      );
+    }
+
+    final vidSrcEndpoints = _endpointsFor(
+      providerId: 'vidsrc',
+      domains: config.streamingVidSrcDomains,
+    );
+    if (vidSrcEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: 'vidsrc',
+          providerId: 'vidsrc',
+          displayName: 'VidSrc',
+          priority: 0,
+          baseUri: vidSrcEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.vidSrc,
+          enabled: config.streamingVidSrcEnabled,
+          timeout: timeout,
+          endpoints: vidSrcEndpoints,
+        ),
+      );
+    }
+
+    final twoEmbedEndpoints = _endpointsFor(
+      providerId: '2embed',
+      domains: config.streamingTwoEmbedDomains,
+    );
+    if (twoEmbedEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: '2embed',
           providerId: '2embed',
           displayName: '2Embed',
-          priority: 100 + index,
-          baseUri: baseUri,
+          priority: 100,
+          baseUri: twoEmbedEndpoints.first.url,
           supportedContentTypes: StreamingContentType.values.toSet(),
           urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
           enabled:
@@ -58,6 +158,7 @@ class StreamingProviderRegistry {
           timeout: timeout,
           movieTemplate: config.streamingTwoEmbedMovieTemplate,
           episodeTemplate: config.streamingTwoEmbedEpisodeTemplate,
+          endpoints: twoEmbedEndpoints,
         ),
       );
     }
@@ -83,7 +184,11 @@ class StreamingProviderRegistry {
     return {
       ..._servers
           .where((server) => server.enabled)
-          .map((server) => _normalizeHost(server.baseUri.host)),
+          .expand(
+            (server) => server.enabledEndpoints().map(
+              (endpoint) => _normalizeHost(endpoint.url.host),
+            ),
+          ),
       ..._additionalAllowedHosts,
     }..removeWhere((host) => host.isEmpty);
   }
@@ -101,9 +206,37 @@ class StreamingProviderRegistry {
       (server) =>
           server.enabled &&
           server.allowHttpNavigation &&
-          _normalizeHost(server.baseUri.host) == normalized,
+          server.enabledEndpoints().any(
+            (endpoint) => _normalizeHost(endpoint.url.host) == normalized,
+          ),
     );
   }
+}
+
+List<StreamingEndpoint> _endpointsFor({
+  required String providerId,
+  required List<String> domains,
+}) {
+  final seenHosts = <String>{};
+  final endpoints = <StreamingEndpoint>[];
+  for (final domain in domains) {
+    final baseUri = _httpsUri(domain);
+    if (baseUri == null) continue;
+    final normalizedHost = _normalizeHost(baseUri.host);
+    if (!seenHosts.add(normalizedHost)) continue;
+    final index = endpoints.length;
+    endpoints.add(
+      StreamingEndpoint(
+        endpointId: index == 0
+            ? '${providerId}_primary'
+            : '${providerId}_mirror_$index',
+        url: baseUri,
+        priority: index,
+        enabled: true,
+      ),
+    );
+  }
+  return List.unmodifiable(endpoints);
 }
 
 Uri? _httpsUri(String value) {

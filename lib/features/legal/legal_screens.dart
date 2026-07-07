@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../app/app_theme.dart';
 import '../../core/constants/app_legal.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
+import '../../core/responsive/adaptive_container.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
@@ -93,30 +95,33 @@ class LegalPageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      body: ListView(
+    return AppShell(
+      body: AdaptiveContainer(
+        maxWidth: 1000,
         padding: EdgeInsets.zero,
-        children: [
-          const MovieAppBar(dark: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(17, 43, 17, 18),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 17),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final paragraph in paragraphs) ...[
-                  Text(paragraph, style: AppTextStyles.normal),
-                  const SizedBox(height: 14),
-                ],
-                ...children,
-              ],
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const MovieAppBar(dark: true),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 43, 17, 18),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 17),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final paragraph in paragraphs) ...[
+                    Text(paragraph, style: AppTextStyles.normal),
+                    const SizedBox(height: 14),
+                  ],
+                  ...children,
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

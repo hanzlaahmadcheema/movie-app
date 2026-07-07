@@ -10,6 +10,8 @@ import '../core/auth/current_user_role.dart';
 import '../core/auth/user_role_service.dart';
 import '../core/constants/app_assets.dart';
 import '../core/navigation/navigation_state_repository.dart';
+import '../core/navigation/app_nav_item.dart';
+import '../core/responsive/responsive_context.dart';
 import '../core/services/auth_service.dart';
 import 'network_art.dart';
 
@@ -20,64 +22,96 @@ class MovieAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10, left: 18, right: 18),
-      alignment: Alignment.bottomCenter,
-      color: dark ? AppColors.appBar : Colors.transparent,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.home),
-            child: const NetworkArt(
-              url: AppAssets.logo,
-              width: 48,
-              height: 48,
-              borderRadius: BorderRadius.all(Radius.circular(24)),
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.search),
-            icon: const Icon(Icons.search, size: 19),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-          ),
-          const SizedBox(width: 10),
-          StreamBuilder(
-            stream: AuthService.instance.authStateChanges,
-            builder: (context, snapshot) {
-              final user = snapshot.data;
-              final signedIn = user != null;
-              final photoUrl = user?.photoURL;
-              return IconButton(
-                onPressed: () => signedIn
-                    ? Navigator.pushNamed(context, AppRoutes.profile)
-                    : Navigator.pushNamed(context, AppRoutes.login),
-                icon: signedIn && photoUrl != null && photoUrl.trim().isNotEmpty
-                    ? CircleAvatar(
-                        radius: 11,
-                        backgroundColor: AppColors.surfaceAlt,
-                        backgroundImage: NetworkImage(photoUrl),
-                      )
-                    : Icon(
-                        signedIn
-                            ? Icons.account_circle
-                            : Icons.account_circle_outlined,
-                        size: 19,
-                        color: signedIn ? AppColors.primary : null,
-                      ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints.tightFor(
-                  width: 28,
-                  height: 28,
+    if (!context.isMobile) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 90,
+          padding: const EdgeInsets.only(bottom: 10, left: 18, right: 18),
+          alignment: Alignment.bottomCenter,
+          color: dark ? AppColors.appBar : Colors.transparent,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, AppRoutes.home),
+                child: const NetworkArt(
+                  url: AppAssets.logo,
+                  width: 48,
+                  height: 48,
+                  borderRadius: BorderRadius.all(Radius.circular(24)),
                 ),
-              );
-            },
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.search),
+                icon: const Icon(Icons.search, size: 19),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+              ),
+              const SizedBox(width: 10),
+              StreamBuilder(
+                stream: AuthService.instance.authStateChanges,
+                builder: (context, snapshot) {
+                  final user = snapshot.data;
+                  final signedIn = user != null;
+                  final photoUrl = user?.photoURL;
+                  return IconButton(
+                    onPressed: () => signedIn
+                        ? Navigator.pushNamed(context, AppRoutes.profile)
+                        : Navigator.pushNamed(context, AppRoutes.login),
+                    icon: signedIn && photoUrl != null && photoUrl.trim().isNotEmpty
+                        ? CircleAvatar(
+                            radius: 11,
+                            backgroundColor: AppColors.surfaceAlt,
+                            backgroundImage: NetworkImage(photoUrl),
+                          )
+                        : Icon(
+                            signedIn
+                                ? Icons.account_circle
+                                : Icons.account_circle_outlined,
+                            size: 19,
+                            color: signedIn ? AppColors.primary : null,
+                          ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 28,
+                      height: 28,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Builder(builder: (context) {
+          final route = ModalRoute.of(context)?.settings.name;
+          if (route == AppRoutes.home) return const SizedBox.shrink();
+
+          return Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.centerLeft,
+            color: dark ? AppColors.appBar : Colors.transparent,
+            child: IconButton(
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pushReplacementNamed(context, AppRoutes.home);
+                }
+              },
+              icon: const Icon(Icons.arrow_back, size: 24),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
@@ -108,6 +142,9 @@ class _MovieBottomNavigationState extends State<MovieBottomNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.isMobile) {
+      return const SizedBox.shrink();
+    }
     final route = ModalRoute.of(context)?.settings.name;
     if (kDebugMode) {
       debugPrint('MovieBottomNavigation build route=$route');
@@ -124,34 +161,17 @@ class _MovieBottomNavigationState extends State<MovieBottomNavigation> {
         ),
         child: Row(
           children: [
-            _BottomNavItem(
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home,
-              label: 'Home',
-              active: route == AppRoutes.home,
-              onTap: () => _replaceWith(context, AppRoutes.home),
-            ),
-            _BottomNavItem(
-              icon: Icons.movie_outlined,
-              activeIcon: Icons.movie,
-              label: 'Movies',
-              active: route == AppRoutes.movies,
-              onTap: () => _replaceWith(context, AppRoutes.movies),
-            ),
-            _BottomNavItem(
-              icon: Icons.live_tv_outlined,
-              activeIcon: Icons.live_tv,
-              label: 'Series',
-              active: route == AppRoutes.series,
-              onTap: () => _replaceWith(context, AppRoutes.series),
-            ),
-            _BottomNavItem(
-              icon: Icons.search,
-              activeIcon: Icons.search,
-              label: 'Search',
-              active: route == AppRoutes.search,
-              onTap: () => _replaceWith(context, AppRoutes.search),
-            ),
+            for (final item in [
+              ...appNavItems.take(3),
+              appNavItems.firstWhere((item) => item.route == AppRoutes.search),
+            ])
+              _BottomNavItem(
+                icon: item.icon,
+                activeIcon: item.activeIcon,
+                label: item.label == 'TV Series' ? 'Series' : item.label,
+                active: route == item.route,
+                onTap: () => _replaceWith(context, item.route),
+              ),
             _BottomNavItem(
               icon: Icons.menu,
               activeIcon: Icons.menu,
@@ -383,7 +403,7 @@ void showAppMenu(BuildContext context) {
                                       if (!context.mounted) return;
                                       Navigator.pushNamedAndRemoveUntil(
                                         context,
-                                        AppRoutes.login,
+                                        AppRoutes.home,
                                         (route) => false,
                                       );
                                     },

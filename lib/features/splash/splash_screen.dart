@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (kDebugMode) {
       debugPrint('SplashScreen init');
     }
-    _timer = Timer(const Duration(milliseconds: 1400), _continueToApp);
+    _timer = Timer(Duration.zero, _continueToApp);
   }
 
   @override

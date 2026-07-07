@@ -7,14 +7,16 @@ import '../../core/config/app_config.dart';
 import '../../core/local_db/recent_search_dao.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_page.dart';
+import '../../core/responsive/adaptive_container.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/filter_widgets.dart';
 import '../../widgets/pagination.dart';
 import '../../widgets/state_views.dart';
 
-enum ExploreMode { search, genre, country, production }
+enum ExploreMode { search, genre, country, production, topRated }
 
 class SearchResultScreen extends StatefulWidget {
   const SearchResultScreen({
@@ -79,150 +81,154 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     final showFilters =
         widget.mode == ExploreMode.search || widget.mode == ExploreMode.genre;
 
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      body: ListView(
+    return AppShell(
+      body: AdaptiveContainer(
         padding: EdgeInsets.zero,
-        children: [
-          const MovieAppBar(dark: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(5, 56, 5, 0),
-            child: Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          if (showSearchBar)
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const MovieAppBar(dark: true),
             Padding(
-              padding: const EdgeInsets.fromLTRB(17, 24, 17, 0),
-              child: SizedBox(
-                height: 44,
-                child: TextField(
-                  controller: _controller,
-                  onChanged: (value) {
-                    setState(() {});
-                    _scheduleSearch(value);
-                  },
-                  onSubmitted: _runSearch,
-                  textInputAction: TextInputAction.search,
-                  style: AppTextStyles.normal.copyWith(fontSize: 13),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    filled: true,
-                    fillColor: AppColors.surfaceAlt,
-                    hintText: 'Search titles',
-                    hintStyle: AppTextStyles.normal.copyWith(
-                      color: Colors.white54,
-                      fontSize: 13,
-                    ),
-                    prefixIcon: const Icon(Icons.search, size: 18),
-                    prefixIconConstraints: const BoxConstraints(
-                      minWidth: 42,
-                      minHeight: 44,
-                    ),
-                    suffixIcon: _controller.text.isEmpty
-                        ? null
-                        : IconButton(
-                            onPressed: () {
-                              _controller.clear();
-                              _runSearch('');
-                            },
-                            icon: const Icon(Icons.close, size: 17),
-                            tooltip: 'Clear search',
-                          ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
-                        width: 1,
+              padding: const EdgeInsets.fromLTRB(5, 56, 5, 0),
+              child: Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            if (showSearchBar)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(17, 24, 17, 0),
+                child: SizedBox(
+                  height: 44,
+                  child: TextField(
+                    controller: _controller,
+                    onChanged: (value) {
+                      setState(() {});
+                      _scheduleSearch(value);
+                    },
+                    onSubmitted: _runSearch,
+                    textInputAction: TextInputAction.search,
+                    style: AppTextStyles.normal.copyWith(fontSize: 13),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      filled: true,
+                      fillColor: AppColors.surfaceAlt,
+                      hintText: 'Search titles',
+                      hintStyle: AppTextStyles.normal.copyWith(
+                        color: Colors.white54,
+                        fontSize: 13,
                       ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 11,
+                      prefixIcon: const Icon(Icons.search, size: 18),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 42,
+                        minHeight: 44,
+                      ),
+                      suffixIcon: _controller.text.isEmpty
+                          ? null
+                          : IconButton(
+                              onPressed: () {
+                                _controller.clear();
+                                _runSearch('');
+                              },
+                              icon: const Icon(Icons.close, size: 17),
+                              tooltip: 'Clear search',
+                            ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 11,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          if (showSearchBar) _buildRecentSearchesPanel(),
-          if (showFilters)
+            if (showSearchBar) _buildRecentSearchesPanel(),
+            if (showFilters)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(17, 18, 17, 0),
+                child: FilterPanel(
+                  initialSelection: _selection,
+                  onApply: (selection) {
+                    setState(() {
+                      _selection = selection;
+                      if (widget.mode == ExploreMode.genre) {
+                        _currentQuery =
+                            selection.genreLabel ??
+                            widget.query ??
+                            widget.title;
+                      }
+                      _currentPage = 1;
+                      _itemsFuture = _load();
+                    });
+                  },
+                ),
+              ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(17, 18, 17, 0),
-              child: FilterPanel(
-                initialSelection: _selection,
-                onApply: (selection) {
-                  setState(() {
-                    _selection = selection;
-                    if (widget.mode == ExploreMode.genre) {
-                      _currentQuery =
-                          selection.genreLabel ?? widget.query ?? widget.title;
-                    }
-                    _currentPage = 1;
-                    _itemsFuture = _load();
-                  });
+              padding: const EdgeInsets.fromLTRB(5, 24, 5, 0),
+              child: FutureBuilder<TmdbPage<MovieItem>>(
+                future: _itemsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return AppErrorView(
+                      title: 'Could not load results',
+                      message: userMessageForError(snapshot.error),
+                      onRetry: _reload,
+                    );
+                  }
+
+                  final page = snapshot.data;
+                  final items =
+                      page?.items.take(20).toList() ?? const <MovieItem>[];
+                  if (items.isEmpty) {
+                    return AppEmptyState(
+                      title: 'No results',
+                      message: _currentQuery.trim().isEmpty
+                          ? 'No titles are available right now.'
+                          : 'No titles matched "$_currentQuery".',
+                      icon: Icons.search_off,
+                      actionLabel: 'Retry',
+                      onAction: _reload,
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      FirebasePosterGrid(items: items, itemCount: items.length),
+                      if (page != null && page.hasMultiplePages) ...[
+                        const SizedBox(height: 28),
+                        PaginationBar(
+                          currentPage: _currentPage,
+                          totalPages: page.totalPages,
+                          onPageChanged: _goToPage,
+                        ),
+                      ],
+                    ],
+                  );
                 },
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(5, 24, 5, 0),
-            child: FutureBuilder<TmdbPage<MovieItem>>(
-              future: _itemsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return AppErrorView(
-                    title: 'Could not load results',
-                    message: userMessageForError(snapshot.error),
-                    onRetry: _reload,
-                  );
-                }
-
-                final page = snapshot.data;
-                final items =
-                    page?.items.take(20).toList() ?? const <MovieItem>[];
-                if (items.isEmpty) {
-                  return AppEmptyState(
-                    title: 'No results',
-                    message: _currentQuery.trim().isEmpty
-                        ? 'No titles are available right now.'
-                        : 'No titles matched "$_currentQuery".',
-                    icon: Icons.search_off,
-                    actionLabel: 'Retry',
-                    onAction: _reload,
-                  );
-                }
-
-                return Column(
-                  children: [
-                    FirebasePosterGrid(items: items, itemCount: items.length),
-                    if (page != null && page.hasMultiplePages) ...[
-                      const SizedBox(height: 28),
-                      PaginationBar(
-                        currentPage: _currentPage,
-                        totalPages: page.totalPages,
-                        onPageChanged: _goToPage,
-                      ),
-                    ],
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -263,6 +269,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
         return _browseByCountry(query.isEmpty ? widget.title : query);
       case ExploreMode.production:
         return _browseByProduction(query.isEmpty ? widget.title : query);
+      case ExploreMode.topRated:
+        return _topRated();
     }
   }
 
@@ -430,6 +438,25 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       page: _currentPage,
     );
     return _combinedPage(movies, series);
+  }
+
+  Future<TmdbPage<MovieItem>> _topRated() async {
+    final movies = await _repository.topRatedMovies();
+    final series = await _repository.topRatedSeries();
+    return _combinedPage(
+      TmdbPage<MovieItem>(
+        items: movies,
+        page: 1,
+        totalPages: 1,
+        totalResults: movies.length,
+      ),
+      TmdbPage<MovieItem>(
+        items: series,
+        page: 1,
+        totalPages: 1,
+        totalResults: series.length,
+      ),
+    );
   }
 
   void _goToPage(int page) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/app_theme.dart';
 import '../../../core/streaming/streaming_embed_request.dart';
+import '../../../core/responsive/responsive_context.dart';
 import '../../streaming/presentation/streaming_player_screen.dart';
 
 class EmbeddedWatchPlayerPanel extends StatelessWidget {
@@ -17,9 +18,7 @@ class EmbeddedWatchPlayerPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (request == null) {
-      return Container(
-        height: 304,
-        margin: const EdgeInsets.symmetric(horizontal: 15),
+      final placeholder = DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
@@ -37,6 +36,12 @@ class EmbeddedWatchPlayerPanel extends StatelessWidget {
             ),
           ),
         ),
+      );
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: context.isMobile ? 15 : 0),
+        child: context.isMobile
+            ? SizedBox(height: 304, child: placeholder)
+            : AspectRatio(aspectRatio: 16 / 9, child: placeholder),
       );
     }
     return StreamingPlayerPanel(request: request);

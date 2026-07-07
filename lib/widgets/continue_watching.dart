@@ -5,6 +5,7 @@ import '../app/app_routes.dart';
 import '../app/app_theme.dart';
 import '../core/navigation/content_navigation.dart';
 import '../core/services/auth_service.dart';
+import '../core/services/local_image_cache_service.dart';
 import '../core/services/user_activity_repository.dart';
 import 'network_art.dart';
 import 'poster_widgets.dart';
@@ -164,7 +165,12 @@ class ContinueWatchingTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: NetworkArt(url: item.posterUrl, width: 76, height: 114),
+                child: NetworkArt(
+                  url: item.posterUrl,
+                  imageType: LocalImageCacheService.imageTypePoster,
+                  width: 76,
+                  height: 114,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -8,11 +8,14 @@ import '../../core/constants/app_assets.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_person.dart';
+import '../../core/responsive/adaptive_container.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/local_image_cache_service.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../core/services/user_activity_repository.dart';
 import '../../core/trailer/trailer_picker.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/detail_widgets.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/network_art.dart';
@@ -63,8 +66,7 @@ class _DetailPageState extends State<_DetailPage> {
       );
     }
 
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
+    return AppShell(
       body: Stack(
         children: [
           FutureBuilder<TmdbDetail?>(
@@ -126,17 +128,11 @@ class _DetailPageState extends State<_DetailPage> {
                                           _setWatched(item, active),
                                       onTrailer: () =>
                                           _openTrailer(context, trailer),
-                                      onWatch: () => widget.isSeries
-                                          ? Navigator.pushNamed(
-                                              context,
-                                              AppRoutes.seriesWatch,
-                                              arguments: item,
-                                            )
-                                          : Navigator.pushNamed(
-                                              context,
-                                              AppRoutes.movieWatch,
-                                              arguments: item,
-                                            ),
+                                      onWatch: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.watchPathForItem(item),
+                                        arguments: item,
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     DetailBody(
@@ -149,10 +145,7 @@ class _DetailPageState extends State<_DetailPage> {
                                   ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 13,
-                                ),
+                              AdaptiveContainer(
                                 child: FirebaseHorizontalPosterSection(
                                   title: 'You may also like',
                                   items: related,
@@ -276,8 +269,7 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
       );
     }
 
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
+    return AppShell(
       body: Stack(
         children: [
           FutureBuilder<TmdbPerson?>(
@@ -318,6 +310,8 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                                 url: person.profilePath.isEmpty
                                     ? AppAssets.cast
                                     : 'https://image.tmdb.org/t/p/w342${person.profilePath}',
+                                imageType:
+                                    LocalImageCacheService.imageTypeProfile,
                               ),
                             ),
                           ),
@@ -354,6 +348,8 @@ class _CastDetailScreenState extends State<CastDetailScreen> {
                               url: person.profilePath.isEmpty
                                   ? AppAssets.cast
                                   : 'https://image.tmdb.org/t/p/w342${person.profilePath}',
+                              imageType:
+                                  LocalImageCacheService.imageTypeProfile,
                               width: 167,
                               height: 250,
                             ),

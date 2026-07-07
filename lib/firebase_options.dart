@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -57,6 +54,15 @@ class DefaultFirebaseOptions {
     appId: '1:888171081165:android:e50d17b3cd43918c79e884',
     messagingSenderId: '888171081165',
     projectId: 'movie-app-cc2c1',
+    storageBucket: 'movie-app-cc2c1.firebasestorage.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCmdg1cqLw0VSMM1EGnnoEFb8VxEq45Yeg',
+    appId: '1:888171081165:web:8df426803667c6cb79e884',
+    messagingSenderId: '888171081165',
+    projectId: 'movie-app-cc2c1',
+    authDomain: 'movie-app-cc2c1.firebaseapp.com',
     storageBucket: 'movie-app-cc2c1.firebasestorage.app',
   );
 }

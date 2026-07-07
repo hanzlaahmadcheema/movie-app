@@ -41,7 +41,7 @@ class StreamingEmbedRequest {
       contentType: StreamingContentType.movie,
       title: item.title,
       tmdbId: item.id > 0 ? item.id : null,
-      imdbId: imdbId,
+      imdbId: imdbId ?? item.imdbId,
       posterUrl: item.posterUrl,
       backdropUrl: item.backdropUrl,
       sourceItem: item,
@@ -59,7 +59,7 @@ class StreamingEmbedRequest {
       contentType: StreamingContentType.episode,
       title: item.title,
       tmdbId: item.id > 0 ? item.id : null,
-      imdbId: imdbId,
+      imdbId: imdbId ?? item.imdbId,
       seasonNumber: seasonNumber,
       episodeNumber: episodeNumber,
       episodeTitle: episodeTitle,
@@ -94,6 +94,20 @@ class StreamingEmbedRequest {
       episodeTitle: arguments['episodeTitle']?.toString(),
       posterUrl: arguments['posterUrl']?.toString(),
       backdropUrl: arguments['backdropUrl']?.toString(),
+      sourceItem: MovieItem(
+        id: _asPositiveInt(arguments['tmdbId']) ?? 0,
+        title: arguments['title']?.toString() ?? '',
+        type: contentType == StreamingContentType.movie ? 'Movie' : 'Series',
+        year: 'N/A',
+        quality: 'HD',
+        posterUrl: arguments['posterUrl']?.toString() ?? '',
+        backdropUrl: arguments['backdropUrl']?.toString() ?? '',
+        imdbId: arguments['imdbId']?.toString(),
+        originCountryCodes: _asStringList(arguments['originCountryCodes']),
+        mediaType: contentType == StreamingContentType.movie
+            ? MediaType.movie
+            : MediaType.tv,
+      ),
       preferredProviderId: arguments['preferredProviderId']?.toString(),
       jellyfinPlaybackModeOverride: arguments['jellyfinPlaybackMode']
           ?.toString(),
@@ -145,6 +159,7 @@ class StreamingEmbedRequest {
       'episodeTitle': episodeTitle,
       'posterUrl': posterUrl,
       'backdropUrl': backdropUrl,
+      'originCountryCodes': sourceItem?.originCountryCodes,
       'preferredProviderId': preferredProviderId,
       'jellyfinPlaybackMode': jellyfinPlaybackModeOverride,
       'resumePositionSeconds': resumePositionSeconds,
@@ -174,6 +189,11 @@ class StreamingEmbedRequest {
   bool get hasUsableId =>
       (tmdbId != null && tmdbId! > 0) || normalizedImdbId != null;
 
+  bool get isIndianContent {
+    final countries = sourceItem?.originCountryCodes ?? const [];
+    return countries.any((country) => country.trim().toUpperCase() == 'IN');
+  }
+
   String? get normalizedImdbId {
     final value = imdbId?.trim();
     if (value == null || !RegExp(r'^tt\d+$').hasMatch(value)) {
@@ -198,7 +218,9 @@ class StreamingEmbedRequest {
           year: 'N/A',
           quality: 'HD',
           posterUrl: posterUrl ?? '',
+          imdbId: imdbId,
           backdropUrl: backdropUrl ?? '',
+          originCountryCodes: const [],
           mediaType: contentType == StreamingContentType.movie
               ? MediaType.movie
               : MediaType.tv,
@@ -222,4 +244,14 @@ int? _asNonNegativeInt(Object? value) {
     _ => int.tryParse(value?.toString() ?? ''),
   };
   return parsed != null && parsed >= 0 ? parsed : null;
+}
+
+List<String> _asStringList(Object? value) {
+  if (value is! Iterable) {
+    return const [];
+  }
+  return value
+      .map((entry) => entry?.toString().trim().toUpperCase() ?? '')
+      .where((entry) => entry.isNotEmpty)
+      .toList(growable: false);
 }

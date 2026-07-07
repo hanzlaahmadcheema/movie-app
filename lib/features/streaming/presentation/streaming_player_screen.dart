@@ -12,6 +12,8 @@ import '../../../core/services/admin_repository.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/network_status_service.dart';
 import '../../../core/services/user_activity_repository.dart';
+import '../../../core/responsive/responsive_context.dart';
+import '../../../core/responsive/adaptive_container.dart';
 import '../../../core/streaming/streaming_embed_request.dart';
 import '../../../core/streaming/streaming_embed_result.dart';
 import '../../../core/streaming/streaming_navigation_policy.dart';
@@ -20,6 +22,8 @@ import '../../../app/app_theme.dart';
 import '../../jellyfin/player/jellyfin_native_player_view.dart';
 import '../widgets/streaming_error_view.dart';
 import '../widgets/streaming_loading_view.dart';
+import '../widgets/web_video_player.dart';
+import '../../../widgets/app_shell.dart';
 import 'streaming_player_controller.dart';
 
 class StreamingPlayerScreen extends StatefulWidget {
@@ -36,6 +40,28 @@ class _StreamingPlayerScreenState extends State<StreamingPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final playerPage = Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.appBar,
+        title: Text(widget.request?.title ?? 'Streaming Player'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: AdaptiveContainer(
+            maxWidth: 1400,
+            padding: EdgeInsets.symmetric(
+              horizontal: context.isMobile ? 0 : 24,
+              vertical: context.isMobile ? 0 : 24,
+            ),
+            child: StreamingPlayerPanel(
+              key: _panelKey,
+              request: widget.request,
+            ),
+          ),
+        ),
+      ),
+    );
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -44,21 +70,7 @@ class _StreamingPlayerScreenState extends State<StreamingPlayerScreen> {
           unawaited(panelState._handleBack());
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.appBar,
-          title: Text(widget.request?.title ?? 'Streaming Player'),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: StreamingPlayerPanel(
-              key: _panelKey,
-              request: widget.request,
-            ),
-          ),
-        ),
-      ),
+      child: context.isMobile ? playerPage : AppShell(body: playerPage),
     );
   }
 }
@@ -86,6 +98,10 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      unawaited(_initializeRequest());
+      return;
+    }
     try {
       _webViewController = _createWebViewController();
     } catch (error) {
@@ -115,7 +131,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
     _offline = false;
 
     final request = widget.request;
-    if (request == null || _webViewController == null) {
+    if (request == null || (!kIsWeb && _webViewController == null)) {
       if (mounted) setState(() {});
       return;
     }
@@ -179,7 +195,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
   void _handlePlayerChanged() {
     final playerController = _playerController;
     final webViewController = _webViewController;
-    if (playerController == null || webViewController == null) {
+    if (playerController == null) {
       return;
     }
 
@@ -194,10 +210,14 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
       _loadedAttempt = playerController.attempt;
       final attempt = _loadedAttempt;
       playerController.beginCurrentAttempt(attempt);
-      webViewController.loadRequest(candidate.url).catchError((Object error) {
-        _debugLog('WebView request failed: ${error.runtimeType}');
-        playerController.failCurrent(attempt, 'Could not load provider');
-      });
+      if (kIsWeb) {
+        playerController.markReady(attempt);
+      } else if (webViewController != null) {
+        webViewController.loadRequest(candidate.url).catchError((Object error) {
+          _debugLog('WebView request failed: ${error.runtimeType}');
+          playerController.failCurrent(attempt, 'Could not load provider');
+        });
+      }
     }
 
     if (playerController.status == StreamingPlayerStatus.ready &&
@@ -228,6 +248,11 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
   void _handlePageFinished(String url) {
     _debugHost('Page finished', url);
     final uri = Uri.tryParse(url);
+    if (uri?.scheme == 'data' &&
+        _playerController?.currentCandidate?.url.scheme == 'data') {
+      _playerController?.markPageLoaded(_loadedAttempt);
+      return;
+    }
     if (uri == null || !_isAllowedNavigationHost(uri.host)) {
       return;
     }
@@ -474,11 +499,14 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 240,
-          width: double.infinity,
-          child: _buildPlayerBody(),
-        ),
+        if (context.isMobile)
+          SizedBox(
+            height: 240,
+            width: double.infinity,
+            child: _buildPlayerBody(),
+          )
+        else
+          AspectRatio(aspectRatio: 16 / 9, child: _buildPlayerBody()),
         _FigmaServerSelector(
           candidates: candidates,
           currentIndex: currentIndex,
@@ -498,7 +526,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
         onBack: () => unawaited(_handleBack()),
       );
     }
-    if (_webViewUnavailableMessage != null) {
+    if (!kIsWeb && _webViewUnavailableMessage != null) {
       return StreamingErrorView(
         title: 'WebView unavailable',
         message: _webViewUnavailableMessage!,
@@ -521,6 +549,9 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
       return const Center(child: CircularProgressIndicator());
     }
     final candidate = playerController.currentCandidate;
+    if (kIsWeb && candidate != null) {
+      return WebVideoPlayer(key: ValueKey(candidate.url), url: candidate.url);
+    }
     if (candidate?.server.providerId == 'jellyfin_native' &&
         candidate?.jellyfinItemId?.trim().isNotEmpty == true) {
       return JellyfinNativePlayerView(
@@ -640,12 +671,12 @@ String? _streamingStatusDetail(StreamingPlayerController controller) {
   final parts = <String>[
     'Server ${controller.currentIndex + 1} of ${controller.candidates.length}',
     candidate.server.displayName,
-    if (diagnostic?.host.isNotEmpty == true) diagnostic!.host,
+    if (diagnostic?.fallbackReason?.isNotEmpty == true) 'checking fallback',
   ];
   return parts.join(' - ');
 }
 
-class _FigmaServerSelector extends StatelessWidget {
+class _FigmaServerSelector extends StatefulWidget {
   const _FigmaServerSelector({
     required this.candidates,
     required this.currentIndex,
@@ -659,30 +690,33 @@ class _FigmaServerSelector extends StatelessWidget {
   final ValueChanged<int> onSelected;
 
   @override
+  State<_FigmaServerSelector> createState() => _FigmaServerSelectorState();
+}
+
+class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    final active = currentIndex >= 0 && currentIndex < candidates.length
-        ? candidates[currentIndex]
+    final active =
+        widget.currentIndex >= 0 &&
+            widget.currentIndex < widget.candidates.length
+        ? widget.candidates[widget.currentIndex]
         : null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(21, 18, 21, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PopupMenuButton<int>(
-            initialValue: currentIndex >= 0 ? currentIndex : null,
-            enabled: enabled,
-            onSelected: onSelected,
-            color: AppColors.surface,
-            offset: const Offset(0, 28),
-            itemBuilder: (context) => [
-              for (var index = 0; index < candidates.length; index++)
-                PopupMenuItem<int>(
-                  value: index,
-                  child: Text(candidates[index].server.displayName),
-                ),
-            ],
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (widget.enabled && widget.candidates.isNotEmpty) {
+                setState(() => _isExpanded = !_isExpanded);
+              }
+            },
             child: Opacity(
-              opacity: enabled ? 1 : 0.6,
+              opacity: widget.enabled ? 1 : 0.6,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -700,14 +734,61 @@ class _FigmaServerSelector extends StatelessWidget {
                     style: AppTextStyles.medium,
                   ),
                   const SizedBox(width: 6),
-                  const Icon(Icons.keyboard_arrow_down, size: 20),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                  ),
                 ],
               ),
             ),
           ),
+          if (_isExpanded)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (var index = 0; index < widget.candidates.length; index++)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => _isExpanded = false);
+                        widget.onSelected(index);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: index == widget.currentIndex
+                              ? AppColors.primary.withOpacity(0.2)
+                              : AppColors.surfaceAlt,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: index == widget.currentIndex
+                                ? AppColors.primary
+                                : Colors.transparent,
+                          ),
+                        ),
+                        child: Text(
+                          widget.candidates[index].server.displayName,
+                          style: AppTextStyles.medium.copyWith(
+                            color: index == widget.currentIndex
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           const SizedBox(height: 12),
           Text(
-            candidates.isEmpty
+            widget.candidates.isEmpty
                 ? 'No streaming server is currently available.'
                 : "If current server doesn't work please try other servers above",
             style: AppTextStyles.normal.copyWith(

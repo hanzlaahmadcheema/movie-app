@@ -1,70 +1,12 @@
 import 'package:flutter/material.dart';
 
-class AppColors {
-  static const background = Color(0xFF121315);
-  static const appBar = Color(0xFF0B0B0D);
-  static const surface = Color(0xFF191B20);
-  static const surfaceAlt = Color(0xFF242426);
-  static const primary = Color(0xFF0FEFFD);
-  static const primaryMuted = Color(0x80089099);
-  static const textPrimary = Colors.white;
-  static const textSecondary = Color(0xCCFFFFFF);
-  static const danger = Color(0xFFFF4D67);
-  static const warning = Color(0xFFFFC857);
-  static const success = Color(0xFF39D98A);
-}
+export '../core/theme/app_colors.dart';
+export '../core/theme/app_radius.dart';
+export '../core/theme/app_spacing.dart';
+export '../core/theme/app_text_styles.dart';
 
-class AppTextStyles {
-  static const String fontFamily = 'Pathway Extreme';
-
-  static const title = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 20,
-    fontWeight: FontWeight.w700,
-    height: 1,
-    letterSpacing: 0,
-  );
-
-  static const medium = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
-    height: 1,
-    letterSpacing: 0,
-  );
-
-  static const normal = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-    height: 1.25,
-    letterSpacing: 0,
-  );
-
-  static const small = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 10,
-    fontWeight: FontWeight.w400,
-    height: 1.2,
-    letterSpacing: 0,
-  );
-
-  static const button = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    height: 1,
-    letterSpacing: 0,
-  );
-
-  static const tag = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    height: 1,
-    letterSpacing: 0,
-  );
-}
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_text_styles.dart';
 
 class AppTheme {
   static ThemeData get dark {
@@ -77,6 +19,25 @@ class AppTheme {
         primary: AppColors.primary,
         surface: AppColors.surface,
         error: AppColors.danger,
+      ),
+      hoverColor: AppColors.primary.withValues(alpha: 0.08),
+      focusColor: AppColors.primary.withValues(alpha: 0.12),
+      splashColor: AppColors.primary.withValues(alpha: 0.10),
+      cardTheme: const CardThemeData(
+        color: AppColors.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceAlt,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      tooltipTheme: const TooltipThemeData(
+        waitDuration: Duration(milliseconds: 400),
       ),
       textTheme:
           const TextTheme(

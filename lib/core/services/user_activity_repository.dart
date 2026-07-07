@@ -47,6 +47,8 @@ class UserContentRecord {
       backdropUrl: (json['backdropUrl'] ?? '').toString(),
       posterPath: json['posterPath']?.toString(),
       backdropPath: json['backdropPath']?.toString(),
+      imdbId: json['imdbId']?.toString(),
+      originCountryCodes: _stringList(json['originCountryCodes']),
       mediaType: mediaType,
       voteAverage: voteAverage,
       rating: voteAverage.toStringAsFixed(1),
@@ -527,6 +529,9 @@ Map<String, Object?> _contentSnapshot(MovieItem item) {
     'year': item.year,
     'posterPath': item.posterPath,
     'backdropPath': item.backdropPath,
+    if (item.imdbId?.trim().isNotEmpty == true) 'imdbId': item.imdbId!.trim(),
+    if (item.originCountryCodes.isNotEmpty)
+      'originCountryCodes': item.originCountryCodes,
     'posterUrl': item.posterUrl,
     'backdropUrl': item.backdropUrl,
     'voteAverage': item.voteAverage,
@@ -538,4 +543,14 @@ DateTime? _timestampToDate(Object? value) {
     return value.toDate();
   }
   return null;
+}
+
+List<String> _stringList(Object? value) {
+  if (value is! Iterable) {
+    return const [];
+  }
+  return value
+      .map((entry) => entry?.toString().trim().toUpperCase() ?? '')
+      .where((entry) => entry.isNotEmpty)
+      .toList(growable: false);
 }

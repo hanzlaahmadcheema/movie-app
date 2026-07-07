@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 
 import '../app/app_theme.dart';
-import '../core/navigation/content_navigation.dart';
 import '../core/models/movie_item.dart';
-import 'buttons.dart';
-import 'network_art.dart';
+import '../features/movies/widgets/movie_card.dart';
+import '../features/movies/widgets/movie_grid.dart';
+import '../features/movies/widgets/movie_horizontal_list.dart';
 
 class MoviePosterCard extends StatelessWidget {
   const MoviePosterCard({
@@ -26,78 +26,12 @@ class MoviePosterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap ?? () => openDetailForItem(context, item),
-        borderRadius: BorderRadius.circular(2),
-        child: AspectRatio(
-          aspectRatio: 195 / 293,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                NetworkArt(url: item.posterUrl),
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Color(0x991E1E1E)],
-                      stops: [0.65, 1],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 7,
-                  left: 6,
-                  child: Text(
-                    item.quality,
-                    style: AppTextStyles.medium.copyWith(color: Colors.white),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: WatchlistButton(
-                    active: watchlisted,
-                    onChanged: onWatchlistChanged,
-                    onTap: onWatchlistTap,
-                    showFeedback: onWatchlistChanged == null,
-                  ),
-                ),
-                Positioned(
-                  left: 8,
-                  right: 8,
-                  bottom: 8,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          TagChip(label: item.type),
-                          const SizedBox(width: 5),
-                          TagChip(label: item.year),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.medium.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return MovieCard(
+      item: item,
+      watchlisted: watchlisted,
+      onTap: onTap,
+      onWatchlistTap: onWatchlistTap,
+      onWatchlistChanged: onWatchlistChanged,
     );
   }
 }
@@ -126,7 +60,7 @@ class SectionHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Text(title, style: AppTextStyles.sectionTitle(context)),
         const Spacer(),
         if (trailing != null) trailing!,
         if (moreButton != null) moreButton,
@@ -167,33 +101,13 @@ class HorizontalPosterSection extends StatelessWidget {
           child: SectionHeader(title: title, onMore: onMore),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 293,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            scrollDirection: Axis.horizontal,
-            itemCount: itemCount ?? items.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 6),
-            itemBuilder: (context, index) => SizedBox(
-              width: 195,
-              child: MoviePosterCard(
-                item: items[index % items.length],
-                watchlisted: isWatchlisted?.call(items[index % items.length]),
-                onTap: onItemTap == null
-                    ? null
-                    : () => onItemTap!(items[index % items.length]),
-                onWatchlistTap: onWatchlistTap == null
-                    ? null
-                    : () => onWatchlistTap!(items[index % items.length]),
-                onWatchlistChanged: onWatchlistChanged == null
-                    ? null
-                    : (active) => onWatchlistChanged!(
-                        items[index % items.length],
-                        active,
-                      ),
-              ),
-            ),
-          ),
+        MovieHorizontalList(
+          items: items,
+          itemCount: itemCount,
+          onItemTap: onItemTap,
+          onWatchlistTap: onWatchlistTap,
+          isWatchlisted: isWatchlisted,
+          onWatchlistChanged: onWatchlistChanged,
         ),
       ],
     );
@@ -220,32 +134,13 @@ class PosterGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = itemCount ?? items.length;
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: count,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 195 / 293,
-      ),
-      itemBuilder: (context, index) => MoviePosterCard(
-        item: items[index % items.length],
-        watchlisted: isWatchlisted?.call(items[index % items.length]),
-        onTap: onItemTap == null
-            ? null
-            : () => onItemTap!(items[index % items.length]),
-        onWatchlistTap: onWatchlistTap == null
-            ? null
-            : () => onWatchlistTap!(items[index % items.length]),
-        onWatchlistChanged: onWatchlistChanged == null
-            ? null
-            : (active) =>
-                  onWatchlistChanged!(items[index % items.length], active),
-      ),
+    return MovieGrid(
+      items: items,
+      itemCount: itemCount,
+      onItemTap: onItemTap,
+      onWatchlistTap: onWatchlistTap,
+      isWatchlisted: isWatchlisted,
+      onWatchlistChanged: onWatchlistChanged,
     );
   }
 }

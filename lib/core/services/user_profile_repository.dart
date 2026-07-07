@@ -38,6 +38,7 @@ class UserProfileRepository {
       'phoneNumber': user.phoneNumber,
       'displayName': user.displayName,
       'photoUrl': user.photoURL,
+      'emailVerified': user.emailVerified,
       'providers': providers,
       'role': (existingData?['role'] ?? 'user').toString(),
       'status': (existingData?['status'] ?? 'active').toString(),

@@ -256,7 +256,7 @@ class TmdbRepository {
     final mediaType = seed.mediaType == MediaType.tv ? 'tv' : 'movie';
     final data = await _client.get(
       '/$mediaType/${seed.id}',
-      query: {'append_to_response': 'credits,videos'},
+      query: {'append_to_response': 'credits,videos,external_ids'},
     );
     final credits = data['credits'] is Map<String, dynamic>
         ? data['credits'] as Map<String, dynamic>
@@ -540,6 +540,7 @@ class TmdbRepository {
     final genreIds = json['genre_ids'] is List
         ? (json['genre_ids'] as List).whereType<int>().toList()
         : const <int>[];
+    final originCountryCodes = _originCountryCodes(json);
 
     return MovieItem(
       id: json['id'] is int ? json['id'] as int : 0,
@@ -552,6 +553,9 @@ class TmdbRepository {
       backdropUrl: _config.backdropUrl(backdropPath),
       posterPath: posterPath,
       backdropPath: backdropPath,
+      imdbId: (json['imdb_id'] ?? (json['external_ids'] as Map?)?['imdb_id'])
+          ?.toString(),
+      originCountryCodes: originCountryCodes,
       genreIds: genreIds,
       releaseDate: releaseDate,
       description: (json['overview'] ?? '').toString(),
@@ -559,6 +563,29 @@ class TmdbRepository {
       voteAverage: ((json['vote_average'] as num?) ?? 0).toDouble(),
       duration: _duration(runtime),
     );
+  }
+
+  List<String> _originCountryCodes(Map<String, dynamic> json) {
+    final codes = <String>{};
+    final originCountries = json['origin_country'];
+    if (originCountries is List) {
+      for (final country in originCountries) {
+        final value = country?.toString().trim().toUpperCase();
+        if (value != null && value.isNotEmpty) {
+          codes.add(value);
+        }
+      }
+    }
+    final productionCountries = json['production_countries'];
+    if (productionCountries is List) {
+      for (final country in productionCountries.whereType<Map>()) {
+        final value = country['iso_3166_1']?.toString().trim().toUpperCase();
+        if (value != null && value.isNotEmpty) {
+          codes.add(value);
+        }
+      }
+    }
+    return List.unmodifiable(codes);
   }
 
   MediaType _mediaType(String? mediaType, MediaType? fallback) {

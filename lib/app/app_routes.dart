@@ -19,8 +19,10 @@ import '../core/models/movie_item.dart';
 import '../core/auth/current_user_role.dart';
 import '../core/auth/user_role_service.dart';
 import '../core/navigation/watch_page_request.dart';
+import '../core/config/app_config.dart';
 import '../core/services/admin_repository.dart';
 import '../core/services/auth_service.dart';
+import '../core/services/tmdb_repository.dart';
 import '../core/streaming/streaming_embed_request.dart';
 import '../core/trailer/trailer_picker.dart';
 import '../widgets/state_views.dart';
@@ -30,11 +32,14 @@ class AppRoutes {
   static const home = '/';
   static const movies = '/movies';
   static const series = '/series';
+  static const tvSeries = '/tv-series';
   static const movieDetail = '/movie-detail';
   static const seriesDetail = '/series-detail';
   static const castDetail = '/cast-detail';
   static const movieWatch = '/movie-watch';
   static const seriesWatch = '/series-watch';
+  static const watchMovies = '/watch-movies';
+  static const watchSeries = '/watch-series';
   static const streaming = '/streaming';
   static const jellyfinNativePlayer = '/jellyfin-native-player';
   static const jellyfinNativePlayerFullscreen =
@@ -45,9 +50,11 @@ class AppRoutes {
   static const genre = '/genre';
   static const country = '/country';
   static const production = '/production';
+  static const topRated = '/top-rated';
   static const login = '/login';
   static const register = '/register';
   static const resetPassword = '/reset-password';
+  static const verifyEmail = '/verify-email';
   static const phoneAuth = '/phone-auth';
   static const profile = '/profile';
   static const watchlist = '/watchlist';
@@ -72,16 +79,47 @@ class AppRoutes {
   static const adminSecurity = '/admin/security';
   static const supportRequest = '/support-request';
 
+  static String detailPathForItem(MovieItem item) {
+    return _isSeriesItem(item) ? '/series/${item.id}' : '/movie/${item.id}';
+  }
+
+  static String watchPathForItem(MovieItem item) {
+    return _isSeriesItem(item)
+        ? '/watch-series/${item.id}'
+        : '/watch-movies/${item.id}';
+  }
+
+  static String watchPathForRequest(WatchPageRequest request) {
+    final item = request.item;
+    if (!_isSeriesItem(item)) {
+      return '/watch-movies/${item.id}';
+    }
+    final season = request.seasonNumber;
+    final episode = request.episodeNumber;
+    if (season != null && episode != null) {
+      return '/watch-series/${item.id}/$season/$episode';
+    }
+    return '/watch-series/${item.id}';
+  }
+
+  static bool _isSeriesItem(MovieItem item) {
+    return item.mediaType == MediaType.tv ||
+        item.type.toLowerCase().contains('series');
+  }
+
   static final Set<String> allRoutes = {
     splash,
     home,
     movies,
     series,
+    tvSeries,
     movieDetail,
     seriesDetail,
     castDetail,
     movieWatch,
     seriesWatch,
+    watchMovies,
+    watchSeries,
     streaming,
     jellyfinNativePlayer,
     jellyfinNativePlayerFullscreen,
@@ -91,9 +129,11 @@ class AppRoutes {
     genre,
     country,
     production,
+    topRated,
     login,
     register,
     resetPassword,
+    verifyEmail,
     phoneAuth,
     profile,
     watchlist,
@@ -122,32 +162,39 @@ class AppRoutes {
   static Map<String, WidgetBuilder> get routes {
     return {
       splash: (_) => const SplashScreen(),
-      home: (_) => _protected(const HomeScreen()),
-      movies: (_) => _protected(const CatalogScreen(kind: CatalogKind.movies)),
-      series: (_) => _protected(const CatalogScreen(kind: CatalogKind.series)),
+      home: (_) => _appScreen(const HomeScreen()),
+      movies: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.movies)),
+      series: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.series)),
+      tvSeries: (_) =>
+          _appScreen(const CatalogScreen(kind: CatalogKind.series)),
       login: (_) => const LoginScreen(),
       register: (_) =>
           _featureGate(child: const RegisterScreen(), requiresSignup: true),
       resetPassword: (_) => const ResetPasswordScreen(),
+      verifyEmail: (_) => const VerifyEmailScreen(),
       phoneAuth: (_) => _featureGate(
         child: const PhoneAuthScreen(),
         requiresPhoneLogin: true,
       ),
-      profile: (_) => _protected(const ProfileScreen()),
-      watchlist: (_) => _protected(const WatchlistScreen()),
-      watched: (_) => _protected(const WatchedScreen()),
-      activity: (_) => _protected(const ActivityScreen()),
-      continueWatching: (_) => _protected(const ContinueWatchingScreen()),
-      contact: (_) => _protected(const ContactScreen()),
-      terms: (_) => _protected(const TermsScreen()),
-      privacy: (_) => _protected(const PrivacyScreen()),
-      jellyfinSettings: (_) => _protected(const JellyfinSettingsScreen()),
+      profile: (_) => _authenticated(const ProfileScreen()),
+      watchlist: (_) => _authenticated(const WatchlistScreen()),
+      watched: (_) => _authenticated(const WatchedScreen()),
+      activity: (_) => _authenticated(const ActivityScreen()),
+      continueWatching: (_) => _authenticated(const ContinueWatchingScreen()),
+      contact: (_) => _appScreen(const ContactScreen()),
+      terms: (_) => _appScreen(const TermsScreen()),
+      privacy: (_) => _appScreen(const PrivacyScreen()),
+      jellyfinSettings: (_) => _appScreen(const JellyfinSettingsScreen()),
       jellyfinLogin: (_) => const JellyfinLoginScreen(),
-      supportRequest: (_) => _protected(const ContentRequestFormScreen()),
+      supportRequest: (_) => _authenticated(const ContentRequestFormScreen()),
     };
   }
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    final uri = Uri.tryParse(settings.name ?? '');
+    final path = uri?.path ?? settings.name;
+    final pathSegments = uri?.pathSegments ?? const <String>[];
+    final searchQuery = _searchQueryFromUri(uri);
     final item = settings.arguments is MovieItem
         ? settings.arguments as MovieItem
         : null;
@@ -155,39 +202,80 @@ class AppRoutes {
       settings.arguments,
     );
 
-    return switch (settings.name) {
-      movieDetail => MaterialPageRoute<void>(
+    if (path == search) {
+      return MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => _hasValidItem(item)
-            ? _protected(MovieDetailScreen(item: item))
-            : const InvalidRouteScreen(
-                message: 'Movie detail requires a valid movie item.',
-              ),
-      ),
-      seriesDetail => MaterialPageRoute<void>(
+        builder: (_) => _appScreen(
+          SearchResultScreen(
+            title: 'Search',
+            query: settings.arguments is String
+                ? settings.arguments as String
+                : searchQuery,
+          ),
+        ),
+      );
+    }
+
+    if (_matchesIdRoute(pathSegments, 'watch-movies')) {
+      if (_hasValidItem(watchRequest?.item)) {
+        return _movieWatchRoute(settings, watchRequest);
+      }
+      final tmdbId = int.tryParse(pathSegments[1]);
+      return _tmdbItemRoute(
         settings: settings,
-        builder: (_) => _hasValidItem(item)
-            ? _protected(SeriesDetailScreen(item: item))
-            : const InvalidRouteScreen(
-                message: 'Series detail requires a valid series item.',
-              ),
-      ),
-      movieWatch => MaterialPageRoute<void>(
+        tmdbId: tmdbId,
+        mediaType: MediaType.movie,
+        destination: _TmdbRouteDestination.watch,
+      );
+    }
+
+    if (_matchesSeriesWatchRoute(pathSegments)) {
+      if (_hasValidItem(watchRequest?.item)) {
+        return _seriesWatchRoute(settings, watchRequest);
+      }
+      final tmdbId = int.tryParse(pathSegments[1]);
+      final seasonNumber = int.tryParse(pathSegments[2]);
+      final episodeNumber = int.tryParse(pathSegments[3]);
+      return _tmdbItemRoute(
         settings: settings,
-        builder: (_) => _hasValidItem(watchRequest?.item)
-            ? _protected(MovieWatchScreen(request: watchRequest))
-            : const InvalidRouteScreen(
-                message: 'Movie watch requires a valid movie item.',
-              ),
-      ),
-      seriesWatch => MaterialPageRoute<void>(
+        tmdbId: tmdbId,
+        mediaType: MediaType.tv,
+        destination: _TmdbRouteDestination.watch,
+        seasonNumber: seasonNumber,
+        episodeNumber: episodeNumber,
+      );
+    }
+
+    if (_matchesIdRoute(pathSegments, 'movie')) {
+      if (_hasValidItem(item)) {
+        return _movieDetailRoute(settings, item);
+      }
+      return _tmdbItemRoute(
         settings: settings,
-        builder: (_) => _hasValidItem(watchRequest?.item)
-            ? _protected(SeriesWatchScreen(request: watchRequest))
-            : const InvalidRouteScreen(
-                message: 'Series watch requires a valid series item.',
-              ),
-      ),
+        tmdbId: int.tryParse(pathSegments[1]),
+        mediaType: MediaType.movie,
+        destination: _TmdbRouteDestination.detail,
+      );
+    }
+
+    if (_matchesIdRoute(pathSegments, 'series') ||
+        _matchesIdRoute(pathSegments, 'tv')) {
+      if (_hasValidItem(item)) {
+        return _seriesDetailRoute(settings, item);
+      }
+      return _tmdbItemRoute(
+        settings: settings,
+        tmdbId: int.tryParse(pathSegments[1]),
+        mediaType: MediaType.tv,
+        destination: _TmdbRouteDestination.detail,
+      );
+    }
+
+    return switch (path) {
+      movieDetail => _movieDetailRoute(settings, item),
+      seriesDetail => _seriesDetailRoute(settings, item),
+      movieWatch => _movieWatchRoute(settings, watchRequest),
+      seriesWatch => _seriesWatchRoute(settings, watchRequest),
       streaming => _streamingRoute(settings),
       jellyfinNativePlayer => _jellyfinNativeRoute(settings),
       jellyfinNativePlayerFullscreen => _jellyfinNativeRoute(settings),
@@ -217,7 +305,7 @@ class AppRoutes {
                   message:
                       'Trailer route is missing a supported site or video key.',
                 )
-              : _protected(TrailerPlayerScreen(trailer: trailer));
+              : _appScreen(TrailerPlayerScreen(trailer: trailer));
         },
       ),
       castDetail => MaterialPageRoute<void>(
@@ -228,22 +316,18 @@ class AppRoutes {
               ? const InvalidRouteScreen(
                   message: 'Cast detail requires a valid cast name.',
                 )
-              : _protected(CastDetailScreen(query: query));
+              : _appScreen(CastDetailScreen(query: query));
         },
-      ),
-      search => MaterialPageRoute<void>(
-        settings: settings,
-        builder: (_) => _protected(const SearchResultScreen(title: 'Search')),
       ),
       genre => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => _protected(
+        builder: (_) => _appScreen(
           const SearchResultScreen(title: 'Genres', mode: ExploreMode.genre),
         ),
       ),
       country => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => _protected(
+        builder: (_) => _appScreen(
           const SearchResultScreen(
             title: 'Countries',
             mode: ExploreMode.country,
@@ -252,10 +336,19 @@ class AppRoutes {
       ),
       production => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => _protected(
+        builder: (_) => _appScreen(
           const SearchResultScreen(
             title: 'Production',
             mode: ExploreMode.production,
+          ),
+        ),
+      ),
+      topRated => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => _appScreen(
+          const SearchResultScreen(
+            title: 'Top IMDb',
+            mode: ExploreMode.topRated,
           ),
         ),
       ),
@@ -275,10 +368,136 @@ class AppRoutes {
 
   static bool _hasValidItem(MovieItem? item) => item != null && item.id > 0;
 
-  static Widget _protected(Widget child) {
-    return AuthService.instance.currentUser == null
-        ? const LoginScreen()
-        : _ProtectedAppScreen(child: child);
+  static bool _matchesIdRoute(List<String> segments, String prefix) {
+    return segments.length == 2 &&
+        segments.first == prefix &&
+        int.tryParse(segments[1]) != null;
+  }
+
+  static bool _matchesSeriesWatchRoute(List<String> segments) {
+    return (segments.length == 2 || segments.length == 4) &&
+        segments.first == 'watch-series' &&
+        int.tryParse(segments[1]) != null &&
+        (segments.length == 2 ||
+            (int.tryParse(segments[2]) != null &&
+                int.tryParse(segments[3]) != null));
+  }
+
+  static String? _searchQueryFromUri(Uri? uri) {
+    if (uri == null || uri.path != search || uri.query.isEmpty) {
+      return null;
+    }
+    final namedQuery =
+        uri.queryParameters['q'] ??
+        uri.queryParameters['query'] ??
+        uri.queryParameters['s'];
+    if (namedQuery != null && namedQuery.trim().isNotEmpty) {
+      return namedQuery.trim();
+    }
+    return Uri.decodeQueryComponent(uri.query.replaceAll('+', ' ')).trim();
+  }
+
+  static Route<dynamic> _tmdbItemRoute({
+    required RouteSettings settings,
+    required int? tmdbId,
+    required MediaType mediaType,
+    required _TmdbRouteDestination destination,
+    int? seasonNumber,
+    int? episodeNumber,
+  }) {
+    if (tmdbId == null || tmdbId <= 0) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => InvalidRouteScreen(
+          message: 'Route ${settings.name ?? ''} requires a valid TMDB ID.',
+        ),
+      );
+    }
+
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) => _appScreen(
+        _TmdbItemRouteScreen(
+          tmdbId: tmdbId,
+          mediaType: mediaType,
+          destination: destination,
+          seasonNumber: seasonNumber,
+          episodeNumber: episodeNumber,
+        ),
+      ),
+    );
+  }
+
+  static Route<dynamic> _movieDetailRoute(
+    RouteSettings settings,
+    MovieItem? item,
+  ) {
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) => _hasValidItem(item)
+          ? _appScreen(MovieDetailScreen(item: item))
+          : const InvalidRouteScreen(
+              message: 'Movie detail requires a valid movie item.',
+            ),
+    );
+  }
+
+  static Route<dynamic> _seriesDetailRoute(
+    RouteSettings settings,
+    MovieItem? item,
+  ) {
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) => _hasValidItem(item)
+          ? _appScreen(SeriesDetailScreen(item: item))
+          : const InvalidRouteScreen(
+              message: 'Series detail requires a valid series item.',
+            ),
+    );
+  }
+
+  static Route<dynamic> _movieWatchRoute(
+    RouteSettings settings,
+    WatchPageRequest? request,
+  ) {
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) => _hasValidItem(request?.item)
+          ? _appScreen(MovieWatchScreen(request: request))
+          : const InvalidRouteScreen(
+              message: 'Movie watch requires a valid movie item.',
+            ),
+    );
+  }
+
+  static Route<dynamic> _seriesWatchRoute(
+    RouteSettings settings,
+    WatchPageRequest? request,
+  ) {
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) => _hasValidItem(request?.item)
+          ? _appScreen(SeriesWatchScreen(request: request))
+          : const InvalidRouteScreen(
+              message: 'Series watch requires a valid series item.',
+            ),
+    );
+  }
+
+  static Widget _authenticated(Widget child) {
+    final user = AuthService.instance.currentUser;
+    if (user == null) {
+      return const LoginScreen();
+    }
+    return _appScreen(child);
+  }
+
+  static Widget _appScreen(Widget child) {
+    final user = AuthService.instance.currentUser;
+    if (user != null && AuthService.instance.requiresEmailVerification(user)) {
+      return const VerifyEmailScreen();
+    }
+    return _ProtectedAppScreen(child: child);
   }
 
   static Widget _featureGate({
@@ -311,7 +530,7 @@ class AppRoutes {
 
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => _protected(StreamingPlayerScreen(request: request)),
+      builder: (_) => _appScreen(StreamingPlayerScreen(request: request)),
     );
   }
 
@@ -330,7 +549,7 @@ class AppRoutes {
 
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => _protected(JellyfinNativePlayerScreen(request: request)),
+      builder: (_) => _appScreen(JellyfinNativePlayerScreen(request: request)),
     );
   }
 
@@ -352,16 +571,23 @@ class AppRoutes {
 
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => _protected(StreamingPlayerScreen(request: request)),
+      builder: (_) => _appScreen(StreamingPlayerScreen(request: request)),
     );
   }
 
   static Route<dynamic> _adminRoute(RouteSettings settings, Widget child) {
     return MaterialPageRoute<void>(
       settings: settings,
-      builder: (_) => AuthService.instance.currentUser == null
-          ? const LoginScreen()
-          : AdminRouteGate(child: child),
+      builder: (_) {
+        final user = AuthService.instance.currentUser;
+        if (user == null) {
+          return const LoginScreen();
+        }
+        if (AuthService.instance.requiresEmailVerification(user)) {
+          return const VerifyEmailScreen();
+        }
+        return AdminRouteGate(child: child);
+      },
     );
   }
 }
@@ -457,5 +683,80 @@ class _PublicConfigGate extends StatelessWidget {
         return child;
       },
     );
+  }
+}
+
+enum _TmdbRouteDestination { detail, watch }
+
+class _TmdbItemRouteScreen extends StatefulWidget {
+  const _TmdbItemRouteScreen({
+    required this.tmdbId,
+    required this.mediaType,
+    required this.destination,
+    this.seasonNumber,
+    this.episodeNumber,
+  });
+
+  final int tmdbId;
+  final MediaType mediaType;
+  final _TmdbRouteDestination destination;
+  final int? seasonNumber;
+  final int? episodeNumber;
+
+  @override
+  State<_TmdbItemRouteScreen> createState() => _TmdbItemRouteScreenState();
+}
+
+class _TmdbItemRouteScreenState extends State<_TmdbItemRouteScreen> {
+  late Future<MovieItem?> _itemFuture = _loadItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<MovieItem?>(
+      future: _itemFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError || snapshot.data == null) {
+          return AppErrorView(
+            title: 'Could not open title',
+            message: snapshot.hasError
+                ? userMessageForError(snapshot.error)
+                : 'This TMDB title was not found.',
+            onRetry: () => setState(() {
+              _itemFuture = _loadItem();
+            }),
+          );
+        }
+
+        final item = snapshot.data!;
+        if (widget.destination == _TmdbRouteDestination.detail) {
+          return widget.mediaType == MediaType.tv
+              ? SeriesDetailScreen(item: item)
+              : MovieDetailScreen(item: item);
+        }
+
+        final request = WatchPageRequest(
+          item: item,
+          seasonNumber: widget.seasonNumber,
+          episodeNumber: widget.episodeNumber,
+          autoPlay: widget.mediaType != MediaType.tv ||
+              (widget.seasonNumber != null && widget.episodeNumber != null),
+        );
+        return widget.mediaType == MediaType.tv
+            ? SeriesWatchScreen(request: request)
+            : MovieWatchScreen(request: request);
+      },
+    );
+  }
+
+  Future<MovieItem?> _loadItem() {
+    final repository = TmdbRepository(config: AppConfig.fromEnv());
+    return widget.mediaType == MediaType.tv
+        ? repository.seriesById(widget.tmdbId)
+        : repository.movieById(widget.tmdbId);
   }
 }

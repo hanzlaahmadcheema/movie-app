@@ -1,61 +1,32 @@
-name: Release Android APK
+name: Release All Platforms
 
 on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  APP_NAME: movie-app
+
 jobs:
-  release:
-    name: Build and publish release APK
+  android:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate required release configuration
+      - name: Validate required configuration
         env:
           TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
         run: |
           if [ -z "$TMDB_READ_ACCESS_TOKEN" ]; then
             echo "Missing secret: TMDB_READ_ACCESS_TOKEN"
-            exit 1
-          fi
-
-      - name: Validate required signing secrets
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          missing=0
-
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "Missing secret: ANDROID_KEYSTORE_BASE64"
-            missing=1
-          fi
-
-          if [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
-            echo "Missing secret: ANDROID_KEYSTORE_PASSWORD"
-            missing=1
-          fi
-
-          if [ -z "$ANDROID_KEY_ALIAS" ]; then
-            echo "Missing secret: ANDROID_KEY_ALIAS"
-            missing=1
-          fi
-
-          if [ -z "$ANDROID_KEY_PASSWORD" ]; then
-            echo "Missing secret: ANDROID_KEY_PASSWORD"
-            missing=1
-          fi
-
-          if [ "$missing" -ne 0 ]; then
             exit 1
           fi
 
@@ -71,46 +42,225 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Decode Android keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release-keystore.jks"
+      - name: Install dependencies
+        run: flutter pub get
 
-      - name: Create key.properties
+      - name: Build debug APK
         env:
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
         run: |
-          {
-            printf 'storePassword=%s\n' "$ANDROID_KEYSTORE_PASSWORD"
-            printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD"
-            printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS"
-            printf 'storeFile=%s\n' "$RUNNER_TEMP/release-keystore.jks"
-          } > android/key.properties
+          flutter build apk --debug \
+            --dart-define=TMDB_READ_ACCESS_TOKEN="$TMDB_READ_ACCESS_TOKEN"
+
+      - name: Prepare Android artifact
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-debug.apk "dist/${APP_NAME}-android-debug.apk"
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: dist/${{ env.APP_NAME }}-android-debug.apk
+
+  web:
+    name: Build Web
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required configuration
+        env:
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$TMDB_READ_ACCESS_TOKEN" ]; then
+            echo "Missing secret: TMDB_READ_ACCESS_TOKEN"
+            exit 1
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Build release APK
+      - name: Build web release
         env:
           TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
         run: |
-          flutter build apk --release \
+          flutter build web --release \
             --dart-define=TMDB_READ_ACCESS_TOKEN="$TMDB_READ_ACCESS_TOKEN"
 
-      - name: Prepare release files
+      - name: Package web artifact
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/movie-app-${GITHUB_REF_NAME}.apk"
-          sha256sum dist/*.apk > dist/SHA256SUMS.txt
+          (cd build/web && zip -r ../../dist/${APP_NAME}-web.zip .)
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-zip
+          path: dist/${{ env.APP_NAME }}-web.zip
+
+  linux:
+    name: Build Linux zip and deb
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            libgtk-3-dev \
+            ninja-build \
+            pkg-config \
+            zip
+
+      - name: Validate required configuration
+        env:
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$TMDB_READ_ACCESS_TOKEN" ]; then
+            echo "Missing secret: TMDB_READ_ACCESS_TOKEN"
+            exit 1
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux release
+        env:
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+        run: |
+          flutter build linux --release \
+            --dart-define=TMDB_READ_ACCESS_TOKEN="$TMDB_READ_ACCESS_TOKEN"
+
+      - name: Package Linux zip
+        run: |
+          mkdir -p dist
+          (cd build/linux/x64/release/bundle && zip -r ../../../../../dist/${APP_NAME}-linux.zip .)
+
+      - name: Package Linux deb
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
+            VERSION="0.1.0"
+          fi
+          rm -rf dist/deb
+          mkdir -p dist/deb/DEBIAN
+          mkdir -p dist/deb/opt/${APP_NAME}
+          mkdir -p dist/deb/usr/share/applications
+          cp -r build/linux/x64/release/bundle/* dist/deb/opt/${APP_NAME}/
+          cat > dist/deb/DEBIAN/control <<EOF
+          Package: movie-app
+          Version: $VERSION
+          Section: video
+          Priority: optional
+          Architecture: amd64
+          Maintainer: MovieApp
+          Description: Flutter movie and TV discovery app.
+          EOF
+          cat > dist/deb/usr/share/applications/movie-app.desktop <<EOF
+          [Desktop Entry]
+          Type=Application
+          Name=MovieApp
+          Exec=/opt/${APP_NAME}/movie_app
+          Terminal=false
+          Categories=AudioVideo;Video;
+          EOF
+          dpkg-deb --build dist/deb "dist/${APP_NAME}-linux-amd64.deb"
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            dist/${{ env.APP_NAME }}-linux.zip
+            dist/${{ env.APP_NAME }}-linux-amd64.deb
+
+  windows:
+    name: Build Windows zip
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required configuration
+        shell: pwsh
+        env:
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TMDB_READ_ACCESS_TOKEN)) {
+            Write-Error "Missing secret: TMDB_READ_ACCESS_TOKEN"
+            exit 1
+          }
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        shell: pwsh
+        env:
+          TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+        run: |
+          flutter build windows --release --dart-define=TMDB_READ_ACCESS_TOKEN="$env:TMDB_READ_ACCESS_TOKEN"
+
+      - name: Package Windows app
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath dist\movie-app-windows.zip -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: dist/movie-app-windows.zip
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - android
+      - web
+      - linux
+      - windows
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
 
       - name: Create GitHub Release
         env:

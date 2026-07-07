@@ -117,7 +117,9 @@ class AdminBanner {
       'title': title.trim(),
       'subtitle': subtitle.trim(),
       'tmdbId': tmdbId,
-      'contentType': contentType == AdminContentType.series ? 'series' : 'movie',
+      'contentType': contentType == AdminContentType.series
+          ? 'series'
+          : 'movie',
       'imageUrl': imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : null,
       'buttonText': buttonText.trim(),
       'buttonAction': buttonAction == BannerActionType.details
@@ -174,7 +176,9 @@ class FeaturedContentConfig {
   Map<String, Object?> toJson() {
     return {
       'tmdbId': tmdbId,
-      'contentType': contentType == AdminContentType.series ? 'series' : 'movie',
+      'contentType': contentType == AdminContentType.series
+          ? 'series'
+          : 'movie',
       'section': section.trim(),
       'titleOverride': titleOverride?.trim().isNotEmpty == true
           ? titleOverride!.trim()
@@ -364,8 +368,8 @@ class AppRemoteConfig {
       jellyfinEnabled: data['jellyfinEnabled'] != false,
       jellyfinNativeEnabled: data['jellyfinNativeEnabled'] != false,
       jellyfinWebEnabled: data['jellyfinWebEnabled'] != false,
-      tailscaleRequiredMessage:
-          (data['tailscaleRequiredMessage'] ?? '').toString(),
+      tailscaleRequiredMessage: (data['tailscaleRequiredMessage'] ?? '')
+          .toString(),
       jellyfinSetupGuide: (data['jellyfinSetupGuide'] ?? '').toString(),
     );
   }
@@ -484,7 +488,9 @@ class ContentRequestRecord {
       'title': title.trim(),
       if (tmdbId != null) 'tmdbId': tmdbId,
       if (contentType != null)
-        'contentType': contentType == AdminContentType.series ? 'series' : 'movie',
+        'contentType': contentType == AdminContentType.series
+            ? 'series'
+            : 'movie',
       if (seasonNumber != null) 'seasonNumber': seasonNumber,
       if (episodeNumber != null) 'episodeNumber': episodeNumber,
       'message': message.trim(),
@@ -526,7 +532,9 @@ class PlaybackLogRecord {
   final int? episodeNumber;
   final DateTime? createdAt;
 
-  factory PlaybackLogRecord.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory PlaybackLogRecord.fromDoc(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data() ?? const {};
     return PlaybackLogRecord(
       id: doc.id,
@@ -596,12 +604,15 @@ class AdminRepository {
     Future<QuerySnapshot<Map<String, dynamic>>> Function()? noticesLoader,
     Future<QuerySnapshot<Map<String, dynamic>>> Function()? usersSnapshotLoader,
     Future<QuerySnapshot<Map<String, dynamic>>> Function()? logsSnapshotLoader,
-    Future<QuerySnapshot<Map<String, dynamic>>> Function()? requestsSnapshotLoader,
-    Future<QuerySnapshot<Map<String, dynamic>>> Function()? providerSnapshotLoader,
+    Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+    requestsSnapshotLoader,
+    Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+    providerSnapshotLoader,
     Future<QuerySnapshot<Map<String, dynamic>>> Function(
       DocumentReference<Map<String, dynamic>> userRef,
       String subcollection,
-    )? userSubcollectionLoader,
+    )?
+    userSubcollectionLoader,
   }) {
     return AdminRepository._(
       firestore: firestore,
@@ -619,19 +630,25 @@ class AdminRepository {
   }
 
   final FirebaseFirestore? _firestoreOverride;
-  final Future<DocumentSnapshot<Map<String, dynamic>>> Function()? appConfigLoader;
+  final Future<DocumentSnapshot<Map<String, dynamic>>> Function()?
+  appConfigLoader;
   final Future<QuerySnapshot<Map<String, dynamic>>> Function()? providersLoader;
   final Future<QuerySnapshot<Map<String, dynamic>>> Function()? bannersLoader;
   final Future<QuerySnapshot<Map<String, dynamic>>> Function()? featuredLoader;
   final Future<QuerySnapshot<Map<String, dynamic>>> Function()? noticesLoader;
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function()? usersSnapshotLoader;
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function()? logsSnapshotLoader;
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function()? requestsSnapshotLoader;
-  final Future<QuerySnapshot<Map<String, dynamic>>> Function()? providerSnapshotLoader;
+  final Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+  usersSnapshotLoader;
+  final Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+  logsSnapshotLoader;
+  final Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+  requestsSnapshotLoader;
+  final Future<QuerySnapshot<Map<String, dynamic>>> Function()?
+  providerSnapshotLoader;
   final Future<QuerySnapshot<Map<String, dynamic>>> Function(
     DocumentReference<Map<String, dynamic>> userRef,
     String subcollection,
-  )? userSubcollectionLoader;
+  )?
+  userSubcollectionLoader;
 
   static const Set<String> _safeFirestoreCodes = {
     'permission-denied',
@@ -656,6 +673,42 @@ class AdminRepository {
       displayName: 'Jellyfin Web',
       enabled: true,
       priority: -100,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
+    ProviderConfigRecord(
+      id: 'hindi_player',
+      providerId: 'hindi_player',
+      displayName: 'Hindi Player',
+      enabled: true,
+      priority: 500,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
+    ProviderConfigRecord(
+      id: 'videasy',
+      providerId: 'videasy',
+      displayName: 'Videasy',
+      enabled: true,
+      priority: 200,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
+    ProviderConfigRecord(
+      id: 'streamvault',
+      providerId: 'streamvault',
+      displayName: 'StreamVault',
+      enabled: true,
+      priority: 300,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
+    ProviderConfigRecord(
+      id: '111movies',
+      providerId: '111movies',
+      displayName: '111Movies',
+      enabled: true,
+      priority: 400,
       maintenanceMode: false,
       fallbackAllowed: true,
     ),
@@ -734,9 +787,9 @@ class AdminRepository {
       return;
     }
     try {
-      await for (final snapshot in _collection(AdminPaths.banners)
-          .orderBy('order')
-          .snapshots()) {
+      await for (final snapshot in _collection(
+        AdminPaths.banners,
+      ).orderBy('order').snapshots()) {
         yield snapshot.docs.map(AdminBanner.fromDoc).toList(growable: false);
       }
     } catch (error) {
@@ -782,10 +835,9 @@ class AdminRepository {
       return;
     }
     try {
-      await for (final snapshot in _collection(AdminPaths.featuredContent)
-          .orderBy('section')
-          .orderBy('order')
-          .snapshots()) {
+      await for (final snapshot in _collection(
+        AdminPaths.featuredContent,
+      ).orderBy('section').orderBy('order').snapshots()) {
         yield snapshot.docs
             .map(FeaturedContentConfig.fromDoc)
             .toList(growable: false);
@@ -802,10 +854,9 @@ class AdminRepository {
     try {
       final snapshot =
           await featuredLoader?.call() ??
-          await _collection(AdminPaths.featuredContent)
-              .orderBy('section')
-              .orderBy('order')
-              .get();
+          await _collection(
+            AdminPaths.featuredContent,
+          ).orderBy('section').orderBy('order').get();
       return snapshot.docs
           .map(FeaturedContentConfig.fromDoc)
           .where((item) => item.enabled && item.tmdbId > 0)
@@ -839,9 +890,9 @@ class AdminRepository {
       return;
     }
     try {
-      await for (final snapshot in _collection(AdminPaths.notices)
-          .orderBy('updatedAt', descending: true)
-          .snapshots()) {
+      await for (final snapshot in _collection(
+        AdminPaths.notices,
+      ).orderBy('updatedAt', descending: true).snapshots()) {
         yield snapshot.docs.map(AdminNotice.fromDoc).toList(growable: false);
       }
     } catch (error) {
@@ -856,9 +907,9 @@ class AdminRepository {
     try {
       final snapshot =
           await noticesLoader?.call() ??
-          await _collection(AdminPaths.notices)
-              .orderBy('updatedAt', descending: true)
-              .get();
+          await _collection(
+            AdminPaths.notices,
+          ).orderBy('updatedAt', descending: true).get();
       return snapshot.docs
           .map(AdminNotice.fromDoc)
           .where((notice) => notice.isCurrentlyActive)
@@ -889,13 +940,13 @@ class AdminRepository {
       return;
     }
     try {
-      await for (final snapshot in _collection(AdminPaths.providers)
-          .orderBy('priority')
-          .snapshots()) {
+      await for (final snapshot in _collection(
+        AdminPaths.providers,
+      ).orderBy('priority').snapshots()) {
         final providers = snapshot.docs
             .map(ProviderConfigRecord.fromDoc)
             .toList(growable: false);
-        yield providers.isEmpty ? defaultProviderConfigs : providers;
+        yield _mergeDefaultProviderConfigs(providers);
       }
     } catch (error) {
       _logFirestoreFallback('watchProviders', error);
@@ -918,7 +969,7 @@ class AdminRepository {
       final providers = snapshot.docs
           .map(ProviderConfigRecord.fromDoc)
           .toList(growable: false);
-      return providers.isEmpty ? defaultProviderConfigs : providers;
+      return _mergeDefaultProviderConfigs(providers);
     } catch (error) {
       _logFirestoreFallback('loadProviders', error);
       return defaultProviderConfigs;
@@ -926,10 +977,25 @@ class AdminRepository {
   }
 
   Future<void> saveProviderConfig(ProviderConfigRecord config) async {
-    await _collection(AdminPaths.providers).doc(config.providerId).set(
-      config.toJson(),
-      SetOptions(merge: true),
-    );
+    await _collection(
+      AdminPaths.providers,
+    ).doc(config.providerId).set(config.toJson(), SetOptions(merge: true));
+  }
+
+  static List<ProviderConfigRecord> _mergeDefaultProviderConfigs(
+    List<ProviderConfigRecord> providers,
+  ) {
+    if (providers.isEmpty) {
+      return defaultProviderConfigs;
+    }
+    final byProvider = {
+      for (final provider in defaultProviderConfigs)
+        provider.providerId: provider,
+      for (final provider in providers) provider.providerId: provider,
+    };
+    final merged = byProvider.values.toList(growable: false);
+    merged.sort((a, b) => a.priority.compareTo(b.priority));
+    return List.unmodifiable(merged);
   }
 
   Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> watchUsers() {
@@ -954,7 +1020,10 @@ class AdminRepository {
     return _collection(AdminPaths.contentRequests)
         .orderBy('updatedAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(ContentRequestRecord.fromDoc).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map(ContentRequestRecord.fromDoc).toList(),
+        );
   }
 
   Future<void> createContentRequest(ContentRequestRecord record) {
@@ -973,7 +1042,9 @@ class AdminRepository {
         ContentRequestStatus.resolved => 'resolved',
         ContentRequestStatus.rejected => 'rejected',
       },
-      'adminNote': adminNote?.trim().isNotEmpty == true ? adminNote!.trim() : null,
+      'adminNote': adminNote?.trim().isNotEmpty == true
+          ? adminNote!.trim()
+          : null,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -986,7 +1057,9 @@ class AdminRepository {
     return _collection(AdminPaths.playbackLogs)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(PlaybackLogRecord.fromDoc).toList());
+        .map(
+          (snapshot) => snapshot.docs.map(PlaybackLogRecord.fromDoc).toList(),
+        );
   }
 
   Future<void> logPlaybackError({
@@ -1098,37 +1171,35 @@ class AdminRepository {
   }
 
   Future<_UsersSummary> _loadUsersSummary(FirebaseFirestore? firestore) {
-    return _safeValue<_UsersSummary>(
-      'loadDashboardStats.users',
-      () async {
-        final usersSnapshot =
-            await usersSnapshotLoader?.call() ??
-            await firestore!.collection('users').get();
-        var activeUsers = 0;
-        var newUsersToday = 0;
-        final today = DateTime.now();
-        final todayStart = DateTime(today.year, today.month, today.day);
-        for (final userDoc in usersSnapshot.docs) {
-          final data = userDoc.data();
-          if ((data['status'] ?? 'active').toString() != 'blocked') {
-            activeUsers++;
-          }
-          final createdAt = _toDate(data['createdAt']);
-          if (createdAt != null && !createdAt.isBefore(todayStart)) {
-            newUsersToday++;
-          }
+    return _safeValue<_UsersSummary>('loadDashboardStats.users', () async {
+      final usersSnapshot =
+          await usersSnapshotLoader?.call() ??
+          await firestore!.collection('users').get();
+      var activeUsers = 0;
+      var newUsersToday = 0;
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      for (final userDoc in usersSnapshot.docs) {
+        final data = userDoc.data();
+        if ((data['status'] ?? 'active').toString() != 'blocked') {
+          activeUsers++;
         }
-        return _UsersSummary(
-          totalUsers: '${usersSnapshot.size}',
-          activeUsers: '$activeUsers',
-          newUsersToday: '$newUsersToday',
-        );
-      },
-      fallback: const _UsersSummary.unavailable(),
-    );
+        final createdAt = _toDate(data['createdAt']);
+        if (createdAt != null && !createdAt.isBefore(todayStart)) {
+          newUsersToday++;
+        }
+      }
+      return _UsersSummary(
+        totalUsers: '${usersSnapshot.size}',
+        activeUsers: '$activeUsers',
+        newUsersToday: '$newUsersToday',
+      );
+    }, fallback: const _UsersSummary.unavailable());
   }
 
-  Future<_ContentSummary> _loadUserContentSummary(FirebaseFirestore? firestore) {
+  Future<_ContentSummary> _loadUserContentSummary(
+    FirebaseFirestore? firestore,
+  ) {
     return _safeValue<_ContentSummary>(
       'loadDashboardStats.userContent',
       () async {
@@ -1139,11 +1210,17 @@ class AdminRepository {
         var activityRecords = 0;
         for (final userDoc in usersSnapshot.docs) {
           final watchlist =
-              await userSubcollectionLoader?.call(userDoc.reference, 'watchlist') ??
+              await userSubcollectionLoader?.call(
+                userDoc.reference,
+                'watchlist',
+              ) ??
               await userDoc.reference.collection('watchlist').get();
           watchlistRecords += watchlist.size;
           final activity =
-              await userSubcollectionLoader?.call(userDoc.reference, 'activity') ??
+              await userSubcollectionLoader?.call(
+                userDoc.reference,
+                'activity',
+              ) ??
               await userDoc.reference.collection('activity').get();
           activityRecords += activity.size;
         }
@@ -1173,7 +1250,8 @@ class AdminRepository {
     if (!kDebugMode) {
       return;
     }
-    if (error is FirebaseException && _safeFirestoreCodes.contains(error.code)) {
+    if (error is FirebaseException &&
+        _safeFirestoreCodes.contains(error.code)) {
       debugPrint('AdminRepository fallback $label: ${error.code}');
       return;
     }

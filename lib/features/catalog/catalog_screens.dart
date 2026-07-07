@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/config/app_config.dart';
 import '../../core/models/movie_item.dart';
 import '../../core/models/tmdb_page.dart';
+import '../../core/responsive/adaptive_container.dart';
 import '../../core/services/tmdb_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/filter_widgets.dart';
 import '../../widgets/pagination.dart';
@@ -36,91 +38,93 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Widget build(BuildContext context) {
     final title = widget.kind == CatalogKind.movies ? 'Movies' : 'TV Series';
 
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      body: ListView(
+    return AppShell(
+      body: AdaptiveContainer(
         padding: EdgeInsets.zero,
-        children: [
-          const MovieAppBar(dark: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(17, 43, 17, 0),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(17, 26, 17, 0),
-            child: FilterPanel(
-              initialSelection: _selectionForPanel,
-              allowedTypes: [
-                widget.kind == CatalogKind.movies
-                    ? FilterContentType.movies
-                    : FilterContentType.series,
-              ],
-              onApply: (value) {
-                final locked = _lockSelection(value);
-                setState(() {
-                  selection = locked;
-                  currentPage = 1;
-                  catalogItems = _loadCatalogForSelection(locked);
-                });
-              },
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const MovieAppBar(dark: true),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 43, 17, 0),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(5, 40, 5, 0),
-            child: FutureBuilder<TmdbPage<MovieItem>>(
-              future: catalogItems,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return AppErrorView(
-                    title: 'Could not load $title',
-                    message: userMessageForError(snapshot.error),
-                    onRetry: () => setState(() {
-                      catalogItems = _loadCatalogForSelection(selection);
-                    }),
-                  );
-                }
-                final page = snapshot.data;
-                final items =
-                    page?.items.take(20).toList() ?? const <MovieItem>[];
-                if (page == null || items.isEmpty) {
-                  return AppEmptyState(
-                    title: 'No results',
-                    message: selection?.hasActiveFilters == true
-                        ? 'No titles match these filters.'
-                        : 'No catalog titles are available right now.',
-                    icon: Icons.movie_filter_outlined,
-                    actionLabel: 'Reset Filters',
-                    onAction: () => setState(() {
-                      selection = null;
-                      currentPage = 1;
-                      catalogItems = _loadCatalogForSelection(null);
-                    }),
-                  );
-                }
+            Padding(
+              padding: EdgeInsets.fromLTRB(17, 26, 17, 0),
+              child: FilterPanel(
+                initialSelection: _selectionForPanel,
+                allowedTypes: [
+                  widget.kind == CatalogKind.movies
+                      ? FilterContentType.movies
+                      : FilterContentType.series,
+                ],
+                onApply: (value) {
+                  final locked = _lockSelection(value);
+                  setState(() {
+                    selection = locked;
+                    currentPage = 1;
+                    catalogItems = _loadCatalogForSelection(locked);
+                  });
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(5, 40, 5, 0),
+              child: FutureBuilder<TmdbPage<MovieItem>>(
+                future: catalogItems,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return AppErrorView(
+                      title: 'Could not load $title',
+                      message: userMessageForError(snapshot.error),
+                      onRetry: () => setState(() {
+                        catalogItems = _loadCatalogForSelection(selection);
+                      }),
+                    );
+                  }
+                  final page = snapshot.data;
+                  final items =
+                      page?.items.take(20).toList() ?? const <MovieItem>[];
+                  if (page == null || items.isEmpty) {
+                    return AppEmptyState(
+                      title: 'No results',
+                      message: selection?.hasActiveFilters == true
+                          ? 'No titles match these filters.'
+                          : 'No catalog titles are available right now.',
+                      icon: Icons.movie_filter_outlined,
+                      actionLabel: 'Reset Filters',
+                      onAction: () => setState(() {
+                        selection = null;
+                        currentPage = 1;
+                        catalogItems = _loadCatalogForSelection(null);
+                      }),
+                    );
+                  }
 
-                return Column(
-                  children: [
-                    FirebasePosterGrid(items: items, itemCount: items.length),
-                    if (page.hasMultiplePages) ...[
-                      const SizedBox(height: 28),
-                      PaginationBar(
-                        currentPage: currentPage,
-                        totalPages: page.totalPages,
-                        onPageChanged: _goToPage,
-                      ),
+                  return Column(
+                    children: [
+                      FirebasePosterGrid(items: items, itemCount: items.length),
+                      if (page.hasMultiplePages) ...[
+                        const SizedBox(height: 28),
+                        PaginationBar(
+                          currentPage: currentPage,
+                          totalPages: page.totalPages,
+                          onPageChanged: _goToPage,
+                        ),
+                      ],
                     ],
-                  ],
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

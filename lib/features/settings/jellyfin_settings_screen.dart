@@ -7,6 +7,8 @@ import '../../core/jellyfin/jellyfin_config.dart';
 import '../../core/jellyfin/jellyfin_repository.dart';
 import '../../core/services/admin_repository.dart';
 import '../../widgets/app_chrome.dart';
+import '../../widgets/app_shell.dart';
+import '../../core/responsive/adaptive_container.dart';
 
 class JellyfinSettingsScreen extends StatefulWidget {
   const JellyfinSettingsScreen({super.key, this.repository});
@@ -110,153 +112,156 @@ class _JellyfinSettingsScreenState extends State<JellyfinSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      body: ListView(
+    return AppShell(
+      body: AdaptiveContainer(
+        maxWidth: 1000,
         padding: EdgeInsets.zero,
-        children: [
-          const MovieAppBar(dark: true),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(17, 43, 17, 18),
-            child: Text(
-              'Jellyfin Settings',
-              style: Theme.of(context).textTheme.titleLarge,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const MovieAppBar(dark: true),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 43, 17, 18),
+              child: Text(
+                'Jellyfin Settings',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 17),
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SwitchListTile(
-                          value: _enabled,
-                          onChanged: (value) =>
-                              setState(() => _enabled = value),
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Enable Jellyfin'),
-                          subtitle: const Text(
-                            'Use your private Tailscale Jellyfin server before public providers.',
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _serverController,
-                          decoration: InputDecoration(
-                            labelText: 'Server URL',
-                            hintText: _defaultServerUrl.trim().isEmpty
-                                ? kJellyfinServerUrlHint
-                                : _defaultServerUrl,
-                          ),
-                          keyboardType: TextInputType.url,
-                          validator: (_) => _validateServerUrl(),
-                        ),
-                        const SizedBox(height: 18),
-                        DropdownButtonFormField<JellyfinPlaybackMode>(
-                          initialValue: _playbackMode,
-                          decoration: const InputDecoration(
-                            labelText: 'Playback Mode',
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: JellyfinPlaybackMode.auto,
-                              child: Text('Auto'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 17),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile(
+                            value: _enabled,
+                            onChanged: (value) =>
+                                setState(() => _enabled = value),
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Enable Jellyfin'),
+                            subtitle: const Text(
+                              'Use your private Tailscale Jellyfin server before public providers.',
                             ),
-                            DropdownMenuItem(
-                              value: JellyfinPlaybackMode.native,
-                              child: Text('Native Flutter Player'),
-                            ),
-                            DropdownMenuItem(
-                              value: JellyfinPlaybackMode.web,
-                              child: Text('Jellyfin Web Player'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            if (value == null) return;
-                            setState(() => _playbackMode = value);
-                          },
-                        ),
-                        const SizedBox(height: 18),
-                        _InfoBox(
-                          icon: _userName.isEmpty
-                              ? Icons.lock_outline
-                              : Icons.verified_user_outlined,
-                          text: _userName.isEmpty
-                              ? 'Login status: Not logged in'
-                              : 'Login status: Logged in as $_userName',
-                        ),
-                        if (_lastSyncAt != null) ...[
+                          ),
                           const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _serverController,
+                            decoration: InputDecoration(
+                              labelText: 'Server URL',
+                              hintText: _defaultServerUrl.trim().isEmpty
+                                  ? kJellyfinServerUrlHint
+                                  : _defaultServerUrl,
+                            ),
+                            keyboardType: TextInputType.url,
+                            validator: (_) => _validateServerUrl(),
+                          ),
+                          const SizedBox(height: 18),
+                          DropdownButtonFormField<JellyfinPlaybackMode>(
+                            initialValue: _playbackMode,
+                            decoration: const InputDecoration(
+                              labelText: 'Playback Mode',
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: JellyfinPlaybackMode.auto,
+                                child: Text('Auto'),
+                              ),
+                              DropdownMenuItem(
+                                value: JellyfinPlaybackMode.native,
+                                child: Text('Native Flutter Player'),
+                              ),
+                              DropdownMenuItem(
+                                value: JellyfinPlaybackMode.web,
+                                child: Text('Jellyfin Web Player'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value == null) return;
+                              setState(() => _playbackMode = value);
+                            },
+                          ),
+                          const SizedBox(height: 18),
                           _InfoBox(
-                            icon: Icons.sync,
-                            text:
-                                'Last Jellyfin sync: ${_lastSyncAt!.toLocal().toString().split('.').first}',
+                            icon: _userName.isEmpty
+                                ? Icons.lock_outline
+                                : Icons.verified_user_outlined,
+                            text: _userName.isEmpty
+                                ? 'Login status: Not logged in'
+                                : 'Login status: Logged in as $_userName',
                           ),
-                        ],
-                        if (_message != null) ...[
-                          const SizedBox(height: 12),
-                          _InfoBox(icon: Icons.info_outline, text: _message!),
-                        ],
-                        const SizedBox(height: 22),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            FilledButton.icon(
-                              onPressed: _testing ? null : _testServer,
-                              icon: const Icon(Icons.wifi_tethering),
-                              label: Text(
-                                _testing ? 'Testing...' : 'Test Server',
-                              ),
-                            ),
-                            FilledButton.icon(
-                              onPressed: _openLogin,
-                              icon: const Icon(Icons.login),
-                              label: Text(
-                                _userName.isEmpty
-                                    ? 'Login to Jellyfin'
-                                    : 'Login Again',
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: _userName.isEmpty ? null : _logout,
-                              icon: const Icon(Icons.logout),
-                              label: const Text('Logout'),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: _userName.isEmpty || _syncing
-                                  ? null
-                                  : _resyncLibrary,
-                              icon: const Icon(Icons.sync_outlined),
-                              label: Text(
-                                _syncing
-                                    ? 'Syncing...'
-                                    : 'Resync Jellyfin Library',
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: _saving ? null : _saveSettings,
-                              icon: const Icon(Icons.save_outlined),
-                              label: Text(
-                                _saving ? 'Saving...' : 'Save Settings',
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _clearAll,
-                              icon: const Icon(Icons.delete_outline),
-                              label: const Text('Clear Jellyfin Settings'),
+                          if (_lastSyncAt != null) ...[
+                            const SizedBox(height: 12),
+                            _InfoBox(
+                              icon: Icons.sync,
+                              text:
+                                  'Last Jellyfin sync: ${_lastSyncAt!.toLocal().toString().split('.').first}',
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 28),
-                      ],
+                          if (_message != null) ...[
+                            const SizedBox(height: 12),
+                            _InfoBox(icon: Icons.info_outline, text: _message!),
+                          ],
+                          const SizedBox(height: 22),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              FilledButton.icon(
+                                onPressed: _testing ? null : _testServer,
+                                icon: const Icon(Icons.wifi_tethering),
+                                label: Text(
+                                  _testing ? 'Testing...' : 'Test Server',
+                                ),
+                              ),
+                              FilledButton.icon(
+                                onPressed: _openLogin,
+                                icon: const Icon(Icons.login),
+                                label: Text(
+                                  _userName.isEmpty
+                                      ? 'Login to Jellyfin'
+                                      : 'Login Again',
+                                ),
+                              ),
+                              OutlinedButton.icon(
+                                onPressed: _userName.isEmpty ? null : _logout,
+                                icon: const Icon(Icons.logout),
+                                label: const Text('Logout'),
+                              ),
+                              OutlinedButton.icon(
+                                onPressed: _userName.isEmpty || _syncing
+                                    ? null
+                                    : _resyncLibrary,
+                                icon: const Icon(Icons.sync_outlined),
+                                label: Text(
+                                  _syncing
+                                      ? 'Syncing...'
+                                      : 'Resync Jellyfin Library',
+                                ),
+                              ),
+                              OutlinedButton.icon(
+                                onPressed: _saving ? null : _saveSettings,
+                                icon: const Icon(Icons.save_outlined),
+                                label: Text(
+                                  _saving ? 'Saving...' : 'Save Settings',
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: _clearAll,
+                                icon: const Icon(Icons.delete_outline),
+                                label: const Text('Clear Jellyfin Settings'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+                        ],
+                      ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

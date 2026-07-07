@@ -1,6 +1,20 @@
 import 'streaming_content_type.dart';
 
-enum StreamingUrlBuilderStrategy { vidSrc, template, jellyfinWeb }
+enum StreamingUrlBuilderStrategy { vidSrc, template, indStream, jellyfinWeb }
+
+class StreamingEndpoint {
+  const StreamingEndpoint({
+    required this.endpointId,
+    required this.url,
+    required this.priority,
+    required this.enabled,
+  });
+
+  final String endpointId;
+  final Uri url;
+  final int priority;
+  final bool enabled;
+}
 
 class StreamingServer {
   const StreamingServer({
@@ -17,6 +31,7 @@ class StreamingServer {
     this.episodeTemplate,
     this.allowHttpNavigation = false,
     this.privateProvider = false,
+    this.endpoints = const [],
   });
 
   final String id;
@@ -32,8 +47,27 @@ class StreamingServer {
   final String? episodeTemplate;
   final bool allowHttpNavigation;
   final bool privateProvider;
+  final List<StreamingEndpoint> endpoints;
 
   bool supports(StreamingContentType contentType) {
     return supportedContentTypes.contains(contentType);
+  }
+
+  List<StreamingEndpoint> enabledEndpoints() {
+    final configuredEndpoints = endpoints.isEmpty
+        ? [
+            StreamingEndpoint(
+              endpointId: id,
+              url: baseUri,
+              priority: priority,
+              enabled: enabled,
+            ),
+          ]
+        : endpoints;
+    final enabledEndpoints = configuredEndpoints
+        .where((endpoint) => endpoint.enabled)
+        .toList();
+    enabledEndpoints.sort((a, b) => a.priority.compareTo(b.priority));
+    return List.unmodifiable(enabledEndpoints);
   }
 }

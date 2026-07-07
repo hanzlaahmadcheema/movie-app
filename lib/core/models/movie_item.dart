@@ -12,6 +12,8 @@ class MovieItem {
     this.backdropUrl = '',
     this.posterPath,
     this.backdropPath,
+    this.imdbId,
+    this.originCountryCodes = const [],
     this.genreIds = const [],
     this.voteAverage = 0,
     this.releaseDate = '',
@@ -30,6 +32,8 @@ class MovieItem {
   final String backdropUrl;
   final String? posterPath;
   final String? backdropPath;
+  final String? imdbId;
+  final List<String> originCountryCodes;
   final List<int> genreIds;
   final double voteAverage;
   final String releaseDate;
@@ -48,6 +52,8 @@ class MovieItem {
     String? backdropUrl,
     String? posterPath,
     String? backdropPath,
+    String? imdbId,
+    List<String>? originCountryCodes,
     List<int>? genreIds,
     double? voteAverage,
     String? releaseDate,
@@ -66,6 +72,8 @@ class MovieItem {
       backdropUrl: backdropUrl ?? this.backdropUrl,
       posterPath: posterPath ?? this.posterPath,
       backdropPath: backdropPath ?? this.backdropPath,
+      imdbId: imdbId ?? this.imdbId,
+      originCountryCodes: originCountryCodes ?? this.originCountryCodes,
       genreIds: genreIds ?? this.genreIds,
       voteAverage: voteAverage ?? this.voteAverage,
       releaseDate: releaseDate ?? this.releaseDate,

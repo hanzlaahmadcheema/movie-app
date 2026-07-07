@@ -49,11 +49,27 @@ class StreamingRepository {
     final seenUrls = <String>{};
     final candidates = <StreamingEmbedResult>[];
     for (final server in registry.serversFor(request.contentType)) {
-      final url = urlBuilder.build(server, request);
-      if (url == null || !seenUrls.add(url.toString())) {
+      final endpoints = <StreamingResolvedEndpoint>[];
+      for (final endpoint in server.enabledEndpoints()) {
+        final url = urlBuilder.buildEndpoint(server, endpoint, request);
+        if (url == null || !seenUrls.add(url.toString())) {
+          continue;
+        }
+        endpoints.add(
+          StreamingResolvedEndpoint(endpointId: endpoint.endpointId, url: url),
+        );
+      }
+      if (endpoints.isEmpty) {
         continue;
       }
-      candidates.add(StreamingEmbedResult(server: server, url: url));
+      candidates.add(
+        StreamingEmbedResult(
+          server: server,
+          url: endpoints.first.url,
+          endpointId: endpoints.first.endpointId,
+          endpoints: List.unmodifiable(endpoints),
+        ),
+      );
     }
     return List.unmodifiable(candidates);
   }
@@ -62,10 +78,10 @@ class StreamingRepository {
     StreamingEmbedRequest request,
   ) async {
     final admin = adminRepository ?? AdminRepository.instance;
-    final remoteConfig = await (remoteConfigLoader?.call() ??
-        admin.loadPublicAppConfig());
-    final providerConfigs = await (providerConfigLoader?.call() ??
-        admin.loadProviders());
+    final remoteConfig =
+        await (remoteConfigLoader?.call() ?? admin.loadPublicAppConfig());
+    final providerConfigs =
+        await (providerConfigLoader?.call() ?? admin.loadProviders());
     var publicCandidates = buildCandidates(request);
     final jellyfin = jellyfinRepository;
     if (jellyfin == null) {
@@ -118,7 +134,20 @@ class StreamingRepository {
   ) {
     final preferredProviderId = request.preferredProviderId?.trim();
     if (preferredProviderId == null || preferredProviderId.isEmpty) {
-      return List.unmodifiable(candidates);
+      if (!request.isIndianContent) {
+        return List.unmodifiable(candidates);
+      }
+      final ordered = [...candidates];
+      ordered.sort((a, b) {
+        final aHindi = a.server.providerId == 'hindi_player' ? 0 : 1;
+        final bHindi = b.server.providerId == 'hindi_player' ? 0 : 1;
+        final hindiCompare = aHindi.compareTo(bHindi);
+        if (hindiCompare != 0) {
+          return hindiCompare;
+        }
+        return a.server.priority.compareTo(b.server.priority);
+      });
+      return List.unmodifiable(ordered);
     }
     final ordered = [...candidates];
     ordered.sort((a, b) {
@@ -168,10 +197,10 @@ class StreamingRepository {
 
   bool _isProviderAllowed(String providerId, AppRemoteConfig remoteConfig) {
     return switch (providerId) {
-      'jellyfin_native' => remoteConfig.jellyfinEnabled &&
-          remoteConfig.jellyfinNativeEnabled,
-      'jellyfin_web' => remoteConfig.jellyfinEnabled &&
-          remoteConfig.jellyfinWebEnabled,
+      'jellyfin_native' =>
+        remoteConfig.jellyfinEnabled && remoteConfig.jellyfinNativeEnabled,
+      'jellyfin_web' =>
+        remoteConfig.jellyfinEnabled && remoteConfig.jellyfinWebEnabled,
       _ => true,
     };
   }
@@ -196,6 +225,7 @@ class StreamingRepository {
       episodeTemplate: server.episodeTemplate,
       allowHttpNavigation: server.allowHttpNavigation,
       privateProvider: server.privateProvider,
+      endpoints: server.endpoints,
     );
   }
 }

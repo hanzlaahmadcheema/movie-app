@@ -8,15 +8,11 @@ import '../services/user_activity_repository.dart';
 import '../streaming/streaming_embed_request.dart';
 
 String detailRouteForItem(MovieItem item) {
-  return item.type.toLowerCase().contains('series')
-      ? AppRoutes.seriesDetail
-      : AppRoutes.movieDetail;
+  return AppRoutes.detailPathForItem(item);
 }
 
 String watchRouteForItem(MovieItem item) {
-  return item.type.toLowerCase().contains('series')
-      ? AppRoutes.seriesWatch
-      : AppRoutes.movieWatch;
+  return AppRoutes.watchPathForItem(item);
 }
 
 void openDetailForItem(BuildContext context, MovieItem item) {
@@ -79,11 +75,23 @@ void openContinueWatchingRecord(
   final request = watchPageRequestForRecord(record);
   switch (continueWatchingDestinationForRecord(record)) {
     case ContinueWatchingDestination.movieWatch:
-      Navigator.pushNamed(context, AppRoutes.movieWatch, arguments: request);
+      Navigator.pushNamed(
+        context,
+        AppRoutes.watchPathForRequest(request),
+        arguments: request,
+      );
     case ContinueWatchingDestination.episodeStream:
-      Navigator.pushNamed(context, AppRoutes.seriesWatch, arguments: request);
+      Navigator.pushNamed(
+        context,
+        AppRoutes.watchPathForRequest(request),
+        arguments: request,
+      );
     case ContinueWatchingDestination.seriesSelection:
-      Navigator.pushNamed(context, AppRoutes.seriesWatch, arguments: request);
+      Navigator.pushNamed(
+        context,
+        AppRoutes.watchPathForRequest(request),
+        arguments: request,
+      );
   }
 }
 

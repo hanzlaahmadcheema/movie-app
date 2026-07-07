@@ -15,10 +15,24 @@
         "lib/firebase_options.dart": {
           "projectId": "movie-app-cc2c1",
           "configurations": {
-            "android": "1:888171081165:android:e50d17b3cd43918c79e884"
+            "web": "1:888171081165:web:8df426803667c6cb79e884"
           }
         }
       }
     }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

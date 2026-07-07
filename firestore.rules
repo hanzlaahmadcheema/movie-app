@@ -80,6 +80,7 @@ service cloud.firestore {
         'phoneNumber',
         'displayName',
         'photoUrl',
+        'emailVerified',
         'providers',
         'role',
         'status',
@@ -92,6 +93,7 @@ service cloud.firestore {
         optionalString(data, 'phoneNumber', 32) &&
         optionalString(data, 'displayName', 120) &&
         optionalString(data, 'photoUrl', 600) &&
+        optionalBool(data, 'emailVerified') &&
         (!('providers' in data) || data.providers is list) &&
         (!('role' in data) || data.role == 'user') &&
         (!('status' in data) || data.status == 'active') &&
@@ -114,6 +116,7 @@ service cloud.firestore {
         'phoneNumber',
         'displayName',
         'photoUrl',
+        'emailVerified',
         'providers',
         'role',
         'status',
@@ -126,6 +129,7 @@ service cloud.firestore {
         optionalString(data, 'phoneNumber', 32) &&
         optionalString(data, 'displayName', 120) &&
         optionalString(data, 'photoUrl', 600) &&
+        optionalBool(data, 'emailVerified') &&
         (!('providers' in data) || data.providers is list) &&
         data.role in ['user', 'admin', 'super_admin'] &&
         data.status in ['active', 'blocked'] &&

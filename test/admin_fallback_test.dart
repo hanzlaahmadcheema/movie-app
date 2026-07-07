@@ -12,10 +12,8 @@ import 'package:movie_app/widgets/state_views.dart';
 void main() {
   test('missing appConfig uses defaults', () async {
     final repository = AdminRepository.test(
-      appConfigLoader: () async => throw FirebaseException(
-        plugin: 'cloud_firestore',
-        code: 'not-found',
-      ),
+      appConfigLoader: () async =>
+          throw FirebaseException(plugin: 'cloud_firestore', code: 'not-found'),
     );
 
     final config = await repository.loadPublicAppConfig();
@@ -35,40 +33,43 @@ void main() {
     expect(providers.map((provider) => provider.providerId), [
       'jellyfin_native',
       'jellyfin_web',
+      'videasy',
+      'streamvault',
+      '111movies',
       'vidsrc',
       '2embed',
     ]);
   });
 
-  test('admin dashboard partial query failure does not fail stats loading', () async {
-    final stats = await AdminRepository.test(
-      usersSnapshotLoader: () async =>
-          throw FirebaseException(
-            plugin: 'cloud_firestore',
-            code: 'permission-denied',
-          ),
-      logsSnapshotLoader: () async =>
-          throw FirebaseException(
-            plugin: 'cloud_firestore',
-            code: 'unavailable',
-          ),
-      requestsSnapshotLoader: () async =>
-          throw FirebaseException(
-            plugin: 'cloud_firestore',
-            code: 'failed-precondition',
-          ),
-      providersLoader: () async => _FakeQuerySnapshot(const []),
-      appConfigLoader: () async => throw FirebaseException(
-        plugin: 'cloud_firestore',
-        code: 'not-found',
-      ),
-    ).loadDashboardStats();
+  test(
+    'admin dashboard partial query failure does not fail stats loading',
+    () async {
+      final stats = await AdminRepository.test(
+        usersSnapshotLoader: () async => throw FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'permission-denied',
+        ),
+        logsSnapshotLoader: () async => throw FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'unavailable',
+        ),
+        requestsSnapshotLoader: () async => throw FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'failed-precondition',
+        ),
+        providersLoader: () async => _FakeQuerySnapshot(const []),
+        appConfigLoader: () async => throw FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'not-found',
+        ),
+      ).loadDashboardStats();
 
-    expect(stats.totalUsers, 'Unavailable');
-    expect(stats.playbackErrors, 'Unavailable');
-    expect(stats.providerStatuses, '4');
-    expect(stats.jellyfinStatus, 'Enabled');
-  });
+      expect(stats.totalUsers, 'Unavailable');
+      expect(stats.playbackErrors, 'Unavailable');
+      expect(stats.providerStatuses, '7');
+      expect(stats.jellyfinStatus, 'Enabled');
+    },
+  );
 
   testWidgets('empty banners, featured, and notices do not break Home', (
     tester,
@@ -140,7 +141,12 @@ void main() {
 
     expect(rules, contains('match /appConfig/main {'));
     expect(rules, contains('allow read: if true;'));
-    expect(rules, contains('allow write: if isAdmin() && validAppConfigWrite(request.resource.data);'));
+    expect(
+      rules,
+      contains(
+        'allow write: if isAdmin() && validAppConfigWrite(request.resource.data);',
+      ),
+    );
     expect(rules, contains('match /providers/{providerId} {'));
     expect(rules, contains('allow read: if true;'));
   });
@@ -149,22 +155,45 @@ void main() {
     final rules = _rulesText();
 
     expect(rules, contains('match /banners/{bannerId} {'));
-    expect(rules, contains('allow write: if isAdmin() && validBannerWrite(request.resource.data);'));
+    expect(
+      rules,
+      contains(
+        'allow write: if isAdmin() && validBannerWrite(request.resource.data);',
+      ),
+    );
     expect(rules, contains('match /featuredContent/{itemId} {'));
-    expect(rules, contains('allow write: if isAdmin() && validFeaturedWrite(request.resource.data);'));
+    expect(
+      rules,
+      contains(
+        'allow write: if isAdmin() && validFeaturedWrite(request.resource.data);',
+      ),
+    );
     expect(rules, contains('match /notices/{noticeId} {'));
-    expect(rules, contains('allow write: if isAdmin() && validNoticeWrite(request.resource.data);'));
+    expect(
+      rules,
+      contains(
+        'allow write: if isAdmin() && validNoticeWrite(request.resource.data);',
+      ),
+    );
   });
 
-  test('firestore rules allow admin reads for users, playback logs, and content requests', () {
-    final rules = _rulesText();
+  test(
+    'firestore rules allow admin reads for users, playback logs, and content requests',
+    () {
+      final rules = _rulesText();
 
-    expect(rules, contains('allow read: if isOwner(uid) || isAdmin();'));
-    expect(rules, contains('match /playbackLogs/{logId} {'));
-    expect(rules, contains('allow read, update, delete: if isAdmin();'));
-    expect(rules, contains('match /contentRequests/{requestId} {'));
-    expect(rules, contains('allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);'));
-  });
+      expect(rules, contains('allow read: if isOwner(uid) || isAdmin();'));
+      expect(rules, contains('match /playbackLogs/{logId} {'));
+      expect(rules, contains('allow read, update, delete: if isAdmin();'));
+      expect(rules, contains('match /contentRequests/{requestId} {'));
+      expect(
+        rules,
+        contains(
+          'allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);',
+        ),
+      );
+    },
+  );
 }
 
 String _rulesText() {
