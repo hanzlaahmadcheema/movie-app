@@ -16,8 +16,7 @@ import '../../../widgets/state_views.dart';
 import '../../../widgets/network_art.dart';
 import '../../../core/auth/user_role_service.dart';
 import '../../../core/auth/current_user_role.dart';
-import '../../../core/auth/user_role_service.dart';
-import '../../../core/auth/current_user_role.dart';
+
 
 class TvHomeScreen extends StatefulWidget {
   const TvHomeScreen({super.key});
@@ -323,6 +322,7 @@ class _TvProfileMenuButtonState extends State<_TvProfileMenuButton> {
 }
 
 class TvProfileMenu extends StatelessWidget {
+  const TvProfileMenu({super.key});
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -412,7 +412,7 @@ class _TvMenuButtonState extends State<_TvMenuButton> {
 
 class TvHeroBanner extends StatefulWidget {
   final List<MovieItem> items;
-  const TvHeroBanner({required this.items});
+  const TvHeroBanner({super.key, required this.items});
 
   @override
   State<TvHeroBanner> createState() => _TvHeroBannerState();
