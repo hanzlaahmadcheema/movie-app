@@ -33,9 +33,11 @@ void main() {
     expect(providers.map((provider) => provider.providerId), [
       'jellyfin_native',
       'jellyfin_web',
+      'hindi_player',
       'videasy',
       'streamvault',
       '111movies',
+      'vidking',
       'vidsrc',
       '2embed',
     ]);
@@ -66,7 +68,7 @@ void main() {
 
       expect(stats.totalUsers, 'Unavailable');
       expect(stats.playbackErrors, 'Unavailable');
-      expect(stats.providerStatuses, '7');
+      expect(stats.providerStatuses, '9');
       expect(stats.jellyfinStatus, 'Enabled');
     },
   );
