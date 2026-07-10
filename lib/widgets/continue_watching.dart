@@ -253,6 +253,7 @@ class ContinueWatchingTile extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ],
                 ),
               ),
               const SizedBox(width: 8),

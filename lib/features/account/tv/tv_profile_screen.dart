@@ -5,6 +5,7 @@ import '../../../app/app_routes.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/auth/current_user_role.dart';
+import '../../../core/auth/user_role_service.dart';
 import '../../../widgets/state_views.dart';
 
 class TvProfileScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _TvProfileScreenState extends State<TvProfileScreen> {
           }
 
           return StreamBuilder<CurrentUserRole>(
-            stream: CurrentUserRole.streamForUser(user),
+            stream: UserRoleService.instance.watchRole(user),
             builder: (context, roleSnapshot) {
               final role = roleSnapshot.data;
               final isAdmin = role?.isAdmin ?? false;
@@ -171,9 +172,9 @@ class _TvMenuButtonState extends State<_TvMenuButton> {
                 ? Colors.white
                 : (widget.isPrimary
                     ? AppColors.primary
-                    : (widget.isDestructive ? Colors.red.withOpacity(0.2) : Colors.white12)),
+                    : (widget.isDestructive ? Colors.red.withValues(alpha: 0.2) : Colors.white12)),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: Row(
             children: [

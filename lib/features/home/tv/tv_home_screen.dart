@@ -127,14 +127,7 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
     return items;
   }
 
-  void _scrollToCenter(BuildContext context) {
-    Scrollable.ensureVisible(
-      context,
-      alignment: 0.5,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +143,7 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
               }
               if (snapshot.hasError || snapshot.data == null) {
                 return AppErrorView(
-                  title: 'Couldn\\'t load content.',
+                  title: "Couldn't load content.",
                   message: 'Please try again later.',
                   onRetry: () => setState(() {
                     homeData = _loadHomeData();
@@ -356,9 +349,9 @@ class TvProfileMenu extends StatelessWidget {
               _TvMenuButton(title: 'Jellyfin Settings', onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminJellyfin)),
               _TvMenuButton(title: 'Settings', onTap: () => Navigator.pop(context)),
               StreamBuilder<CurrentUserRole>(
-                stream: UserRoleService.instance.roleStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.isAdmin) {
+              stream: UserRoleService.instance.watchCurrentUserRole(),
+              builder: (context, roleSnapshot) {
+                  if (roleSnapshot.hasData && roleSnapshot.data!.isAdmin) {
                     return _TvMenuButton(
                       title: 'Admin Panel',
                       onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.admin),
@@ -521,7 +514,7 @@ class _TvHeroBannerState extends State<TvHeroBanner> {
                       SizedBox(
                         width: 600,
                         child: Text(
-                          item.overview,
+                          item.description,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 18, color: Colors.white70),

@@ -5,7 +5,7 @@ import '../../../core/config/app_config.dart';
 import '../../../core/models/movie_item.dart';
 import '../../../core/models/tmdb_page.dart';
 import '../../../core/services/tmdb_repository.dart';
-import '../../../widgets/firebase_posters.dart';
+import '../../../widgets/network_art.dart';
 import '../../../widgets/filter_widgets.dart';
 import '../../../widgets/state_views.dart';
 import '../catalog_screens.dart';
@@ -45,14 +45,26 @@ class _TvCatalogScreenState extends State<TvCatalogScreen> {
     _selection = sel;
     _currentPage = 1;
     _items.clear();
-    return _repository.discover(
-      page: _currentPage,
-      selection: sel,
-      mediaType: widget.kind == CatalogKind.movies ? MediaType.movie : MediaType.tv,
+    final genreIdInt = sel?.genreId != null ? int.tryParse(sel!.genreId!) : null;
+    return (widget.kind == CatalogKind.movies
+            ? _repository.discoverMovieBrowsePage(
+                page: _currentPage,
+                genreId: genreIdInt,
+                country: sel?.countryCode,
+                year: sel?.releaseYear,
+                ratingGte: sel?.ratingGte,
+              )
+            : _repository.discoverSeriesBrowsePage(
+                page: _currentPage,
+                genreId: genreIdInt,
+                country: sel?.countryCode,
+                year: sel?.releaseYear,
+                ratingGte: sel?.ratingGte,
+              ))
     ).then((page) {
       if (mounted) {
         setState(() {
-          _items.addAll(page.results);
+          _items.addAll(page.items);
           _totalPages = page.totalPages;
         });
       }
@@ -66,14 +78,25 @@ class _TvCatalogScreenState extends State<TvCatalogScreen> {
 
     _currentPage++;
     try {
-      final page = await _repository.discover(
-        page: _currentPage,
-        selection: _selection,
-        mediaType: widget.kind == CatalogKind.movies ? MediaType.movie : MediaType.tv,
-      );
+      final genreIdInt = _selection?.genreId != null ? int.tryParse(_selection!.genreId!) : null;
+      final page = widget.kind == CatalogKind.movies
+          ? await _repository.discoverMovieBrowsePage(
+              page: _currentPage,
+              genreId: genreIdInt,
+              country: _selection?.countryCode,
+              year: _selection?.releaseYear,
+              ratingGte: _selection?.ratingGte,
+            )
+          : await _repository.discoverSeriesBrowsePage(
+              page: _currentPage,
+              genreId: genreIdInt,
+              country: _selection?.countryCode,
+              year: _selection?.releaseYear,
+              ratingGte: _selection?.ratingGte,
+            );
       if (mounted) {
         setState(() {
-          _items.addAll(page.results);
+          _items.addAll(page.items);
           _totalPages = page.totalPages;
           _isLoadingMore = false;
         });
@@ -210,11 +233,11 @@ class _TvGridPosterState extends State<_TvGridPoster> {
                 color: _isFocused ? Colors.white : Colors.transparent,
                 width: 4,
               ),
-              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: FirebasePoster(item: widget.item, heroTag: 'tv_catalog_${widget.item.id}'),
+              child: Hero(tag: 'tv_catalog_${widget.item.id}', child: NetworkArt(url: widget.item.posterUrl)),
             ),
           ),
         ),

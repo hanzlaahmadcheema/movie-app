@@ -156,7 +156,7 @@ class _TvSeriesDetailsScreenState extends State<TvSeriesDetailsScreen> {
                 SizedBox(
                   width: 800,
                   child: Text(
-                    item.overview,
+                    item.description,
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 20, color: Colors.white70, height: 1.4),
@@ -291,7 +291,7 @@ class _TvButtonState extends State<_TvButton> {
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: Row(
             children: [
@@ -395,7 +395,7 @@ class _TvEpisodeCardState extends State<_TvEpisodeCard> {
           decoration: BoxDecoration(
             color: Colors.black45,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.6), blurRadius: 15, spreadRadius: 3)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 15, spreadRadius: 3)] : [],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

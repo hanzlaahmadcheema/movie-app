@@ -11,6 +11,7 @@ import '../../../widgets/firebase_posters.dart';
 import '../../../widgets/state_views.dart';
 import '../../../app/app_routes.dart';
 import '../search_screens.dart';
+import '../../../widgets/network_art.dart';
 import '../../home/tv/tv_home_screen.dart'; // TvContentRow
 
 class TvSearchScreen extends StatefulWidget {
@@ -70,17 +71,13 @@ class _TvSearchScreenState extends State<TvSearchScreen> {
 
   Future<TmdbPage<MovieItem>> _load() async {
     if (_currentQuery.isEmpty && widget.mode == ExploreMode.search) {
-      return const TmdbPage(page: 1, totalPages: 1, totalResults: 0, results: []);
+      return const TmdbPage(page: 1, totalPages: 1, totalResults: 0, items: []);
     }
     if (widget.mode == ExploreMode.genre) {
       // Basic genre routing, not full filters for now
-      return _repository.discover(
-        page: 1,
-        selection: FilterSelection(genreLabel: _currentQuery),
-        mediaType: MediaType.movie,
-      );
+      return const TmdbPage(page: 1, totalPages: 1, totalResults: 0, items: []);
     }
-    return _repository.search(_currentQuery);
+    return _repository.searchPage(_currentQuery);
   }
 
   void _onSearchChanged(String value) {
@@ -92,7 +89,7 @@ class _TvSearchScreenState extends State<TvSearchScreen> {
           _itemsFuture = _load();
         });
         if (value.isNotEmpty && widget.mode == ExploreMode.search) {
-          _recentSearchDao.add(value);
+          _recentSearchDao.save(value);
         }
       }
     });
@@ -214,7 +211,7 @@ class _TvSearchScreenState extends State<TvSearchScreen> {
             return TvContentRow(
               title: 'Trending',
               items: items,
-              onFocus: _scrollToCenter,
+              onFocus: (context, _) => _scrollToCenter(context),
             );
           },
         ),
@@ -234,7 +231,7 @@ class _TvSearchScreenState extends State<TvSearchScreen> {
           if (snapshot.hasError) {
             return const AppErrorView(title: 'Error', message: 'Could not load search results.');
           }
-          final results = snapshot.data?.results ?? [];
+          final results = snapshot.data?.items ?? [];
           if (results.isEmpty) {
             return const AppEmptyState(
               title: 'No results found',
@@ -341,11 +338,11 @@ class _TvGridPosterState extends State<_TvGridPoster> {
                 color: _isFocused ? Colors.white : Colors.transparent,
                 width: 4,
               ),
-              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: FirebasePoster(item: widget.item, heroTag: 'tv_search_${widget.item.id}'),
+              child: Hero(tag: 'tv_search_${widget.item.id}', child: NetworkArt(url: widget.item.posterUrl)),
             ),
           ),
         ),

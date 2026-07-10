@@ -6,8 +6,7 @@ import '../../../core/services/auth_service.dart';
 import '../../../core/services/user_activity_repository.dart';
 import '../../../core/models/movie_item.dart';
 import '../../../widgets/state_views.dart';
-import '../../../widgets/firebase_posters.dart';
-import '../../catalog/tv/tv_catalog_screen.dart'; // we can reuse _TvGridPoster if we want, wait no it's private.
+import '../../../widgets/network_art.dart'; // we can reuse _TvGridPoster if we want, wait no it's private.
 
 class TvWatchlistScreen extends StatelessWidget {
   const TvWatchlistScreen({super.key});
@@ -170,11 +169,11 @@ class _TvActivityPosterState extends State<_TvActivityPoster> {
                 color: _isFocused ? Colors.white : Colors.transparent,
                 width: 4,
               ),
-              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: FirebasePoster(item: widget.item, heroTag: 'tv_activity_${widget.item.id}'),
+              child: Hero(tag: 'tv_activity_${widget.item.id}', child: NetworkArt(url: widget.item.posterUrl)),
             ),
           ),
         ),

@@ -787,3 +787,28 @@ class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
     );
   }
 }
+
+class _ServerChip extends StatelessWidget {
+  const _ServerChip({
+    required this.name,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String name;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(name),
+      onPressed: onTap,
+      backgroundColor: isSelected ? AppColors.primary : Colors.black45,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.black : Colors.white,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+}

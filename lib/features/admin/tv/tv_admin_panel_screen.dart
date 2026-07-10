@@ -45,8 +45,8 @@ class _TvAdminPanelScreenState extends State<TvAdminPanelScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _TvStatCard(label: 'Users', value: '${stats.totalUsers}', icon: Icons.people),
-                      _TvStatCard(label: 'Playback Logs', value: '${stats.totalPlaybackLogs}', icon: Icons.play_circle),
-                      _TvStatCard(label: 'Content Requests', value: '${stats.pendingRequests}', icon: Icons.request_page),
+                      _TvStatCard(label: 'Continue Watching', value: '${stats.continueWatchingRecords}', icon: Icons.play_circle),
+                      _TvStatCard(label: 'Playback Errors', value: '${stats.playbackErrors}', icon: Icons.error),
                     ],
                   ),
                 const SizedBox(height: 48),
@@ -135,7 +135,7 @@ class _TvAdminButtonState extends State<_TvAdminButton> {
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white : Colors.white12,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: Row(
             children: [

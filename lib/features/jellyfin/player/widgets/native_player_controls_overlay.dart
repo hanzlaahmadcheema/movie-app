@@ -354,34 +354,3 @@ class _PrimaryControlButton extends StatelessWidget {
   }
 }
 
-class _PrimaryControlButton extends StatelessWidget {
-  const _PrimaryControlButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton.filled(
-          onPressed: onPressed,
-          icon: Icon(icon, size: 28),
-          style: IconButton.styleFrom(
-            fixedSize: const Size(56, 56),
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.small.copyWith(fontSize: 11)),
-      ],
-    );
-  }
-}

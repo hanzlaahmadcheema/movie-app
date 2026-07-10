@@ -517,7 +517,7 @@ class _WatchPageState extends State<_WatchPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  item.overview,
+                  item.description,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 18, color: Colors.white70),
@@ -530,7 +530,7 @@ class _WatchPageState extends State<_WatchPage> {
             TvContentRow(
               title: 'Recommendations',
               items: related,
-              onFocus: (context) {
+              onFocus: (context, _) {
                 Scrollable.ensureVisible(
                   context,
                   alignment: 0.5,
