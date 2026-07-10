@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_routes.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/navigation/content_navigation.dart';
+import '../../../core/models/movie_item.dart';
+import '../../../core/services/tmdb_repository.dart';
 import '../../../core/services/admin_repository.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../widgets/app_shell.dart';
