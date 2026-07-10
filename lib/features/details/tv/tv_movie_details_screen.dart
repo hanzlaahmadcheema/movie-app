@@ -8,6 +8,7 @@ import '../../../core/services/tmdb_repository.dart';
 import '../../../core/trailer/trailer_picker.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/network_art.dart';
+import '../../../core/services/local_image_cache_service.dart';
 import '../../home/tv/tv_home_screen.dart'; // for TvContentRow if reusable, or we redefine TvCastRow
 
 class TvMovieDetailsScreen extends StatefulWidget {
@@ -36,9 +37,13 @@ class _TvMovieDetailsScreenState extends State<TvMovieDetailsScreen> {
   }
 
   Future<TmdbDetail?> _loadDetail() async {
-    final item = widget.item;
-    if (item == null || item.id == 0) return null;
-    return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
+    final detail = await TmdbRepository(config: AppConfig.fromEnv()).detail(item);
+    for (final relatedItem in detail.related.take(10)) {
+      if (relatedItem.posterUrl.isNotEmpty) {
+        LocalImageCacheService.instance.cachedFileFor(remoteUrl: relatedItem.posterUrl, imageType: LocalImageCacheService.imageTypePoster);
+      }
+    }
+    return detail;
   }
 
   void _scrollToCenter(BuildContext context, [MovieItem? item]) {

@@ -14,6 +14,7 @@ import '../../../widgets/app_shell.dart';
 import '../../../widgets/continue_watching.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/network_art.dart';
+import '../../../core/services/local_image_cache_service.dart';
 import '../../../core/auth/user_role_service.dart';
 import '../../../core/auth/current_user_role.dart';
 
@@ -93,7 +94,7 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
           .toList(),
     );
 
-    return TvHomeContentData(
+    final tvHomeData = TvHomeContentData(
       heroItems: heroItems.isNotEmpty ? heroItems : trendingMovies.take(5).toList(),
       featuredItems: featuredItems,
       trendingMovies: trendingMovies,
@@ -103,6 +104,15 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
       upcomingMovies: upcomingMovies,
       nowPlaying: nowPlaying,
     );
+
+    // Preload hero images intelligently
+    for (final item in tvHomeData.heroItems) {
+      if (item.backdropUrl.isNotEmpty) {
+        LocalImageCacheService.instance.cachedFileFor(remoteUrl: item.backdropUrl, imageType: LocalImageCacheService.imageTypeBackdrop);
+      }
+    }
+
+    return tvHomeData;
   }
 
   Future<List<MovieItem>> _resolveAdminItems({
@@ -175,6 +185,7 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
                   ),
                   ListView(
                     controller: _verticalScrollController,
+                    cacheExtent: 1500, // Preload previous and next rows
                     padding: const EdgeInsets.only(bottom: 60),
                     children: [
                       TvHeroBanner(items: data.heroItems),
@@ -635,6 +646,7 @@ class TvContentRow extends StatelessWidget {
           height: 300,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            cacheExtent: 1500, // Preload next 10 items
             padding: const EdgeInsets.symmetric(horizontal: 52),
             itemCount: items.length,
             itemBuilder: (context, index) {

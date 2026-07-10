@@ -10,7 +10,8 @@ import '../../../core/services/tmdb_repository.dart';
 import '../../../core/trailer/trailer_picker.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/network_art.dart';
-import '../../home/tv/tv_home_screen.dart'; // For TvContentRow
+import '../../../core/services/local_image_cache_service.dart';
+import '../../home/tv/tv_home_screen.dart'; // for TvContentRow
 
 class TvSeriesDetailsScreen extends StatefulWidget {
   const TvSeriesDetailsScreen({this.item, super.key});
@@ -42,8 +43,15 @@ class _TvSeriesDetailsScreenState extends State<TvSeriesDetailsScreen> {
     final item = widget.item;
     if (item == null || item.id == 0) return null;
     final detail = await TmdbRepository(config: AppConfig.fromEnv()).detail(item);
-    if (detail.seasons.isNotEmpty && mounted) {
-      setState(() => _selectedSeason = detail.seasons.first);
+    if (detail != null) {
+      for (final relatedItem in detail.related.take(10)) {
+        if (relatedItem.posterUrl.isNotEmpty) {
+          LocalImageCacheService.instance.cachedFileFor(remoteUrl: relatedItem.posterUrl, imageType: LocalImageCacheService.imageTypePoster);
+        }
+      }
+      if (detail.seasons.isNotEmpty && mounted) {
+        setState(() => _selectedSeason = detail.seasons.first);
+      }
     }
     return detail;
   }

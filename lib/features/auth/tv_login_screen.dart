@@ -146,23 +146,27 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
       },
       child: GestureDetector(
         onTap: _submitting ? null : onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: isFocused ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 200),
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-            color: isFocused
-                ? Colors.white
-                : (isPrimary ? AppColors.primary : Colors.black45),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isFocused ? Colors.white : Colors.white24,
-              width: 2,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(
+              color: isFocused
+                  ? Colors.white
+                  : (isPrimary ? AppColors.primary : Colors.black45),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isFocused ? Colors.white : Colors.white24,
+                width: 2,
+              ),
+              boxShadow: isFocused
+                  ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 16)]
+                  : [],
             ),
-            boxShadow: isFocused
-                ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 16)]
-                : [],
-          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -187,7 +191,8 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   @override
