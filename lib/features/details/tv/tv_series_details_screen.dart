@@ -284,27 +284,32 @@ class _TvButtonState extends State<_TvButton> {
       onFocusChange: (focused) => setState(() => _isFocused = focused),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
-          ),
-          child: Row(
-            children: [
-              Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
-              const SizedBox(width: 12),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  color: _isFocused ? Colors.black : Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: Row(
+              children: [
+                Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: _isFocused ? Colors.black : Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -336,22 +341,28 @@ class _TvSeasonTabState extends State<_TvSeasonTab> {
       },
       child: GestureDetector(
         onTap: widget.onSelect,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : (widget.isSelected ? Colors.white24 : Colors.transparent),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: _isFocused ? Colors.white : (widget.isSelected ? Colors.white54 : Colors.transparent)),
-          ),
-          child: Center(
-            child: Text(
-              widget.season.name,
-              style: TextStyle(
-                color: _isFocused ? Colors.black : Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : (widget.isSelected ? Colors.white24 : Colors.transparent),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: _isFocused ? Colors.white : (widget.isSelected ? Colors.white54 : Colors.transparent)),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: Center(
+              child: Text(
+                widget.season.name,
+                style: TextStyle(
+                  color: _isFocused ? Colors.black : Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -387,68 +398,74 @@ class _TvEpisodeCardState extends State<_TvEpisodeCard> {
         onTap: () {
           Navigator.pushNamed(context, AppRoutes.watchPathForItem(widget.item), arguments: widget.item);
         },
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          width: _isFocused ? 320 : 300,
-          decoration: BoxDecoration(
-            color: Colors.black45,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 15, spreadRadius: 3)] : [],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      NetworkArt(
-                        url: widget.episode.thumbnail,
-                        fit: BoxFit.cover,
-                      ),
-                      const Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: Icon(Icons.play_circle_fill, color: Colors.white, size: 36),
-                      ),
-                    ],
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            width: 300,
+            decoration: BoxDecoration(
+              color: Colors.black45,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _isFocused ? Colors.white : Colors.transparent, width: 2),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 15, spreadRadius: 3)] : [],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        NetworkArt(
+                          url: widget.episode.thumbnail,
+                          fit: BoxFit.cover,
+                        ),
+                        const Positioned(
+                          bottom: 8,
+                          right: 8,
+                          child: Icon(Icons.play_circle_fill, color: Colors.white, size: 36),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${widget.episode.number}. ${widget.episode.title}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.episode.duration,
-                        style: const TextStyle(color: Colors.white54, fontSize: 14),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.episode.overview,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                    ],
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${widget.episode.number}. ${widget.episode.title}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.episode.duration,
+                          style: const TextStyle(color: Colors.white54, fontSize: 14),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.episode.overview,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

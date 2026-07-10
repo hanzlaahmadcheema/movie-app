@@ -495,14 +495,17 @@ class _WatchPageState extends State<_WatchPage> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 60),
         children: [
-          SizedBox(
-            height: 600,
-            width: double.infinity,
-            child: EmbeddedWatchPlayerPanel(
-              request: activeRequest,
-              selectionPrompt: widget.isSeries
-                  ? 'Select an episode to start playback.'
-                  : 'Preparing player...',
+          Hero(
+            tag: 'tv_poster_${item.id}',
+            child: SizedBox(
+              height: 600,
+              width: double.infinity,
+              child: EmbeddedWatchPlayerPanel(
+                request: activeRequest,
+                selectionPrompt: widget.isSeries
+                    ? 'Select an episode to start playback.'
+                    : 'Preparing player...',
+              ),
             ),
           ),
           const SizedBox(height: 40),
