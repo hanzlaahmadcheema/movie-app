@@ -43,15 +43,13 @@ class _TvSeriesDetailsScreenState extends State<TvSeriesDetailsScreen> {
     final item = widget.item;
     if (item == null || item.id == 0) return null;
     final detail = await TmdbRepository(config: AppConfig.fromEnv()).detail(item);
-    if (detail != null) {
-      for (final relatedItem in detail.related.take(10)) {
-        if (relatedItem.posterUrl.isNotEmpty) {
-          LocalImageCacheService.instance.cachedFileFor(remoteUrl: relatedItem.posterUrl, imageType: LocalImageCacheService.imageTypePoster);
-        }
+    for (final relatedItem in detail.related.take(10)) {
+      if (relatedItem.posterUrl.isNotEmpty) {
+        LocalImageCacheService.instance.cachedFileFor(remoteUrl: relatedItem.posterUrl, imageType: LocalImageCacheService.imageTypePoster);
       }
-      if (detail.seasons.isNotEmpty && mounted) {
-        setState(() => _selectedSeason = detail.seasons.first);
-      }
+    }
+    if (detail.seasons.isNotEmpty && mounted) {
+      setState(() => _selectedSeason = detail.seasons.first);
     }
     return detail;
   }

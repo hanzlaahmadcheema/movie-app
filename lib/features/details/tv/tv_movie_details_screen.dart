@@ -37,6 +37,8 @@ class _TvMovieDetailsScreenState extends State<TvMovieDetailsScreen> {
   }
 
   Future<TmdbDetail?> _loadDetail() async {
+    final item = widget.item;
+    if (item == null || item.id == 0) return null;
     final detail = await TmdbRepository(config: AppConfig.fromEnv()).detail(item);
     for (final relatedItem in detail.related.take(10)) {
       if (relatedItem.posterUrl.isNotEmpty) {
