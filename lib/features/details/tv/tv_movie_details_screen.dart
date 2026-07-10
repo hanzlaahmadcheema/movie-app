@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_routes.dart';
@@ -83,7 +82,6 @@ class _TvMovieDetailsScreenState extends State<TvMovieDetailsScreen> {
           }
 
           final detail = snapshot.data!;
-          final item = detail.item;
 
           return ListView(
             controller: _scrollController,
@@ -305,7 +303,7 @@ class _TvCastCardState extends State<_TvCastCard> {
         decoration: BoxDecoration(
           color: Colors.black45,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.6), blurRadius: 10, spreadRadius: 2)] : [],
+          boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 10, spreadRadius: 2)] : [],
         ),
         child: Column(
           children: [

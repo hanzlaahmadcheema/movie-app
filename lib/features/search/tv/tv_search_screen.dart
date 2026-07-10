@@ -7,7 +7,6 @@ import '../../../core/local_db/recent_search_dao.dart';
 import '../../../core/models/movie_item.dart';
 import '../../../core/models/tmdb_page.dart';
 import '../../../core/services/tmdb_repository.dart';
-import '../../../widgets/firebase_posters.dart';
 import '../../../widgets/state_views.dart';
 import '../../../app/app_routes.dart';
 import '../search_screens.dart';

@@ -4,23 +4,15 @@ import 'package:flutter/material.dart';
 import '../../../app/app_routes.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/config/app_config.dart';
-import '../../../core/models/movie_item.dart';
 import '../../../core/navigation/content_navigation.dart';
-import '../../../core/responsive/adaptive_container.dart';
 import '../../../core/services/admin_repository.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/tmdb_repository.dart';
-import '../../../core/services/user_activity_repository.dart';
-import '../../../widgets/app_chrome.dart';
 import '../../../widgets/app_shell.dart';
-import '../../../widgets/buttons.dart';
 import '../../../widgets/continue_watching.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/network_art.dart';
-import '../../movies/widgets/movie_card.dart';
 import '../../../core/auth/user_role_service.dart';
 import '../../../core/auth/current_user_role.dart';
-import 'dart:ui';
 import '../../../core/auth/user_role_service.dart';
 import '../../../core/auth/current_user_role.dart';
 
@@ -280,7 +272,7 @@ class _TvIconButtonState extends State<_TvIconButton> {
             decoration: BoxDecoration(
               color: _isFocused ? Colors.white : Colors.black45,
               shape: BoxShape.circle,
-              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
             ),
             child: Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
           ),
@@ -313,7 +305,7 @@ class _TvProfileMenuButtonState extends State<_TvProfileMenuButton> {
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white : Colors.black45,
             shape: BoxShape.circle,
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: const CircleAvatar(
             radius: 20,
@@ -362,7 +354,9 @@ class TvProfileMenu extends StatelessWidget {
               ),
               _TvMenuButton(title: 'Logout', onTap: () async {
                 await AuthService.instance.signOut();
-                Navigator.pushReplacementNamed(context, AppRoutes.login);
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                }
               }),
             ],
           ),
@@ -569,7 +563,7 @@ class _TvActionButtonState extends State<_TvActionButton> {
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: Row(
             children: [
@@ -697,7 +691,7 @@ class _TvMoviePosterState extends State<TvMoviePoster> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: _isFocused ? Colors.white : Colors.transparent, width: 4),
-                boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.6), blurRadius: 15, spreadRadius: 3)] : [],
+                boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 15, spreadRadius: 3)] : [],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),

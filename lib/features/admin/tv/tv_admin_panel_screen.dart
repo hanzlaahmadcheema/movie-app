@@ -44,9 +44,9 @@ class _TvAdminPanelScreenState extends State<TvAdminPanelScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _TvStatCard(label: 'Users', value: '${stats.totalUsers}', icon: Icons.people),
-                      _TvStatCard(label: 'Continue Watching', value: '${stats.continueWatchingRecords}', icon: Icons.play_circle),
-                      _TvStatCard(label: 'Playback Errors', value: '${stats.playbackErrors}', icon: Icons.error),
+                      _TvStatCard(label: 'Users', value: stats.totalUsers.toString(), icon: Icons.people),
+                      _TvStatCard(label: 'Continue Watching', value: stats.continueWatchingRecords.toString(), icon: Icons.play_circle),
+                      _TvStatCard(label: 'Playback Errors', value: stats.playbackErrors.toString(), icon: Icons.error),
                     ],
                   ),
                 const SizedBox(height: 48),

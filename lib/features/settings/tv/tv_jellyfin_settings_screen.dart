@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../app/app_theme.dart';
 import '../../../core/jellyfin/jellyfin_config.dart';
 import '../../../core/jellyfin/jellyfin_repository.dart';
 import '../../../core/services/admin_repository.dart';
-import '../../../widgets/state_views.dart';
 
 class TvJellyfinSettingsScreen extends StatefulWidget {
   const TvJellyfinSettingsScreen({super.key});
@@ -159,7 +157,7 @@ class _TvSettingsButtonState extends State<_TvSettingsButton> {
           decoration: BoxDecoration(
             color: _isFocused ? Colors.white : Colors.white12,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
           ),
           child: Row(
             children: [

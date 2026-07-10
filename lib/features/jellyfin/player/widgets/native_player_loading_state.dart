@@ -18,7 +18,7 @@ class NativePlayerLoadingState extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return ColoredBox(
-      color: Colors.black.withOpacity(0.85),
+      color: Colors.black.withValues(alpha: 0.85),
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -28,7 +28,7 @@ class NativePlayerLoadingState extends StatelessWidget {
             border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 20,
                 spreadRadius: 5,
               )

@@ -43,6 +43,7 @@ dependencies:
   cloud_firestore: ^6.4.1
   google_sign_in: ^7.2.0
   webview_flutter: ^4.13.1
+  sqflite_common_ffi: ^2.4.0+3
   webview_flutter_android: 4.10.13
   webview_flutter_wkwebview: 3.25.1
   flutter_secure_storage: ^9.2.4

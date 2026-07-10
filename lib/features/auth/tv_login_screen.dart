@@ -95,7 +95,7 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
             width: isFocused ? 3 : 1,
           ),
           boxShadow: isFocused
-              ? [BoxShadow(color: AppColors.primary.withOpacity(0.5), blurRadius: 16)]
+              ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.5), blurRadius: 16)]
               : [],
         ),
         child: Row(
@@ -160,7 +160,7 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
               width: 2,
             ),
             boxShadow: isFocused
-                ? [BoxShadow(color: Colors.white.withOpacity(0.5), blurRadius: 16)]
+                ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 16)]
                 : [],
           ),
           child: Row(
@@ -237,9 +237,9 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.2),
+                            color: Colors.red.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.red.withOpacity(0.5)),
+                            border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
                           ),
                           child: Row(
                             children: [
@@ -264,8 +264,8 @@ class _TvLoginScreenState extends State<TvLoginScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(80.0),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    border: Border(left: BorderSide(color: Colors.white.withOpacity(0.1))),
+                    color: Colors.black.withValues(alpha: 0.5),
+                    border: Border(left: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
                   ),
                   child: Center(
                     child: ConstrainedBox(
