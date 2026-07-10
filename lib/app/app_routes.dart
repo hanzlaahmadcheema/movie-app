@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../features/account/account_screens.dart';
 import '../features/admin/admin_screens.dart';
 import '../features/auth/auth_screens.dart';
+import '../features/auth/tv_login_screen.dart';
 import '../features/catalog/catalog_screens.dart';
 import '../features/details/detail_screens.dart';
 import '../features/home/home_screen.dart';
+import '../features/home/tv/tv_home_screen.dart';
 import '../features/legal/legal_screens.dart';
 import '../features/search/search_screens.dart';
 import '../features/jellyfin/player/jellyfin_native_player_screen.dart';
@@ -20,6 +22,14 @@ import '../core/auth/current_user_role.dart';
 import '../core/auth/user_role_service.dart';
 import '../core/navigation/watch_page_request.dart';
 import '../core/config/app_config.dart';
+import '../core/responsive/device_detector.dart';
+
+import '../features/account/tv/tv_profile_screen.dart';
+import '../features/account/tv/tv_activity_screens.dart';
+import '../features/settings/tv/tv_settings_screen.dart';
+import '../features/settings/tv/tv_jellyfin_settings_screen.dart';
+import '../features/admin/tv/tv_admin_panel_screen.dart';
+import '../features/notifications/tv_notifications_screen.dart';
 import '../core/services/admin_repository.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/tmdb_repository.dart';
@@ -64,6 +74,8 @@ class AppRoutes {
   static const contact = '/contact';
   static const terms = '/terms';
   static const privacy = '/privacy';
+  static const settings = '/settings';
+  static const notifications = '/notifications';
   static const jellyfinSettings = '/jellyfin-settings';
   static const jellyfinLogin = '/jellyfin-login';
   static const admin = '/admin';
@@ -143,6 +155,8 @@ class AppRoutes {
     contact,
     terms,
     privacy,
+    settings,
+    notifications,
     jellyfinSettings,
     jellyfinLogin,
     admin,
@@ -162,12 +176,12 @@ class AppRoutes {
   static Map<String, WidgetBuilder> get routes {
     return {
       splash: (_) => const SplashScreen(),
-      home: (_) => _appScreen(const HomeScreen()),
+      home: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvHomeScreen() : const HomeScreen()),
       movies: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.movies)),
       series: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.series)),
       tvSeries: (_) =>
           _appScreen(const CatalogScreen(kind: CatalogKind.series)),
-      login: (_) => const LoginScreen(),
+      login: (_) => DeviceDetector.instance.isTv ? const TvLoginScreen() : const LoginScreen(),
       register: (_) =>
           _featureGate(child: const RegisterScreen(), requiresSignup: true),
       resetPassword: (_) => const ResetPasswordScreen(),
@@ -176,15 +190,17 @@ class AppRoutes {
         child: const PhoneAuthScreen(),
         requiresPhoneLogin: true,
       ),
-      profile: (_) => _authenticated(const ProfileScreen()),
-      watchlist: (_) => _authenticated(const WatchlistScreen()),
+      profile: (_) => _authenticated(DeviceDetector.instance.isTv ? const TvProfileScreen() : const ProfileScreen()),
+      watchlist: (_) => _authenticated(DeviceDetector.instance.isTv ? const TvWatchlistScreen() : const WatchlistScreen()),
       watched: (_) => _authenticated(const WatchedScreen()),
       activity: (_) => _authenticated(const ActivityScreen()),
-      continueWatching: (_) => _authenticated(const ContinueWatchingScreen()),
+      continueWatching: (_) => _authenticated(DeviceDetector.instance.isTv ? const TvContinueWatchingScreen() : const ContinueWatchingScreen()),
       contact: (_) => _appScreen(const ContactScreen()),
       terms: (_) => _appScreen(const TermsScreen()),
       privacy: (_) => _appScreen(const PrivacyScreen()),
-      jellyfinSettings: (_) => _appScreen(const JellyfinSettingsScreen()),
+      settings: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvSettingsScreen() : const PrivacyScreen()), // No mobile settings screen, redirecting
+      notifications: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvNotificationsScreen() : const Scaffold(body: Center(child: Text('No notifications')))),
+      jellyfinSettings: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvJellyfinSettingsScreen() : const JellyfinSettingsScreen()),
       jellyfinLogin: (_) => const JellyfinLoginScreen(),
       supportRequest: (_) => _authenticated(const ContentRequestFormScreen()),
     };
@@ -280,7 +296,7 @@ class AppRoutes {
       jellyfinNativePlayer => _jellyfinNativeRoute(settings),
       jellyfinNativePlayerFullscreen => _jellyfinNativeRoute(settings),
       jellyfinWebPlayer => _jellyfinWebRoute(settings),
-      admin => _adminRoute(settings, const AdminDashboardScreen()),
+      admin => _adminRoute(settings, DeviceDetector.instance.isTv ? const TvAdminPanelScreen() : const AdminDashboardScreen()),
       adminFeatured => _adminRoute(settings, const AdminFeaturedScreen()),
       adminBanners => _adminRoute(settings, const AdminBannersScreen()),
       adminNotices => _adminRoute(settings, const AdminNoticesScreen()),

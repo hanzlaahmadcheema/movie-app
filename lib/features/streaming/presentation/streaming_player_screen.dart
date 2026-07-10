@@ -695,6 +695,7 @@ class _FigmaServerSelector extends StatefulWidget {
 
 class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
   bool _isExpanded = false;
+  bool _isFocused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -708,39 +709,48 @@ class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              if (widget.enabled && widget.candidates.isNotEmpty) {
-                setState(() => _isExpanded = !_isExpanded);
-              }
-            },
-            child: Opacity(
-              opacity: widget.enabled ? 1 : 0.6,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
+          Focus(
+            onFocusChange: (focused) => setState(() => _isFocused = focused),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                if (widget.enabled && widget.candidates.isNotEmpty) {
+                  setState(() => _isExpanded = !_isExpanded);
+                }
+              },
+              child: Opacity(
+                opacity: widget.enabled ? 1 : 0.6,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _isFocused ? Colors.white24 : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    active?.server.displayName ?? 'Servers',
-                    style: AppTextStyles.medium,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        active?.server.displayName ?? 'Servers',
+                        style: AppTextStyles.medium,
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                        size: 20,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 6),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 20,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -752,36 +762,13 @@ class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
                 runSpacing: 8,
                 children: [
                   for (var index = 0; index < widget.candidates.length; index++)
-                    GestureDetector(
+                    _ServerChip(
+                      name: widget.candidates[index].server.displayName,
+                      isSelected: index == widget.currentIndex,
                       onTap: () {
                         setState(() => _isExpanded = false);
                         widget.onSelected(index);
                       },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: index == widget.currentIndex
-                              ? AppColors.primary.withOpacity(0.2)
-                              : AppColors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: index == widget.currentIndex
-                                ? AppColors.primary
-                                : Colors.transparent,
-                          ),
-                        ),
-                        child: Text(
-                          widget.candidates[index].server.displayName,
-                          style: AppTextStyles.medium.copyWith(
-                            color: index == widget.currentIndex
-                                ? AppColors.primary
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
                     ),
                 ],
               ),

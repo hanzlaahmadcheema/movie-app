@@ -204,15 +204,55 @@ class ContinueWatchingTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      'Exact resume time is unavailable for embedded players.',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.small.copyWith(
-                        color: Colors.white.withValues(alpha: 0.58),
+                    const SizedBox(height: 6),
+                    if (activity.selectedServer == 'Jellyfin' && activity.durationSeconds != null && activity.durationSeconds! > 0) ...[
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final progress = (activity.positionSeconds / activity.durationSeconds!).clamp(0.0, 1.0);
+                          final remainingSeconds = activity.durationSeconds! - activity.positionSeconds;
+                          final remainingMinutes = (remainingSeconds / 60).round();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 4,
+                                width: constraints.maxWidth,
+                                decoration: BoxDecoration(
+                                  color: Colors.white24,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor: progress,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '$remainingMinutes min remaining',
+                                style: AppTextStyles.small.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                    ),
-                  ],
+                    ] else ...[
+                      Text(
+                        'Exact resume time is unavailable for embedded players.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.small.copyWith(
+                          color: Colors.white.withValues(alpha: 0.58),
+                        ),
+                      ),
+                    ],
                 ),
               ),
               const SizedBox(width: 8),

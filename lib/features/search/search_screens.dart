@@ -16,9 +16,12 @@ import '../../widgets/filter_widgets.dart';
 import '../../widgets/pagination.dart';
 import '../../widgets/state_views.dart';
 
+import '../../core/responsive/device_detector.dart';
+import 'tv/tv_search_screen.dart';
+
 enum ExploreMode { search, genre, country, production, topRated }
 
-class SearchResultScreen extends StatefulWidget {
+class SearchResultScreen extends StatelessWidget {
   const SearchResultScreen({
     required this.title,
     this.mode = ExploreMode.search,
@@ -33,10 +36,42 @@ class SearchResultScreen extends StatefulWidget {
   final RecentSearchDao? recentSearchDao;
 
   @override
-  State<SearchResultScreen> createState() => _SearchResultScreenState();
+  Widget build(BuildContext context) {
+    if (DeviceDetector.instance.isTv) {
+      return TvSearchScreen(
+        title: title,
+        mode: mode,
+        query: query,
+        recentSearchDao: recentSearchDao,
+      );
+    }
+    return _SearchResultPage(
+      title: title,
+      mode: mode,
+      query: query,
+      recentSearchDao: recentSearchDao,
+    );
+  }
 }
 
-class _SearchResultScreenState extends State<SearchResultScreen> {
+class _SearchResultPage extends StatefulWidget {
+  const _SearchResultPage({
+    required this.title,
+    this.mode = ExploreMode.search,
+    this.query,
+    this.recentSearchDao,
+  });
+
+  final String title;
+  final ExploreMode mode;
+  final String? query;
+  final RecentSearchDao? recentSearchDao;
+
+  @override
+  State<_SearchResultPage> createState() => _SearchResultPageState();
+}
+
+class _SearchResultPageState extends State<_SearchResultPage> {
   final _repository = TmdbRepository(config: AppConfig.fromEnv());
   final _controller = TextEditingController();
   Timer? _debounce;

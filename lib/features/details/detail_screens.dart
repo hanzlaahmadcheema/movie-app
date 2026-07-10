@@ -22,6 +22,9 @@ import '../../widgets/network_art.dart';
 import '../../widgets/pagination.dart';
 import '../../widgets/poster_widgets.dart';
 import '../../widgets/state_views.dart';
+import '../../core/responsive/device_detector.dart';
+import 'tv/tv_movie_details_screen.dart';
+import 'tv/tv_series_details_screen.dart';
 
 class MovieDetailScreen extends StatelessWidget {
   const MovieDetailScreen({this.item, super.key});
@@ -30,6 +33,9 @@ class MovieDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (DeviceDetector.instance.isTv) {
+      return TvMovieDetailsScreen(item: item);
+    }
     return _DetailPage(item: item, isSeries: false);
   }
 }
@@ -41,6 +47,9 @@ class SeriesDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (DeviceDetector.instance.isTv) {
+      return TvSeriesDetailsScreen(item: item);
+    }
     return _DetailPage(item: item, isSeries: true);
   }
 }

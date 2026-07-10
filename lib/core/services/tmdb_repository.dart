@@ -6,6 +6,7 @@ import '../models/tmdb_person.dart';
 import '../models/tmdb_option.dart';
 import '../models/tmdb_season.dart';
 import '../models/tmdb_video.dart';
+import '../models/tmdb_cast.dart';
 import 'tmdb_api_client.dart';
 
 class TmdbDetail {
@@ -15,6 +16,7 @@ class TmdbDetail {
     required this.related,
     required this.videos,
     required this.seasons,
+    required this.cast,
   });
 
   final MovieItem item;
@@ -22,6 +24,7 @@ class TmdbDetail {
   final List<MovieItem> related;
   final List<TmdbVideo> videos;
   final List<TmdbSeason> seasons;
+  final List<TmdbCast> cast;
 }
 
 class TmdbRepository {
@@ -272,6 +275,11 @@ class TmdbRepository {
     final related = _dedupeItems([...recommendations, ...similar]);
     final item = _itemFromJson(data, fallbackMediaType: seed.mediaType);
 
+    final parsedCast = (credits['cast'] as List?)
+        ?.whereType<Map<String, dynamic>>()
+        .map((p) => TmdbCast.fromJson(p))
+        .toList() ?? [];
+
     return TmdbDetail(
       item: item.copyWith(
         posterUrl: item.posterUrl.isEmpty ? seed.posterUrl : null,
@@ -280,6 +288,7 @@ class TmdbRepository {
       related: related.isEmpty ? [seed] : related,
       videos: _videosFromDetail(data),
       seasons: _seasonsFromDetail(data),
+      cast: parsedCast,
     );
   }
 
@@ -369,6 +378,10 @@ class TmdbRepository {
             duration: episode['runtime'] is int
                 ? '${episode['runtime']}min'
                 : 'N/A',
+            overview: (episode['overview'] ?? '').toString(),
+            thumbnail: episode['still_path'] != null
+                ? 'https://image.tmdb.org/t/p/w500${episode['still_path']}'
+                : '',
           ),
         )
         .toList();

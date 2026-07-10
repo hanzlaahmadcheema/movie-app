@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/app_theme.dart';
+import '../../../../core/responsive/device_detector.dart';
 import 'native_player_progress_bar.dart';
 import 'native_player_ui_state.dart';
 
@@ -176,7 +177,7 @@ class _NativePlayerControlsOverlayState
                         icon: Icons.replay_10,
                         onPressed: state.isInitialized ? widget.onRewind : null,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: DeviceDetector.instance.isTv ? 24 : 12),
                       _PrimaryControlButton(
                         label: controlLabel,
                         icon: controlIcon,
@@ -186,7 +187,7 @@ class _NativePlayerControlsOverlayState
                                   : widget.onPlayPause)
                             : null,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: DeviceDetector.instance.isTv ? 24 : 12),
                       _ControlButton(
                         label: 'Forward 10',
                         icon: Icons.forward_10,
@@ -239,6 +240,24 @@ class _NativePlayerControlsOverlayState
                           '${state.playbackSpeed.toStringAsFixed(2)}x',
                         ),
                       ),
+                      IconButton(
+                        tooltip: 'Subtitles',
+                        onPressed: state.isInitialized ? () {} : null, // Architecture for Subtitles
+                        icon: const Icon(Icons.subtitles),
+                        style: IconButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Audio Tracks',
+                        onPressed: state.isInitialized ? () {} : null, // Architecture for Audio Tracks
+                        icon: const Icon(Icons.audiotrack),
+                        style: IconButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
                       if (widget.onFullscreen != null)
                         IconButton(
                           tooltip: state.isFullscreen
@@ -280,19 +299,56 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTv = DeviceDetector.instance.isTv;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton.filledTonal(
           onPressed: onPressed,
+          iconSize: isTv ? 48 : 24,
           icon: Icon(icon),
           style: IconButton.styleFrom(
             backgroundColor: Colors.black.withValues(alpha: 0.42),
             foregroundColor: Colors.white,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.small.copyWith(fontSize: 11)),
+        SizedBox(height: isTv ? 8 : 4),
+        Text(label, style: AppTextStyles.small.copyWith(fontSize: isTv ? 16 : 11)),
+      ],
+    );
+  }
+}
+
+class _PrimaryControlButton extends StatelessWidget {
+  const _PrimaryControlButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isTv = DeviceDetector.instance.isTv;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.filled(
+          onPressed: onPressed,
+          iconSize: isTv ? 64 : 42,
+          icon: Icon(icon),
+        ),
+        SizedBox(height: isTv ? 8 : 4),
+        Text(
+          label,
+          style: AppTextStyles.medium.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: isTv ? 18 : 13,
+          ),
+        ),
       ],
     );
   }

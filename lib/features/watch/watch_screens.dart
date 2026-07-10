@@ -24,6 +24,8 @@ import '../../widgets/app_shell.dart';
 import '../../widgets/detail_widgets.dart';
 import '../../widgets/firebase_posters.dart';
 import '../../widgets/state_views.dart';
+import '../../core/responsive/device_detector.dart';
+import '../home/tv/tv_home_screen.dart'; // for TvContentRow
 
 class MovieWatchScreen extends StatelessWidget {
   const MovieWatchScreen({this.request, super.key});
@@ -231,6 +233,14 @@ class _WatchPageState extends State<_WatchPage> {
                                 .watchedStateStream(user, item),
                             builder: (context, watchedSnapshot) {
                               final watched = watchedSnapshot.data ?? false;
+                              if (DeviceDetector.instance.isTv) {
+                                return _buildTvWatchPage(
+                                  item: item,
+                                  related: related,
+                                  seasons: seasons,
+                                  activity: activity,
+                                );
+                              }
                               if (context.isDesktop) {
                                 return _buildDesktopWatchPage(
                                   item: item,
@@ -469,6 +479,66 @@ class _WatchPageState extends State<_WatchPage> {
             },
           ),
           const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTvWatchPage({
+    required MovieItem item,
+    required List<MovieItem> related,
+    required List<TmdbSeason> seasons,
+    required UserActivity activity,
+  }) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 60),
+        children: [
+          SizedBox(
+            height: 600,
+            width: double.infinity,
+            child: EmbeddedWatchPlayerPanel(
+              request: activeRequest,
+              selectionPrompt: widget.isSeries
+                  ? 'Select an episode to start playback.'
+                  : 'Preparing player...',
+            ),
+          ),
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 60),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  item.overview,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 18, color: Colors.white70),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+          if (related.isNotEmpty)
+            TvContentRow(
+              title: 'Recommendations',
+              items: related,
+              onFocus: (context) {
+                Scrollable.ensureVisible(
+                  context,
+                  alignment: 0.5,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+            ),
         ],
       ),
     );

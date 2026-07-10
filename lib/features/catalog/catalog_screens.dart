@@ -12,18 +12,35 @@ import '../../widgets/filter_widgets.dart';
 import '../../widgets/pagination.dart';
 import '../../widgets/state_views.dart';
 
+import '../../core/responsive/device_detector.dart';
+import 'tv/tv_catalog_screen.dart';
+
 enum CatalogKind { movies, series }
 
-class CatalogScreen extends StatefulWidget {
+class CatalogScreen extends StatelessWidget {
   const CatalogScreen({required this.kind, super.key});
 
   final CatalogKind kind;
 
   @override
-  State<CatalogScreen> createState() => _CatalogScreenState();
+  Widget build(BuildContext context) {
+    if (DeviceDetector.instance.isTv) {
+      return TvCatalogScreen(kind: kind);
+    }
+    return _CatalogPage(kind: kind);
+  }
 }
 
-class _CatalogScreenState extends State<CatalogScreen> {
+class _CatalogPage extends StatefulWidget {
+  const _CatalogPage({required this.kind});
+
+  final CatalogKind kind;
+
+  @override
+  State<_CatalogPage> createState() => _CatalogPageState();
+}
+
+class _CatalogPageState extends State<_CatalogPage> {
   late Future<TmdbPage<MovieItem>> catalogItems;
   FilterSelection? selection;
   int currentPage = 1;
