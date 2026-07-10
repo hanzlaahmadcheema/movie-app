@@ -230,6 +230,7 @@ class TvHomeContentData {
 }
 
 class TvTopBar extends StatelessWidget {
+  const TvTopBar({super.key});
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -593,7 +594,7 @@ class TvContentRow extends StatelessWidget {
   final List<MovieItem> items;
   final void Function(BuildContext, MovieItem) onFocus;
 
-  const TvContentRow({required this.title, required this.items, required this.onFocus});
+  const TvContentRow({super.key, required this.title, required this.items, required this.onFocus});
 
   @override
   Widget build(BuildContext context) {
@@ -630,7 +631,7 @@ class TvMoviePoster extends StatefulWidget {
   final MovieItem item;
   final void Function(BuildContext, MovieItem) onFocus;
 
-  const TvMoviePoster({required this.item, required this.onFocus});
+  const TvMoviePoster({super.key, required this.item, required this.onFocus});
 
   @override
   State<TvMoviePoster> createState() => _TvMoviePosterState();

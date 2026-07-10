@@ -902,7 +902,7 @@ class _WatchPageState extends State<_WatchPage> {
       autoPlay: true,
     );
     final path = AppRoutes.watchPathForRequest(request);
-    SystemNavigator.routeInformationUpdated(location: path, replace: true);
+    SystemNavigator.routeInformationUpdated(uri: Uri.parse(path), replace: true);
     unawaited(
       NavigationStateRepository.instance.saveRouteState(
         route: AppRoutes.seriesWatch,
