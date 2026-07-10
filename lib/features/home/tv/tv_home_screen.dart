@@ -269,15 +269,20 @@ class _TvIconButtonState extends State<_TvIconButton> {
         child: Semantics(
           button: true,
           label: 'Navigation Icon',
-          child: AnimatedContainer(
+          child: AnimatedScale(
+            scale: _isFocused ? 1.08 : 1.0,
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _isFocused ? Colors.white : Colors.black45,
-              shape: BoxShape.circle,
-              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            curve: Curves.easeOut,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _isFocused ? Colors.white : Colors.black45,
+                shape: BoxShape.circle,
+                boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+              ),
+              child: Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
             ),
-            child: Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
           ),
         ),
       ),
@@ -302,18 +307,23 @@ class _TvProfileMenuButtonState extends State<_TvProfileMenuButton> {
           // Open profile menu bottom sheet or dialog
           showDialog(context: context, builder: (_) => TvProfileMenu());
         },
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : Colors.black45,
-            shape: BoxShape.circle,
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
-          ),
-          child: const CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.grey,
-            child: Icon(Icons.person, color: Colors.white),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : Colors.black45,
+              shape: BoxShape.circle,
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: const CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
           ),
         ),
       ),
@@ -387,21 +397,27 @@ class _TvMenuButtonState extends State<_TvMenuButton> {
       onFocusChange: (focused) => setState(() => _isFocused = focused),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 200),
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : Colors.white10,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            widget.title,
-            style: TextStyle(
-              color: _isFocused ? Colors.black : Colors.white,
-              fontSize: 18,
-              fontWeight: _isFocused ? FontWeight.bold : FontWeight.normal,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : Colors.white10,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: Text(
+              widget.title,
+              style: TextStyle(
+                color: _isFocused ? Colors.black : Colors.white,
+                fontSize: 18,
+                fontWeight: _isFocused ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ),
         ),
@@ -561,27 +577,32 @@ class _TvActionButtonState extends State<_TvActionButton> {
       onFocusChange: (focused) => setState(() => _isFocused = focused),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
-          ),
-          child: Row(
-            children: [
-              Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white),
-              const SizedBox(width: 8),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  color: _isFocused ? Colors.black : Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: Row(
+              children: [
+                Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: _isFocused ? Colors.black : Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

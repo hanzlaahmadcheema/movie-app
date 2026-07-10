@@ -248,27 +248,32 @@ class _TvButtonState extends State<_TvButton> {
       onFocusChange: (focused) => setState(() => _isFocused = focused),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
+        child: AnimatedScale(
+          scale: _isFocused ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
-          ),
-          child: Row(
-            children: [
-              Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
-              const SizedBox(width: 12),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  color: _isFocused ? Colors.black : Colors.white.withValues(alpha: 0.8),
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            decoration: BoxDecoration(
+              color: _isFocused ? Colors.white : (widget.isPrimary ? AppColors.primary : Colors.white24),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 2)] : [],
+            ),
+            child: Row(
+              children: [
+                Icon(widget.icon, color: _isFocused ? Colors.black : Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: _isFocused ? Colors.black : Colors.white.withValues(alpha: 0.8),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -296,48 +301,53 @@ class _TvCastCardState extends State<_TvCastCard> {
         setState(() => _isFocused = focused);
         if (focused) widget.onFocus(context);
       },
-      child: AnimatedContainer(
+      child: AnimatedScale(
+        scale: _isFocused ? 1.08 : 1.0,
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        width: _isFocused ? 150 : 130,
-        decoration: BoxDecoration(
-          color: Colors.black45,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 10, spreadRadius: 2)] : [],
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: NetworkArt(
-                  url: widget.cast.profilePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          width: _isFocused ? 150 : 130,
+          decoration: BoxDecoration(
+            color: Colors.black45,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: _isFocused ? [BoxShadow(color: Colors.white.withValues(alpha: 0.6), blurRadius: 10, spreadRadius: 2)] : [],
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: NetworkArt(
+                    url: widget.cast.profilePath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    widget.cast.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.cast.character,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
-              ),
-            )
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      widget.cast.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.cast.character,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

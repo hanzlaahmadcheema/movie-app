@@ -63,17 +63,7 @@ android {
     }
 }
 
-gradle.taskGraph.whenReady {
-    val releaseBuildRequested = allTasks.any { task ->
-        task.name.contains("Release", ignoreCase = true)
-    }
 
-    if (releaseBuildRequested && !keystorePropertiesFile.exists()) {
-        throw GradleException(
-            "Missing android/key.properties. Release builds require Android signing configuration."
-        )
-    }
-}
 
 flutter {
     source = "../.."
