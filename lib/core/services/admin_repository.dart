@@ -713,6 +713,15 @@ class AdminRepository {
       fallbackAllowed: true,
     ),
     ProviderConfigRecord(
+      id: 'vidking',
+      providerId: 'vidking',
+      displayName: 'VidKing',
+      enabled: true,
+      priority: 450,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
+    ProviderConfigRecord(
       id: 'vidsrc',
       providerId: 'vidsrc',
       displayName: 'VidSrc',

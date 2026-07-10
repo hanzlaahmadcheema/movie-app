@@ -187,6 +187,39 @@ void main() {
     expect(episode.toString(), 'https://111movies.net/tv/240411/1/5');
   });
 
+  test('builds VidKing movie and episode routes', () {
+    final server = _server(
+      id: 'vidking',
+      priority: 450,
+      strategy: StreamingUrlBuilderStrategy.template,
+      domain: 'https://www.vidking.net',
+      movieTemplate: '{domain}/embed/movie/{id}',
+      episodeTemplate: '{domain}/embed/tv/{id}/{season}/{episode}',
+    );
+
+    final movie = builder.build(
+      server,
+      const StreamingEmbedRequest(
+        contentType: StreamingContentType.movie,
+        title: 'Example Movie',
+        tmdbId: 1078605,
+      ),
+    );
+    final episode = builder.build(
+      server,
+      const StreamingEmbedRequest(
+        contentType: StreamingContentType.episode,
+        title: 'Example Show',
+        tmdbId: 119051,
+        seasonNumber: 1,
+        episodeNumber: 8,
+      ),
+    );
+
+    expect(movie.toString(), 'https://www.vidking.net/embed/movie/1078605');
+    expect(episode.toString(), 'https://www.vidking.net/embed/tv/119051/1/8');
+  });
+
   test('builds Hindi Player generated HTML with IMDb source', () {
     final url = builder.build(
       _server(
@@ -235,6 +268,7 @@ void main() {
         'Videasy',
         'StreamVault',
         '111Movies',
+        'VidKing',
         'Hindi Player',
       ]);
       expect(
@@ -243,6 +277,10 @@ void main() {
       );
       expect(
         servers.where((server) => server.providerId == '111movies'),
+        hasLength(1),
+      );
+      expect(
+        servers.where((server) => server.providerId == 'vidking'),
         hasLength(1),
       );
       expect(
@@ -877,6 +915,7 @@ StreamingServer _server({
       'videasy' => 'Videasy',
       'streamvault' => 'StreamVault',
       '111movies' => '111Movies',
+      'vidking' => 'VidKing',
       'hindi_player' => 'Hindi Player',
       _ => 'VidSrc',
     },
@@ -918,6 +957,11 @@ AppConfig _config({
     streamingOneElevenMoviesMovieTemplate: '{domain}/movie/{id}',
     streamingOneElevenMoviesEpisodeTemplate:
         '{domain}/tv/{id}/{season}/{episode}',
+    streamingVidKingDomains: const ['https://www.vidking.net'],
+    streamingVidKingEnabled: true,
+    streamingVidKingMovieTemplate: '{domain}/embed/movie/{id}',
+    streamingVidKingEpisodeTemplate:
+        '{domain}/embed/tv/{id}/{season}/{episode}',
     streamingHindiPlayerDomains: const [
       'https://allmovieland.link',
       'https://gemma416okl.com',

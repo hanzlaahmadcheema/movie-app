@@ -95,6 +95,32 @@ class StreamingProviderRegistry {
       );
     }
 
+    final vidKingEndpoints = _endpointsFor(
+      providerId: 'vidking',
+      domains: config.streamingVidKingDomains,
+    );
+    if (vidKingEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: 'vidking',
+          providerId: 'vidking',
+          displayName: 'VidKing',
+          priority: 450,
+          baseUri: vidKingEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
+          enabled:
+              config.streamingVidKingEnabled &&
+              config.streamingVidKingMovieTemplate.trim().isNotEmpty &&
+              config.streamingVidKingEpisodeTemplate.trim().isNotEmpty,
+          timeout: timeout,
+          movieTemplate: config.streamingVidKingMovieTemplate,
+          episodeTemplate: config.streamingVidKingEpisodeTemplate,
+          endpoints: vidKingEndpoints,
+        ),
+      );
+    }
+
     final hindiPlayerEndpoints = _endpointsFor(
       providerId: 'hindi_player',
       domains: config.streamingHindiPlayerDomains,

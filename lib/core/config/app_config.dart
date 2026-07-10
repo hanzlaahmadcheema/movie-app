@@ -16,6 +16,10 @@ class AppConfig {
     required this.streamingOneElevenMoviesEnabled,
     required this.streamingOneElevenMoviesMovieTemplate,
     required this.streamingOneElevenMoviesEpisodeTemplate,
+    required this.streamingVidKingDomains,
+    required this.streamingVidKingEnabled,
+    required this.streamingVidKingMovieTemplate,
+    required this.streamingVidKingEpisodeTemplate,
     required this.streamingHindiPlayerDomains,
     required this.streamingHindiPlayerEnabled,
     required this.streamingVidSrcDomains,
@@ -83,6 +87,20 @@ class AppConfig {
       streamingOneElevenMoviesEpisodeTemplate:
           _dotenvValue('STREAMING_111MOVIES_EPISODE_TEMPLATE')?.trim() ??
           '{domain}/tv/{id}/{season}/{episode}',
+      streamingVidKingDomains: _csv(
+        _dotenvValue('STREAMING_VIDKING_DOMAINS'),
+        fallback: 'https://www.vidking.net',
+      ),
+      streamingVidKingEnabled: _bool(
+        _dotenvValue('STREAMING_VIDKING_ENABLED'),
+        fallback: true,
+      ),
+      streamingVidKingMovieTemplate:
+          _dotenvValue('STREAMING_VIDKING_MOVIE_TEMPLATE')?.trim() ??
+          '{domain}/embed/movie/{id}',
+      streamingVidKingEpisodeTemplate:
+          _dotenvValue('STREAMING_VIDKING_EPISODE_TEMPLATE')?.trim() ??
+          '{domain}/embed/tv/{id}/{season}/{episode}',
       streamingHindiPlayerDomains: _csv(
         _dotenvValue('STREAMING_HINDI_PLAYER_DOMAINS'),
         fallback: 'https://allmovieland.link,https://gemma416okl.com',
@@ -137,6 +155,10 @@ class AppConfig {
   final bool streamingOneElevenMoviesEnabled;
   final String streamingOneElevenMoviesMovieTemplate;
   final String streamingOneElevenMoviesEpisodeTemplate;
+  final List<String> streamingVidKingDomains;
+  final bool streamingVidKingEnabled;
+  final String streamingVidKingMovieTemplate;
+  final String streamingVidKingEpisodeTemplate;
   final List<String> streamingHindiPlayerDomains;
   final bool streamingHindiPlayerEnabled;
   final List<String> streamingVidSrcDomains;

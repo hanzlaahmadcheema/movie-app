@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
@@ -374,7 +375,9 @@ class _WatchPageState extends State<_WatchPage> {
                                                   return EpisodeList(
                                                     episodes: episodes,
                                                     selectedEpisodeNumber:
-                                                        activity.episodeNumber,
+                                                        _selectedEpisodeNumber(
+                                                          activity,
+                                                        ),
                                                     onEpisodeSelected:
                                                         (
                                                           episode,
@@ -400,7 +403,10 @@ class _WatchPageState extends State<_WatchPage> {
                                                     selectedSeasonNumber ??
                                                     seasons.first.number,
                                                 selectedEpisodeNumber:
-                                                    activity.episodeNumber ?? 1,
+                                                    _selectedEpisodeNumber(
+                                                          activity,
+                                                        ) ??
+                                                        1,
                                                 onSelected: (season) async {
                                                   final episodesFutureLocal =
                                                       _loadEpisodes(
@@ -533,7 +539,8 @@ class _WatchPageState extends State<_WatchPage> {
                     seasons: seasons,
                     selectedSeasonNumber:
                         selectedSeasonNumber ?? seasons.first.number,
-                    selectedEpisodeNumber: activity.episodeNumber ?? 1,
+                    selectedEpisodeNumber:
+                        _selectedEpisodeNumber(activity) ?? 1,
                     onSelected: (season) =>
                         _selectSeason(item, seasons, season),
                   ),
@@ -561,7 +568,9 @@ class _WatchPageState extends State<_WatchPage> {
                       final episodes = snapshot.data ?? const <Episode>[];
                       return EpisodeList(
                         episodes: episodes,
-                        selectedEpisodeNumber: activity.episodeNumber,
+                        selectedEpisodeNumber: _selectedEpisodeNumber(
+                          activity,
+                        ),
                         onEpisodeSelected: (episode) => _setEpisode(
                           item,
                           selectedSeasonNumber ?? seasons.first.number,
@@ -795,6 +804,41 @@ class _WatchPageState extends State<_WatchPage> {
                 activeRequest?.jellyfinPlaybackModeOverride,
           );
     });
+    _replaceSeriesWatchUrl(
+      item: item,
+      seasonNumber: seasonNumber,
+      episodeNumber: episode.number,
+    );
+  }
+
+  int? _selectedEpisodeNumber(UserActivity activity) {
+    return activeRequest?.episodeNumber ??
+        widget.request?.episodeNumber ??
+        activity.episodeNumber;
+  }
+
+  void _replaceSeriesWatchUrl({
+    required MovieItem item,
+    required int seasonNumber,
+    required int episodeNumber,
+  }) {
+    if (!widget.isSeries) {
+      return;
+    }
+    final request = WatchPageRequest(
+      item: item,
+      seasonNumber: seasonNumber,
+      episodeNumber: episodeNumber,
+      autoPlay: true,
+    );
+    final path = AppRoutes.watchPathForRequest(request);
+    SystemNavigator.routeInformationUpdated(location: path, replace: true);
+    unawaited(
+      NavigationStateRepository.instance.saveRouteState(
+        route: AppRoutes.seriesWatch,
+        arguments: request,
+      ),
+    );
   }
 }
 
