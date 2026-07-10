@@ -1,0 +1,264 @@
+Resolving dependencies...
+Downloading packages...
+  _flutterfire_internals 1.3.71 (1.3.73 available)
+  cli_util 0.4.2 (0.5.1 available)
+  cloud_firestore 6.4.1 (6.6.0 available)
+  cloud_firestore_platform_interface 8.0.1 (8.0.3 available)
+  cloud_firestore_web 5.4.1 (5.6.0 available)
+  firebase_auth 6.5.1 (6.5.4 available)
+  firebase_auth_platform_interface 9.0.1 (9.0.3 available)
+  firebase_auth_web 6.2.1 (6.2.3 available)
+  firebase_core 4.9.0 (4.11.0 available)
+  firebase_core_platform_interface 7.0.1 (7.1.0 available)
+  firebase_core_web 3.7.0 (3.9.0 available)
+  flutter_launcher_icons 0.13.1 (0.14.4 available)
+  flutter_secure_storage 9.2.4 (10.3.1 available)
+  flutter_secure_storage_linux 1.2.3 (3.0.1 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.1.1 available)
+  flutter_secure_storage_windows 3.1.2 (4.2.2 available)
+  google_sign_in_android 7.2.10 (7.2.15 available)
+  js 0.6.7 (0.7.2 available)
+  matcher 0.12.19 (0.12.20 available)
+  meta 1.17.0 (1.19.0 available)
+  native_toolchain_c 0.19.1 (0.19.2 available)
+  package_config 2.2.0 (3.0.0 available)
+  path_provider_linux 2.2.1 (2.2.2 available)
+  shared_preferences_android 2.4.23 (2.4.26 available)
+  sqflite 2.4.2+1 (2.4.3 available)
+  sqflite_android 2.4.2+3 (2.4.3 available)
+  sqflite_common 2.5.8 (2.5.11 available)
+  sqflite_common_ffi 2.4.0+3 (2.4.2 available)
+  sqflite_darwin 2.4.2 (2.4.3+1 available)
+  sqflite_platform_interface 2.4.0 (2.4.1 available)
+  sqlite3 3.3.3 (3.3.4 available)
+  synchronized 3.4.0+1 (3.4.1 available)
+  test_api 0.7.10 (0.7.13 available)
+  vector_math 2.2.0 (2.4.0 available)
+  video_player_android 2.9.5 (2.11.0 available)
+  video_player_avfoundation 2.9.7 (2.11.0 available)
+  video_player_platform_interface 6.7.0 (6.9.0 available)
+  webview_flutter 4.13.1 (4.14.1 available)
+  webview_flutter_android 4.10.13 (4.13.0 available)
+  webview_flutter_wkwebview 3.25.1 (3.26.0 available)
+  win32 5.15.0 (6.3.0 available)
+Got dependencies!
+43 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /home/hanzlaahmad/PersonalProjects/movie-app/test/share_text_builder_test.dart
+00:00 +0: /home/hanzlaahmad/PersonalProjects/movie-app/test/share_text_builder_test.dart: builds safe movie share text
+00:00 +1: /home/hanzlaahmad/PersonalProjects/movie-app/test/share_text_builder_test.dart: builds series text with missing metadata fallback
+00:00 +2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: missing appConfig uses defaults
+AdminRepository fallback loadPublicAppConfig: not-found
+00:00 +3: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty providers uses default provider order
+00:00 +3 -1: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty providers uses default provider order [E]
+  Expected: [
+              'jellyfin_native',
+              'jellyfin_web',
+              'videasy',
+              'streamvault',
+              '111movies',
+              'vidsrc',
+              '2embed'
+            ]
+    Actual: MappedListIterable<ProviderConfigRecord, String>:[
+              'jellyfin_native',
+              'jellyfin_web',
+              'hindi_player',
+              'videasy',
+              'streamvault',
+              '111movies',
+              'vidking',
+              'vidsrc',
+              '2embed'
+            ]
+     Which: at location [2] is 'hindi_player' instead of 'videasy'
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/admin_fallback_test.dart 33:5                  main.<fn>
+  
+00:00 +3 -1: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: admin dashboard partial query failure does not fail stats loading
+AdminRepository fallback loadDashboardStats.users: permission-denied
+AdminRepository fallback loadDashboardStats.userContent: permission-denied
+AdminRepository fallback loadDashboardStats.playbackLogs: unavailable
+AdminRepository fallback loadDashboardStats.requests: failed-precondition
+AdminRepository fallback loadPublicAppConfig: not-found
+00:00 +3 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: admin dashboard partial query failure does not fail stats loading [E]
+  Expected: '7'
+    Actual: '9'
+     Which: is different.
+            Expected: 7
+              Actual: 9
+                      ^
+             Differ at offset 0
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/admin_fallback_test.dart 69:7                  main.<fn>
+  
+00:00 +3 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:00 +4 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:00 +5 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:00 +6 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:00 +7 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +8 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +9 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +10 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +11 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +12 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +13 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +14 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +15 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +16 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +17 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +18 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +19 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +20 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +21 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +22 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +23 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +24 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +25 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +26 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +27 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +28 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +29 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +30 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +31 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +32 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +33 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:01 +34 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +35 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +36 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +37 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +38 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +39 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +39 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: provider registry and fallback controller preserve group priority order
+Streaming diagnostic: provider=VidSrc endpoint=vidsrc host=vidsrc.example started=2026-07-10T11:46:04.172598 finished=2026-07-10T11:46:04.174143 fallback=test failure
+Streaming fallback: test failure
+00:02 +40 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +41 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +41 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: selecting VidSrc tries internal endpoints in priority order
+Streaming diagnostic: provider=VidSrc endpoint=vidsrc_primary host=primary.example started=2026-07-10T11:46:04.194896 finished=2026-07-10T11:46:04.195013 fallback=primary failed
+Streaming fallback: primary failed
+00:02 +42 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +43 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +43 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: if all VidSrc endpoints fail, fallback moves to next provider
+Streaming diagnostic: provider=VidSrc endpoint=vidsrc_primary host=primary.example started=2026-07-10T11:46:04.204433 finished=2026-07-10T11:46:04.204473 fallback=primary failed
+Streaming fallback: primary failed
+Streaming diagnostic: provider=VidSrc endpoint=vidsrc_backup_2 host=backup.example started=2026-07-10T11:46:04.204913 finished=2026-07-10T11:46:04.205171 fallback=backup failed
+Streaming fallback: backup failed
+00:02 +44 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +45 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +46 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +47 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +47 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: exhausted fallback state is reached without infinite loops
+Streaming diagnostic: provider=VidSrc endpoint=vidsrc-1 host=vidsrc.example started=2026-07-10T11:46:04.224431 finished=2026-07-10T11:46:04.224482 fallback=test failure
+00:02 +48 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +49 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +50 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +51 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +52 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +53 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: empty banners, featured, and notices do not break Home
+00:02 +54 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +54 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: admin dashboard can render unavailable cards without failing
+MovieBottomNavigation init
+00:02 +55 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +56 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +56 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/admin_fallback_test.dart: admin dashboard can render unavailable cards without failing
+MovieBottomNavigation dispose
+00:02 +57 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +58 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +59 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +60 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/streaming_repository_test.dart: loading view does not show fake playback progress
+00:02 +61 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:02 +62 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:02 +63 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:02 +64 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:02 +65 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +66 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +67 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +68 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +69 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +70 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +71 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +72 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:03 +73 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings prefill default server URL and not logged in status
+00:04 +74 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/native_player_controls_overlay_test.dart: native controls overlay explicit animation renders safely
+00:04 +75 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings show logged in username
+00:04 +76 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings show logged in username
+00:04 +77 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings show logged in username
+00:04 +78 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings show logged in username
+00:04 +79 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/jellyfin_settings_screen_test.dart: settings show logged in username
+00:04 +80 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: contentKeyFor uses media type and TMDB id
+00:04 +81 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: UserContentRecord parses Firestore content snapshot
+00:04 +82 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: UserContentRecord parses watched timestamp
+00:04 +83 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: Continue Watching movie record reopens movie stream
+00:04 +84 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: Continue Watching episode record reopens episode stream
+00:04 +85 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: TV record without episode opens series selection safely
+00:04 +86 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: streaming activity payload is honest and rules-compatible
+00:04 +87 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: native Jellyfin activity payload stores real progress fields
+00:04 +88 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/user_activity_repository_test.dart: activity playback metadata fields are allowed by Firestore rules
+00:05 +89 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/widget_test.dart: renders the app shell
+00:05 +90 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/widget_test.dart: renders the app shell
+00:05 +91 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/widget_test.dart: renders the app shell
+00:05 +92 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/widget_test.dart: renders the app shell
+MovieApp build
+Navigation current route: /splash
+SplashScreen init
+SplashScreen build
+SplashScreen dispose
+00:05 +93 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/image_cache_test.dart: image cache row insert/read works
+00:05 +94 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/image_cache_test.dart: duplicate URL updates lastAccessedAt without resetting createdAt
+00:05 +95 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/image_cache_test.dart: missing file triggers re-download path
+00:05 +96 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/image_cache_test.dart: cache cleanup removes old rows/files
+00:05 +97 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/image_cache_test.dart: (tearDownAll)
+00:06 +97 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/recent_search_dao_test.dart: (setUpAll)
+00:06 +97 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/recent_search_dao_test.dart: recent search saves
+00:06 +98 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/recent_search_dao_test.dart: duplicate search moves to top
+00:06 +99 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/recent_search_dao_test.dart: clear recent searches works
+00:06 +100 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/recent_search_dao_test.dart: (tearDownAll)
+00:06 +100 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +101 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +102 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +103 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +104 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +105 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:06 +106 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: unknown route returns NotFoundScreen
+00:07 +107 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: movie detail missing item returns InvalidRouteScreen
+00:07 +108 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: trailer missing key returns InvalidRouteScreen
+00:07 +109 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: trailer missing key returns InvalidRouteScreen
+00:07 +110 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: trailer missing key returns InvalidRouteScreen
+00:07 +111 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/route_validation_test.dart: trailer missing key returns InvalidRouteScreen
+00:07 +112 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/email_verification_gate_test.dart: email verification gate verify email route renders verification screen
+00:07 +113 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/email_verification_gate_test.dart: email verification gate verify email route renders verification screen
+00:07 +114 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/email_verification_gate_test.dart: email verification gate verify email route renders verification screen
+00:07 +115 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/email_verification_gate_test.dart: email verification gate verify email route renders verification screen
+00:07 +115 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/movie_app_lifecycle_test.dart: notification shade lifecycle does not reopen splash
+MovieApp build
+Navigation current route: /splash
+SplashScreen init
+SplashScreen build
+00:08 +116 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/movie_app_lifecycle_test.dart: notification shade lifecycle does not reopen splash
+SplashScreen bootstrap target: /login
+Navigation current route: /login
+SplashScreen dispose
+MovieApp lifecycle: inactive
+MovieApp lifecycle: resumed
+00:08 +117 -2: /home/hanzlaahmad/PersonalProjects/movie-app/test/movie_app_lifecycle_test.dart: paused lifecycle saves state without navigating
+MovieApp build
+Navigation current route: /splash
+SplashScreen init
+SplashScreen build
+SplashScreen bootstrap target: /login
+Navigation current route: /login
+SplashScreen dispose
+MovieApp lifecycle: inactive
+MovieApp lifecycle: hidden
+MovieApp lifecycle: paused
+MovieApp lifecycle: hidden
+MovieApp lifecycle: inactive
+MovieApp lifecycle: resumed
+00:08 +118 -2: Some tests failed.
