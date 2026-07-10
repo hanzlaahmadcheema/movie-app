@@ -41,35 +41,34 @@ class _TvCatalogScreenState extends State<TvCatalogScreen> {
     super.dispose();
   }
 
-  Future<TmdbPage<MovieItem>> _loadCatalogForSelection(FilterSelection? sel) {
+  Future<TmdbPage<MovieItem>> _loadCatalogForSelection(FilterSelection? sel) async {
     _selection = sel;
     _currentPage = 1;
     _items.clear();
     final genreIdInt = sel?.genreId != null ? int.tryParse(sel!.genreId!) : null;
-    return (widget.kind == CatalogKind.movies
-            ? _repository.discoverMovieBrowsePage(
-                page: _currentPage,
-                genreId: genreIdInt,
-                country: sel?.countryCode,
-                year: sel?.releaseYear,
-                ratingGte: sel?.ratingGte,
-              )
-            : _repository.discoverSeriesBrowsePage(
-                page: _currentPage,
-                genreId: genreIdInt,
-                country: sel?.countryCode,
-                year: sel?.releaseYear,
-                ratingGte: sel?.ratingGte,
-              ))
-    ).then((page) {
-      if (mounted) {
-        setState(() {
-          _items.addAll(page.items);
-          _totalPages = page.totalPages;
-        });
-      }
-      return page;
-    });
+    final page = widget.kind == CatalogKind.movies
+        ? await _repository.discoverMovieBrowsePage(
+            page: _currentPage,
+            genreId: genreIdInt,
+            country: sel?.countryCode,
+            year: sel?.releaseYear,
+            ratingGte: sel?.ratingGte,
+          )
+        : await _repository.discoverSeriesBrowsePage(
+            page: _currentPage,
+            genreId: genreIdInt,
+            country: sel?.countryCode,
+            year: sel?.releaseYear,
+            ratingGte: sel?.ratingGte,
+          );
+
+    if (mounted) {
+      setState(() {
+        _items.addAll(page.items);
+        _totalPages = page.totalPages;
+      });
+    }
+    return page;
   }
 
   Future<void> _loadMore() async {
