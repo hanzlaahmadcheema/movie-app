@@ -263,6 +263,7 @@ void main() {
       final servers = registry.serversFor(StreamingContentType.movie);
 
       expect(servers.map((server) => server.displayName), [
+        'Nxsha',
         'VidSrc',
         '2Embed',
         'Videasy',
@@ -271,6 +272,10 @@ void main() {
         'VidKing',
         'Hindi Player',
       ]);
+      expect(
+        servers.where((server) => server.providerId == 'nxsha'),
+        hasLength(1),
+      );
       expect(
         servers.where((server) => server.providerId == 'hindi_player'),
         hasLength(1),
@@ -299,8 +304,8 @@ void main() {
         servers.where((server) => server.providerId == '2embed'),
         hasLength(1),
       );
-      expect(servers.first.enabledEndpoints(), hasLength(3));
-      expect(servers[1].enabledEndpoints(), hasLength(2));
+      expect(servers[1].enabledEndpoints(), hasLength(3));
+      expect(servers[2].enabledEndpoints(), hasLength(2));
     },
   );
 
@@ -347,7 +352,7 @@ void main() {
     );
 
     expect(indianCandidates.first.server.providerId, 'hindi_player');
-    expect(genericCandidates.first.server.providerId, 'vidsrc');
+    expect(genericCandidates.first.server.providerId, 'nxsha');
   });
 
   test(
@@ -917,6 +922,7 @@ StreamingServer _server({
       '111movies' => '111Movies',
       'vidking' => 'VidKing',
       'hindi_player' => 'Hindi Player',
+      'nxsha' => 'Nxsha',
       _ => 'VidSrc',
     },
     priority: priority,
@@ -967,6 +973,10 @@ AppConfig _config({
       'https://gemma416okl.com',
     ],
     streamingHindiPlayerEnabled: true,
+    streamingNxshaDomains: const ['https://nxsha.space'],
+    streamingNxshaEnabled: true,
+    streamingNxshaMovieTemplate: '{domain}/embed/movie/{id}',
+    streamingNxshaEpisodeTemplate: '{domain}/embed/tv/{id}/{season}/{episode}',
     streamingTwoEmbedDomains: twoEmbedDomains,
     streamingTwoEmbedEnabled: true,
     streamingTwoEmbedMovieTemplate: '{domain}/embed/{id}',

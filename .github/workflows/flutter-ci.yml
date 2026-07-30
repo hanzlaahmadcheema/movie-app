@@ -43,6 +43,10 @@ jobs:
         env:
           TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
         run: |
+          if [ -z "$TMDB_READ_ACCESS_TOKEN" ]; then
+            echo "TMDB_READ_ACCESS_TOKEN is missing. Using dummy token for CI build."
+            TMDB_READ_ACCESS_TOKEN="dummy-token-for-ci"
+          fi
           flutter build apk --debug \
             --dart-define=TMDB_READ_ACCESS_TOKEN="$TMDB_READ_ACCESS_TOKEN"
 

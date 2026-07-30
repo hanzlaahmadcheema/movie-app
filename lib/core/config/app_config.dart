@@ -22,6 +22,10 @@ class AppConfig {
     required this.streamingVidKingEpisodeTemplate,
     required this.streamingHindiPlayerDomains,
     required this.streamingHindiPlayerEnabled,
+    required this.streamingNxshaDomains,
+    required this.streamingNxshaEnabled,
+    required this.streamingNxshaMovieTemplate,
+    required this.streamingNxshaEpisodeTemplate,
     required this.streamingVidSrcDomains,
     required this.streamingVidSrcEnabled,
     required this.streamingTwoEmbedDomains,
@@ -109,6 +113,20 @@ class AppConfig {
         _dotenvValue('STREAMING_HINDI_PLAYER_ENABLED'),
         fallback: true,
       ),
+      streamingNxshaDomains: _csv(
+        _dotenvValue('STREAMING_NXSHA_DOMAINS'),
+        fallback: 'https://nxsha.space',
+      ),
+      streamingNxshaEnabled: _bool(
+        _dotenvValue('STREAMING_NXSHA_ENABLED'),
+        fallback: true,
+      ),
+      streamingNxshaMovieTemplate:
+          _dotenvValue('STREAMING_NXSHA_MOVIE_TEMPLATE')?.trim() ??
+          '{domain}/embed/movie/{id}',
+      streamingNxshaEpisodeTemplate:
+          _dotenvValue('STREAMING_NXSHA_EPISODE_TEMPLATE')?.trim() ??
+          '{domain}/embed/tv/{id}/{season}/{episode}',
       streamingVidSrcDomains: _csv(
         _dotenvValue('STREAMING_VIDSRC_DOMAINS'),
         fallback:
@@ -161,6 +179,10 @@ class AppConfig {
   final String streamingVidKingEpisodeTemplate;
   final List<String> streamingHindiPlayerDomains;
   final bool streamingHindiPlayerEnabled;
+  final List<String> streamingNxshaDomains;
+  final bool streamingNxshaEnabled;
+  final String streamingNxshaMovieTemplate;
+  final String streamingNxshaEpisodeTemplate;
   final List<String> streamingVidSrcDomains;
   final bool streamingVidSrcEnabled;
   final List<String> streamingTwoEmbedDomains;

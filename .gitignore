@@ -33,4 +33,3 @@ android/key.properties
 docs/
 firepit-log.txt
 google-services.json
-!android/app/google-services.json

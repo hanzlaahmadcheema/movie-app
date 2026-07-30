@@ -142,6 +142,32 @@ class StreamingProviderRegistry {
       );
     }
 
+    final nxshaEndpoints = _endpointsFor(
+      providerId: 'nxsha',
+      domains: config.streamingNxshaDomains,
+    );
+    if (nxshaEndpoints.isNotEmpty) {
+      servers.add(
+        StreamingServer(
+          id: 'nxsha',
+          providerId: 'nxsha',
+          displayName: 'Nxsha',
+          priority: -10, // Default player
+          baseUri: nxshaEndpoints.first.url,
+          supportedContentTypes: StreamingContentType.values.toSet(),
+          urlBuilderStrategy: StreamingUrlBuilderStrategy.template,
+          enabled:
+              config.streamingNxshaEnabled &&
+              config.streamingNxshaMovieTemplate.trim().isNotEmpty &&
+              config.streamingNxshaEpisodeTemplate.trim().isNotEmpty,
+          timeout: timeout,
+          movieTemplate: config.streamingNxshaMovieTemplate,
+          episodeTemplate: config.streamingNxshaEpisodeTemplate,
+          endpoints: nxshaEndpoints,
+        ),
+      );
+    }
+
     final vidSrcEndpoints = _endpointsFor(
       providerId: 'vidsrc',
       domains: config.streamingVidSrcDomains,

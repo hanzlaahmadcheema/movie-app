@@ -99,6 +99,10 @@ AppConfig _config({required String token}) {
     streamingTwoEmbedEnabled: true,
     streamingTwoEmbedMovieTemplate: '',
     streamingTwoEmbedEpisodeTemplate: '',
+    streamingNxshaDomains: const [],
+    streamingNxshaEnabled: true,
+    streamingNxshaMovieTemplate: '',
+    streamingNxshaEpisodeTemplate: '',
     streamingAllowedHosts: const [],
     streamingTimeoutSeconds: 15,
   );
