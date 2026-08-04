@@ -69,7 +69,7 @@ class AppConfig {
       ),
       streamingStreamVaultEnabled: _bool(
         _dotenvValue('STREAMING_STREAMVAULT_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingStreamVaultMovieTemplate:
           _dotenvValue('STREAMING_STREAMVAULT_MOVIE_TEMPLATE')?.trim() ??
@@ -83,7 +83,7 @@ class AppConfig {
       ),
       streamingOneElevenMoviesEnabled: _bool(
         _dotenvValue('STREAMING_111MOVIES_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingOneElevenMoviesMovieTemplate:
           _dotenvValue('STREAMING_111MOVIES_MOVIE_TEMPLATE')?.trim() ??
@@ -119,7 +119,7 @@ class AppConfig {
       ),
       streamingNxshaEnabled: _bool(
         _dotenvValue('STREAMING_NXSHA_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingNxshaMovieTemplate:
           _dotenvValue('STREAMING_NXSHA_MOVIE_TEMPLATE')?.trim() ??
@@ -143,7 +143,7 @@ class AppConfig {
       ),
       streamingTwoEmbedEnabled: _bool(
         _dotenvValue('STREAMING_2EMBED_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingTwoEmbedMovieTemplate:
           _dotenvValue('STREAMING_2EMBED_MOVIE_TEMPLATE')?.trim() ??

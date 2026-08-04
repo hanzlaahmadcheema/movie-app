@@ -2,8 +2,9 @@ name: Release All Platforms
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -13,8 +14,28 @@ env:
   APP_NAME: movie-app
 
 jobs:
+  tag:
+    name: Auto Generate Tag
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      new_version: ${{ steps.tag_version.outputs.new_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+
   android:
     name: Build Android APK
+    needs: tag
     runs-on: ubuntu-latest
 
     steps:
@@ -45,26 +66,27 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build debug APK
+      - name: Build release APK
         env:
           TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
         run: |
-          flutter build apk --debug \
+          flutter build apk --release \
             --dart-define=TMDB_READ_ACCESS_TOKEN="$TMDB_READ_ACCESS_TOKEN"
 
       - name: Prepare Android artifact
         run: |
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-debug.apk "dist/${APP_NAME}-android-debug.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/${APP_NAME}-android-release.apk"
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: dist/${{ env.APP_NAME }}-android-debug.apk
+          path: dist/${{ env.APP_NAME }}-android-release.apk
 
   web:
     name: Build Web
+    needs: tag
     runs-on: ubuntu-latest
 
     steps:
@@ -109,6 +131,7 @@ jobs:
 
   linux:
     name: Build Linux zip and deb
+    needs: tag
     runs-on: ubuntu-latest
 
     steps:
@@ -159,8 +182,8 @@ jobs:
 
       - name: Package Linux deb
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
+          VERSION="${{ needs.tag.outputs.new_version }}"
+          if [ -z "$VERSION" ]; then
             VERSION="0.1.0"
           fi
           rm -rf dist/deb
@@ -197,6 +220,7 @@ jobs:
 
   windows:
     name: Build Windows zip
+    needs: tag
     runs-on: windows-latest
 
     steps:
@@ -244,12 +268,12 @@ jobs:
   release:
     name: Publish GitHub Release
     needs:
+      - tag
       - android
       - web
       - linux
       - windows
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Checkout repository
@@ -269,7 +293,8 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          NEW_TAG: ${{ needs.tag.outputs.new_tag }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --title "Movie App $GITHUB_REF_NAME" \
+          gh release create "$NEW_TAG" dist/* \
+            --title "Movie App $NEW_TAG" \
             --generate-notes

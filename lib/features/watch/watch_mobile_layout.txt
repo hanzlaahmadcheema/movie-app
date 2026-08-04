@@ -1,0 +1,40 @@
+                              if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+                                return Scaffold(
+                                  backgroundColor: Colors.black,
+                                  body: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      EmbeddedWatchPlayerPanel(
+                                        request: activeRequest,
+                                        selectionPrompt: widget.isSeries
+                                            ? 'Select an episode to start playback.'
+                                            : 'Preparing player...',
+                                      ),
+                                      Positioned(
+                                        top: 16,
+                                        left: 16,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                                          onPressed: () => Navigator.of(context).pop(),
+                                        ),
+                                      ),
+                                      if (widget.isSeries)
+                                        Positioned(
+                                          top: 16,
+                                          right: 16,
+                                          child: ElevatedButton.icon(
+                                            icon: const Icon(Icons.list),
+                                            label: const Text('Episodes'),
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                backgroundColor: AppColors.background,
+                                                builder: (context) => _buildMobileEpisodeSheet(item, seasons, activity),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }

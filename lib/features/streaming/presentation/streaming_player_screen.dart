@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -495,6 +496,30 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
     final candidates = playerController?.candidates ?? const [];
     final currentIndex = playerController?.currentIndex ?? -1;
 
+    final bool isMobileLandscape = !kIsWeb && (Platform.isAndroid || Platform.isIOS) && MediaQuery.orientationOf(context) == Orientation.landscape;
+
+    if (isMobileLandscape) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildPlayerBody(),
+          if (candidates.isNotEmpty)
+            Positioned(
+              top: 16,
+              right: 140, // Next to episodes button
+              child: SafeArea(
+                child: _ServerDropdownSelector(
+                  candidates: candidates,
+                  currentIndex: currentIndex,
+                  enabled: playerController?.canUseControls ?? false,
+                  onSelected: (index) => playerController?.selectCandidate(index),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,6 +833,55 @@ class _ServerChip extends StatelessWidget {
       labelStyle: TextStyle(
         color: isSelected ? Colors.black : Colors.white,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+}
+
+class _ServerDropdownSelector extends StatelessWidget {
+  const _ServerDropdownSelector({
+    required this.candidates,
+    required this.currentIndex,
+    required this.enabled,
+    required this.onSelected,
+  });
+
+  final List<StreamingEmbedResult> candidates;
+  final int currentIndex;
+  final bool enabled;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (candidates.isEmpty) return const SizedBox();
+    
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: currentIndex >= 0 ? currentIndex : null,
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          dropdownColor: Colors.black87,
+          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          onChanged: enabled ? (int? newValue) {
+            if (newValue != null) {
+              onSelected(newValue);
+            }
+          } : null,
+          items: List.generate(
+            candidates.length,
+            (index) => DropdownMenuItem<int>(
+              value: index,
+              child: Text(candidates[index].server.displayName),
+            ),
+          ),
+        ),
       ),
     );
   }
