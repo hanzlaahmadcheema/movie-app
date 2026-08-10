@@ -106,9 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 onGoogleTap: _submitting || !config.googleLoginEnabled
                     ? null
                     : _signInWithGoogle,
-                onPhoneTap: _submitting || !config.phoneLoginEnabled
-                    ? null
-                    : () => Navigator.pushNamed(context, AppRoutes.phoneAuth),
               );
             },
           ),
@@ -298,9 +295,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onGoogleTap: _submitting || !config.googleLoginEnabled
                     ? null
                     : _signInWithGoogle,
-                onPhoneTap: _submitting || !config.phoneLoginEnabled
-                    ? null
-                    : () => Navigator.pushNamed(context, AppRoutes.phoneAuth),
               );
             },
           ),

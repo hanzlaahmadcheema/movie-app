@@ -97,10 +97,9 @@ class AuthPanel extends StatelessWidget {
 }
 
 class SocialButtons extends StatelessWidget {
-  const SocialButtons({this.onGoogleTap, this.onPhoneTap, super.key});
+  const SocialButtons({this.onGoogleTap, super.key});
 
   final VoidCallback? onGoogleTap;
-  final VoidCallback? onPhoneTap;
 
   @override
   Widget build(BuildContext context) {
@@ -141,16 +140,6 @@ class SocialButtons extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(width: 5),
-        SizedBox(
-          width: 44,
-          child: PrimaryButton(
-            label: '',
-            icon: Icons.phone,
-            height: 44,
-            onPressed: onPhoneTap,
           ),
         ),
       ],
