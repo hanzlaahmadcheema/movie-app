@@ -79,7 +79,7 @@ jobs:
           STORE_FILE: ${{ secrets.STORE_FILE }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo $KEYSTORE_BASE64 | base64 --decode > android/app/$STORE_FILE
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/$STORE_FILE
             cat <<EOF > android/key.properties
           storePassword=$STORE_PASSWORD
           keyPassword=$KEY_PASSWORD
