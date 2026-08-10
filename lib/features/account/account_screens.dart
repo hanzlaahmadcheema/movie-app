@@ -49,7 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final hasPasswordProvider = user.providerData.any(
             (provider) => provider.providerId == EmailAuthProvider.PROVIDER_ID,
           );
-          final hasPhoneNumber = user.phoneNumber?.isNotEmpty == true;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,128 +378,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _linkPhoneNumber() async {
-    final phoneController = TextEditingController();
-    final phoneNumber = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Add Phone Number'),
-        content: TextField(
-          controller: phoneController,
-          keyboardType: TextInputType.phone,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Phone number',
-            hintText: '+1234567890',
-            helperText: 'Include the country code.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = phoneController.text.trim();
-              if (!value.startsWith('+') || value.length < 8) return;
-              Navigator.of(dialogContext).pop(value);
-            },
-            child: const Text('Send Code'),
-          ),
-        ],
-      ),
-    );
-    phoneController.dispose();
-    if (phoneNumber == null || !mounted) return;
-
-    final verification = Completer<String>();
-    try {
-      await AuthService.instance.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: (_) {
-          // Account linking remains explicit so the user confirms the SMS code.
-        },
-        verificationFailed: (error) {
-          if (!verification.isCompleted) verification.completeError(error);
-        },
-        codeSent: (verificationId, _) {
-          if (!verification.isCompleted) verification.complete(verificationId);
-        },
-        codeAutoRetrievalTimeout: (verificationId) {
-          if (!verification.isCompleted) verification.complete(verificationId);
-        },
-      );
-      final verificationId = await verification.future;
-      if (!mounted) return;
-
-      final codeController = TextEditingController();
-      final smsCode = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Verify Phone Number'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Firebase accepted the request for $phoneNumber. Delivery '
-                  'can take a minute. Firebase test numbers do not receive an '
-                  'SMS; use their configured test code.',
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: codeController,
-                  keyboardType: TextInputType.number,
-                  autofocus: true,
-                  decoration: const InputDecoration(labelText: 'SMS code'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final value = codeController.text.trim();
-                if (value.length < 6) return;
-                Navigator.of(dialogContext).pop(value);
-              },
-              child: const Text('Verify'),
-            ),
-          ],
-        ),
-      );
-      codeController.dispose();
-      if (smsCode == null || !mounted) return;
-
-      await AuthService.instance.linkPhoneCode(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
-      if (!mounted) return;
-      _showSnackBarDeferred('Phone number added');
-    } on FirebaseAuthException catch (error) {
-      final message = switch (error.code) {
-        'invalid-phone-number' =>
-          'Enter a valid phone number with country code.',
-        'invalid-verification-code' => 'The SMS code is incorrect.',
-        'session-expired' => 'The SMS code expired. Request a new code.',
-        'credential-already-in-use' =>
-          'This phone number is already linked to another account.',
-        'provider-already-linked' =>
-          'A phone number is already linked to this account.',
-        'too-many-requests' => 'Too many attempts. Please try again later.',
-        _ => error.message ?? 'Could not add phone number. Try again.',
-      };
-      _showError(message);
-    } catch (_) {
-      _showError('Could not add phone number. Try again.');
-    }
-  }
 
   Future<void> _logout() async {
     await AuthService.instance.signOut();

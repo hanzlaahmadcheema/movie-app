@@ -68,7 +68,7 @@ class _ContinueWatchingSectionState extends State<ContinueWatchingSection> {
                   if (records.isEmpty) {
                     return const ContinueWatchingEmpty(compact: true);
                   }
-                  return Container(
+                  return SizedBox(
                     width: double.infinity,
                     height: 180,
                     child: ListView.separated(

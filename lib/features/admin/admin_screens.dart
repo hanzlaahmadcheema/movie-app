@@ -951,7 +951,7 @@ Future<void> _showUserManagementSheet(
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: ['user', 'admin', 'super_admin'].contains(role) ? role : 'user',
+                initialValue: ['user', 'admin', 'super_admin'].contains(role) ? role : 'user',
                 items: const [
                   DropdownMenuItem(value: 'user', child: Text('User')),
                   DropdownMenuItem(value: 'admin', child: Text('Admin')),
@@ -964,7 +964,7 @@ Future<void> _showUserManagementSheet(
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: ['active', 'blocked'].contains(status) ? status : 'active',
+                initialValue: ['active', 'blocked'].contains(status) ? status : 'active',
                 items: const [
                   DropdownMenuItem(value: 'active', child: Text('Active')),
                   DropdownMenuItem(value: 'blocked', child: Text('Blocked')),

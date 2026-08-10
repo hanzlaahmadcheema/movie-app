@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app/app_theme.dart';
-import 'buttons.dart';
 
 class AuthTextField extends StatelessWidget {
   const AuthTextField({

@@ -17,7 +17,6 @@ import '../../core/services/user_activity_repository.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/buttons.dart';
-import '../../widgets/continue_watching.dart';
 import '../../widgets/filter_widgets.dart';
 import '../../widgets/network_art.dart';
 import '../../widgets/poster_widgets.dart';
