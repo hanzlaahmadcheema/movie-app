@@ -86,7 +86,9 @@ service cloud.firestore {
         'status',
         'createdAt',
         'lastLoginAt',
-        'updatedAt'
+        'updatedAt',
+        'isVerified',
+        'verified'
       ]) &&
         data.uid == uid &&
         optionalString(data, 'email', 320) &&
@@ -97,6 +99,8 @@ service cloud.firestore {
         (!('providers' in data) || data.providers is list) &&
         (!('role' in data) || data.role == 'user') &&
         (!('status' in data) || data.status == 'active') &&
+        optionalBool(data, 'isVerified') &&
+        optionalBool(data, 'verified') &&
         optionalTimestamp(data, 'createdAt') &&
         optionalTimestamp(data, 'lastLoginAt') &&
         data.updatedAt is timestamp;
@@ -122,7 +126,9 @@ service cloud.firestore {
         'status',
         'createdAt',
         'lastLoginAt',
-        'updatedAt'
+        'updatedAt',
+        'isVerified',
+        'verified'
       ]) &&
         data.uid == uid &&
         optionalString(data, 'email', 320) &&
@@ -133,6 +139,8 @@ service cloud.firestore {
         (!('providers' in data) || data.providers is list) &&
         data.role in ['user', 'admin', 'super_admin'] &&
         data.status in ['active', 'blocked'] &&
+        optionalBool(data, 'isVerified') &&
+        optionalBool(data, 'verified') &&
         optionalTimestamp(data, 'createdAt') &&
         optionalTimestamp(data, 'lastLoginAt') &&
         data.updatedAt is timestamp;
@@ -529,7 +537,7 @@ service cloud.firestore {
       allow delete: if isOwner(uid);
       allow create: if isOwner(uid) && validProfileCreate(request.resource.data, uid);
       allow update: if (isOwner(uid) && validProfileUpdate(request.resource.data, uid)) ||
-        (isSuperAdmin() && validAdminManagedProfileUpdate(request.resource.data, uid));
+        (isAdmin() && validAdminManagedProfileUpdate(request.resource.data, uid));
 
       match /watchlist/{contentKey} {
         allow read, delete: if isOwner(uid);

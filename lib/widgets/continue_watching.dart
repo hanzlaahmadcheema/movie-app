@@ -68,8 +68,9 @@ class _ContinueWatchingSectionState extends State<ContinueWatchingSection> {
                   if (records.isEmpty) {
                     return const ContinueWatchingEmpty(compact: true);
                   }
-                  return SizedBox(
-                    height: 150,
+                  return Container(
+                    width: double.infinity,
+                    height: 180,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       scrollDirection: Axis.horizontal,
@@ -77,7 +78,7 @@ class _ContinueWatchingSectionState extends State<ContinueWatchingSection> {
                       separatorBuilder: (context, index) =>
                           const SizedBox(width: 10),
                       itemBuilder: (context, index) => SizedBox(
-                        width: 300,
+                        width: 320,
                         child: ContinueWatchingTile(record: records[index]),
                       ),
                     ),
@@ -153,6 +154,10 @@ class ContinueWatchingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = record.item;
     final activity = record.activity;
+    
+    final episodeLabel = _episodeLabel(activity);
+    final selectedServer = activity.selectedServer;
+    final durationSeconds = activity.durationSeconds;
     return Material(
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(10),
@@ -185,16 +190,20 @@ class ContinueWatchingTile extends StatelessWidget {
                       style: AppTextStyles.medium,
                     ),
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        _MetaChip(item.type),
-                        if (_episodeLabel(activity) != null)
-                          _MetaChip(_episodeLabel(activity)!),
-                        if (activity.selectedServer?.isNotEmpty == true)
-                          _MetaChip(activity.selectedServer!),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _MetaChip(item.type),
+                          const SizedBox(width: 6),
+                          if (episodeLabel != null) ...[
+                            _MetaChip(episodeLabel),
+                            const SizedBox(width: 6),
+                          ],
+                          if (selectedServer != null && selectedServer.trim().isNotEmpty)
+                            _MetaChip(selectedServer),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -205,31 +214,22 @@ class ContinueWatchingTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     const SizedBox(height: 6),
-                    if (activity.selectedServer == 'Jellyfin' && activity.durationSeconds != null && activity.durationSeconds! > 0) ...[
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final progress = (activity.positionSeconds / activity.durationSeconds!).clamp(0.0, 1.0);
-                          final remainingSeconds = activity.durationSeconds! - activity.positionSeconds;
+                    if (selectedServer == 'Jellyfin' && durationSeconds != null && durationSeconds > 0) ...[
+                      Builder(
+                        builder: (context) {
+                          final progress = (activity.positionSeconds / durationSeconds).clamp(0.0, 1.0);
+                          final remainingSeconds = durationSeconds - activity.positionSeconds;
                           final remainingMinutes = (remainingSeconds / 60).round();
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                height: 4,
-                                width: constraints.maxWidth,
-                                decoration: BoxDecoration(
-                                  color: Colors.white24,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                child: FractionallySizedBox(
-                                  alignment: Alignment.centerLeft,
-                                  widthFactor: progress,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: LinearProgressIndicator(
+                                  value: progress,
+                                  backgroundColor: Colors.white24,
+                                  color: AppColors.primary,
+                                  minHeight: 4,
                                 ),
                               ),
                               const SizedBox(height: 4),

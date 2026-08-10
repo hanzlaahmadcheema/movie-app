@@ -326,6 +326,7 @@ class AppRemoteConfig {
     this.jellyfinWebEnabled = true,
     this.tailscaleRequiredMessage = '',
     this.jellyfinSetupGuide = '',
+    this.paymentWhatsappLink = '',
   });
 
   final bool maintenanceMode;
@@ -347,6 +348,7 @@ class AppRemoteConfig {
   final bool jellyfinWebEnabled;
   final String tailscaleRequiredMessage;
   final String jellyfinSetupGuide;
+  final String paymentWhatsappLink;
 
   factory AppRemoteConfig.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? const {};
@@ -371,6 +373,7 @@ class AppRemoteConfig {
       tailscaleRequiredMessage: (data['tailscaleRequiredMessage'] ?? '')
           .toString(),
       jellyfinSetupGuide: (data['jellyfinSetupGuide'] ?? '').toString(),
+      paymentWhatsappLink: (data['paymentWhatsappLink'] ?? '').toString(),
     );
   }
 
@@ -395,6 +398,7 @@ class AppRemoteConfig {
       'jellyfinWebEnabled': jellyfinWebEnabled,
       'tailscaleRequiredMessage': tailscaleRequiredMessage.trim(),
       'jellyfinSetupGuide': jellyfinSetupGuide.trim(),
+      'paymentWhatsappLink': paymentWhatsappLink.trim(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
   }
@@ -1177,6 +1181,12 @@ class AdminRepository {
       jellyfinStatus: jellyfinStatus,
       latestReports: latestReports,
     );
+  }
+
+  Future<void> updateUser(String uid, Map<String, dynamic> data) async {
+    final firestore = _firestore;
+    if (firestore == null) return;
+    await firestore.collection('users').doc(uid).update(data);
   }
 
   Future<_UsersSummary> _loadUsersSummary(FirebaseFirestore? firestore) {

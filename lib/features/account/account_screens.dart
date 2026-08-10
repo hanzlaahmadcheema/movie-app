@@ -118,12 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       hasPasswordProvider ? 'Change Password' : 'Set Password',
                     ),
                   ),
-                  if (!hasPhoneNumber)
-                    OutlinedButton.icon(
-                      onPressed: _linkPhoneNumber,
-                      icon: const Icon(Icons.phone_android),
-                      label: const Text('Add Phone'),
-                    ),
                   OutlinedButton.icon(
                     onPressed: _logout,
                     icon: const Icon(Icons.logout),

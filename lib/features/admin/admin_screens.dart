@@ -902,9 +902,11 @@ class _UserSummaryCard extends StatelessWidget {
       child: ListTile(
         title: Text((data['displayName'] ?? 'Unknown user').toString()),
         subtitle: Text(
-          '${data['email'] ?? data['uid']} \nrole: ${data['role'] ?? 'user'} • status: ${data['status'] ?? 'active'}\ncreated: ${_dateLabel(createdAt)} • last login: ${_dateLabel(lastLoginAt)}',
+          '${data['email'] ?? data['uid']} \nrole: ${data['role'] ?? 'user'} • status: ${data['status'] ?? 'active'} • verified: ${data['isVerified'] == true || data['verified'] == true}\ncreated: ${_dateLabel(createdAt)} • last login: ${_dateLabel(lastLoginAt)}',
         ),
         isThreeLine: true,
+        trailing: const Icon(Icons.edit),
+        onTap: () => _showUserManagementSheet(context, doc),
       ),
     );
   }
@@ -915,6 +917,92 @@ String _dateLabel(DateTime? value) {
   final month = value.month.toString().padLeft(2, '0');
   final day = value.day.toString().padLeft(2, '0');
   return '${value.year}-$month-$day';
+}
+
+Future<void> _showUserManagementSheet(
+  BuildContext context,
+  QueryDocumentSnapshot<Map<String, dynamic>> doc,
+) async {
+  final data = doc.data();
+  var role = (data['role'] ?? 'user').toString();
+  var status = (data['status'] ?? 'active').toString();
+  var isVerified = data['isVerified'] == true || data['verified'] == true;
+
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surface,
+    builder: (sheetContext) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Manage ${(data['displayName'] ?? 'Unknown user')}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: ['user', 'admin', 'super_admin'].contains(role) ? role : 'user',
+                items: const [
+                  DropdownMenuItem(value: 'user', child: Text('User')),
+                  DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                  DropdownMenuItem(value: 'super_admin', child: Text('Super Admin')),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => role = value);
+                },
+                decoration: const InputDecoration(labelText: 'Role'),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: ['active', 'blocked'].contains(status) ? status : 'active',
+                items: const [
+                  DropdownMenuItem(value: 'active', child: Text('Active')),
+                  DropdownMenuItem(value: 'blocked', child: Text('Blocked')),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => status = value);
+                },
+                decoration: const InputDecoration(labelText: 'Status'),
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: const Text('Verified User'),
+                subtitle: const Text('Allows access to watch content'),
+                value: isVerified,
+                onChanged: (value) => setState(() => isVerified = value),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () async {
+                  await AdminRepository.instance.updateUser(
+                    doc.id,
+                    {
+                      'role': role,
+                      'status': status,
+                      'isVerified': isVerified,
+                    },
+                  );
+                  if (!sheetContext.mounted) return;
+                  Navigator.pop(sheetContext);
+                },
+                child: const Text('Save Changes'),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 Future<void> _showFeaturedDialog(
@@ -1550,6 +1638,9 @@ class _AppConfigFormState extends State<_AppConfigForm> {
   late final _whatsappController = TextEditingController(
     text: widget.config.supportWhatsapp,
   );
+  late final _paymentWhatsappController = TextEditingController(
+    text: widget.config.paymentWhatsappLink,
+  );
   late final _privacyController = TextEditingController(
     text: widget.config.privacyPolicyUrl,
   );
@@ -1570,6 +1661,7 @@ class _AppConfigFormState extends State<_AppConfigForm> {
     _forceUpdateController.dispose();
     _contactController.dispose();
     _whatsappController.dispose();
+    _paymentWhatsappController.dispose();
     _privacyController.dispose();
     _termsController.dispose();
     super.dispose();
@@ -1630,6 +1722,11 @@ class _AppConfigFormState extends State<_AppConfigForm> {
         ),
         const SizedBox(height: 12),
         TextField(
+          controller: _paymentWhatsappController,
+          decoration: const InputDecoration(labelText: 'Payment WhatsApp Link'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
           controller: _privacyController,
           decoration: const InputDecoration(labelText: 'Privacy policy URL'),
         ),
@@ -1663,6 +1760,7 @@ class _AppConfigFormState extends State<_AppConfigForm> {
           defaultPlaybackMode: widget.config.defaultPlaybackMode,
           contactEmail: _contactController.text,
           supportWhatsapp: _whatsappController.text,
+          paymentWhatsappLink: _paymentWhatsappController.text,
           privacyPolicyUrl: _privacyController.text,
           termsUrl: _termsController.text,
           defaultJellyfinServerUrl: widget.config.defaultJellyfinServerUrl,

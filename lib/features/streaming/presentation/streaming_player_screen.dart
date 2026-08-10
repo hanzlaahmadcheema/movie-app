@@ -506,7 +506,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           if (candidates.isNotEmpty)
             Positioned(
               top: 16,
-              right: 140, // Next to episodes button
+              right: 16,
               child: SafeArea(
                 child: _ServerDropdownSelector(
                   candidates: candidates,
@@ -622,13 +622,15 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
       StreamingPlayerStatus.ready => Stack(
         fit: StackFit.expand,
         children: [
-          WebViewWidget(
-            controller: _webViewController!,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<OneSequenceGestureRecognizer>(
-                () => EagerGestureRecognizer(),
-              ),
-            },
+          ExcludeSemantics(
+            child: WebViewWidget(
+              controller: _webViewController!,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                ),
+              },
+            ),
           ),
           if (playerController.status != StreamingPlayerStatus.ready)
             StreamingLoadingView(

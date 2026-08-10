@@ -4,6 +4,7 @@ import '../features/account/account_screens.dart';
 import '../features/admin/admin_screens.dart';
 import '../features/auth/auth_screens.dart';
 import '../features/auth/tv_login_screen.dart';
+import '../features/auth/payment_verification_screen.dart';
 import '../features/catalog/catalog_screens.dart';
 import '../features/details/detail_screens.dart';
 import '../features/home/home_screen.dart';
@@ -70,6 +71,7 @@ class AppRoutes {
   static const watchlist = '/watchlist';
   static const watched = '/watched';
   static const activity = '/activity';
+  static const verifyPayment = '/verify-payment';
   static const continueWatching = '/continue-watching';
   static const contact = '/contact';
   static const terms = '/terms';
@@ -203,6 +205,7 @@ class AppRoutes {
       jellyfinSettings: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvJellyfinSettingsScreen() : const JellyfinSettingsScreen()),
       jellyfinLogin: (_) => const JellyfinLoginScreen(),
       supportRequest: (_) => _authenticated(const ContentRequestFormScreen()),
+      verifyPayment: (_) => const PaymentVerificationScreen(),
     };
   }
 
@@ -476,10 +479,10 @@ class AppRoutes {
     RouteSettings settings,
     WatchPageRequest? request,
   ) {
-    return MaterialPageRoute<void>(
-      settings: settings,
-      builder: (_) => _hasValidItem(request?.item)
-          ? _appScreen(MovieWatchScreen(request: request))
+    return _verifiedWatchRoute(
+      settings,
+      _hasValidItem(request?.item)
+          ? MovieWatchScreen(request: request)
           : const InvalidRouteScreen(
               message: 'Movie watch requires a valid movie item.',
             ),
@@ -490,10 +493,10 @@ class AppRoutes {
     RouteSettings settings,
     WatchPageRequest? request,
   ) {
-    return MaterialPageRoute<void>(
-      settings: settings,
-      builder: (_) => _hasValidItem(request?.item)
-          ? _appScreen(SeriesWatchScreen(request: request))
+    return _verifiedWatchRoute(
+      settings,
+      _hasValidItem(request?.item)
+          ? SeriesWatchScreen(request: request)
           : const InvalidRouteScreen(
               message: 'Series watch requires a valid series item.',
             ),
@@ -603,6 +606,34 @@ class AppRoutes {
           return const VerifyEmailScreen();
         }
         return AdminRouteGate(child: child);
+      },
+    );
+  }
+
+  static Route<dynamic> _verifiedWatchRoute(RouteSettings settings, Widget child) {
+    return MaterialPageRoute<void>(
+      settings: settings,
+      builder: (_) {
+        final user = AuthService.instance.currentUser;
+        if (user == null) {
+          return DeviceDetector.instance.isTv ? const TvLoginScreen() : const LoginScreen();
+        }
+        if (AuthService.instance.requiresEmailVerification(user)) {
+          return const VerifyEmailScreen();
+        }
+        return FutureBuilder<CurrentUserRole>(
+          future: UserRoleService.instance.loadRole(user),
+          builder: (context, roleSnapshot) {
+            if (!roleSnapshot.hasData) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            final role = roleSnapshot.data!;
+            if (!role.isVerified) {
+              return const PaymentVerificationScreen();
+            }
+            return child;
+          },
+        );
       },
     );
   }

@@ -112,6 +112,7 @@ void main() {
         uid: 'admin-1',
         role: UserRoleValue.admin,
         status: UserAccountStatus.active,
+        isVerified: true,
       ),
     );
 
@@ -127,6 +128,7 @@ void main() {
         uid: 'user-1',
         role: UserRoleValue.user,
         status: UserAccountStatus.active,
+        isVerified: true,
       ),
     );
 
@@ -152,6 +154,7 @@ void main() {
         uid: 'user-1',
         role: UserRoleValue.user,
         status: UserAccountStatus.active,
+        isVerified: true,
       ),
     );
 
@@ -177,6 +180,7 @@ void main() {
         uid: 'user-1',
         role: UserRoleValue.user,
         status: UserAccountStatus.active,
+        isVerified: true,
       ),
     );
     expect(target.route, AppRoutes.home);
@@ -198,6 +202,7 @@ void main() {
         uid: 'user-1',
         role: UserRoleValue.user,
         status: UserAccountStatus.active,
+        isVerified: true,
       ),
     );
     expect(target.route, AppRoutes.home);
@@ -213,6 +218,7 @@ extension on CurrentUserRole {
       uid: uid,
       role: role,
       status: UserAccountStatus.active,
+      isVerified: true,
     );
   }
 }

@@ -3,11 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../app/app_routes.dart';
+import '../../../core/models/movie_item.dart';
+import '../../../core/services/tmdb_repository.dart';
 import '../../../app/app_theme.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/navigation/content_navigation.dart';
-import '../../../core/models/movie_item.dart';
-import '../../../core/services/tmdb_repository.dart';
 import '../../../core/services/admin_repository.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../widgets/app_shell.dart';
@@ -279,7 +279,9 @@ class _TvIconButtonState extends State<_TvIconButton> {
         onTap: widget.onTap,
         child: Semantics(
           button: true,
+          focusable: true,
           label: 'Navigation Icon',
+          onTap: widget.onTap,
           child: AnimatedScale(
             scale: _isFocused ? 1.08 : 1.0,
             duration: const Duration(milliseconds: 200),
@@ -716,7 +718,9 @@ class _TvMoviePosterState extends State<TvMoviePoster> {
         child: Semantics(
           label: 'Movie Poster: ${widget.item.title}',
           button: true,
+          focusable: true,
           focused: _isFocused,
+          onTap: () => openDetailForItem(context, widget.item),
           child: AnimatedScale(
             scale: _isFocused ? 1.08 : 1.0,
             duration: const Duration(milliseconds: 200),

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -148,8 +148,7 @@ class _WatchPageState extends State<_WatchPage> {
       );
     }
 
-    return AppShell(
-      body: Stack(
+    final content = Stack(
         children: [
           FutureBuilder<TmdbDetail?>(
             future: detailFuture,
@@ -184,21 +183,6 @@ class _WatchPageState extends State<_WatchPage> {
                 );
               }
 
-              if (widget.isSeries &&
-                  selectedSeasonNumber == null &&
-                  seasons.isNotEmpty) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  setState(() {
-                    selectedSeasonNumber = seasons.first.number;
-                    episodesFuture = _loadEpisodes(
-                      item.id,
-                      seasons.first.number,
-                    );
-                  });
-                });
-              }
-
               return StreamBuilder(
                 stream: AuthService.instance.authStateChanges,
                 builder: (context, authSnapshot) {
@@ -219,34 +203,45 @@ class _WatchPageState extends State<_WatchPage> {
                           if (widget.isSeries &&
                               activeRequest == null &&
                               widget.request?.autoPlay != false &&
-                              activity.seasonNumber != null &&
-                              activity.episodeNumber != null &&
-                              selectedSeasonNumber == null) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              selectedSeasonNumber == null &&
+                              seasons.isNotEmpty) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) async {
                               if (!mounted) return;
+                              final autoSeason = activity.seasonNumber ?? seasons.first.number;
                               setState(() {
-                                selectedSeasonNumber = activity.seasonNumber;
-                                episodesFuture = _loadEpisodes(
-                                  item.id,
-                                  activity.seasonNumber!,
-                                );
-                                activeRequest =
-                                    StreamingEmbedRequest.episode(
-                                      item: item,
-                                      seasonNumber: activity.seasonNumber!,
-                                      episodeNumber: activity.episodeNumber!,
-                                      episodeTitle: activity.episodeTitle,
-                                    ).copyWith(
-                                      preferredProviderId:
-                                          widget.request?.selectedProviderId,
-                                      jellyfinPlaybackModeOverride:
-                                          widget.request?.playbackMode,
-                                      resumePositionSeconds:
-                                          widget.request?.resumePositionSeconds,
-                                      resumeDurationSeconds:
-                                          widget.request?.resumeDurationSeconds,
-                                    );
+                                selectedSeasonNumber = autoSeason;
+                                episodesFuture = _loadEpisodes(item.id, autoSeason);
                               });
+                              
+                              if (activity.seasonNumber != null && activity.episodeNumber != null) {
+                                setState(() {
+                                  activeRequest = StreamingEmbedRequest.episode(
+                                    item: item,
+                                    seasonNumber: activity.seasonNumber!,
+                                    episodeNumber: activity.episodeNumber!,
+                                    episodeTitle: activity.episodeTitle,
+                                  ).copyWith(
+                                    preferredProviderId: widget.request?.selectedProviderId,
+                                    jellyfinPlaybackModeOverride: widget.request?.playbackMode,
+                                    resumePositionSeconds: widget.request?.resumePositionSeconds,
+                                    resumeDurationSeconds: widget.request?.resumeDurationSeconds,
+                                  );
+                                });
+                              } else {
+                                try {
+                                  final eps = await _loadEpisodes(item.id, autoSeason);
+                                  if (eps.isNotEmpty && mounted && activeRequest == null) {
+                                    setState(() {
+                                      activeRequest = StreamingEmbedRequest.episode(
+                                        item: item,
+                                        seasonNumber: autoSeason,
+                                        episodeNumber: eps.first.number,
+                                        episodeTitle: eps.first.title,
+                                      );
+                                    });
+                                  }
+                                } catch (_) {}
+                              }
                             });
                           }
                           return StreamBuilder<bool>(
@@ -349,7 +344,7 @@ class _WatchPageState extends State<_WatchPage> {
                                       if (widget.isSeries)
                                         Positioned(
                                           top: 16,
-                                          right: 16,
+                                          right: 150,
                                           child: Builder(
                                             builder: (ctx) => ElevatedButton.icon(
                                               icon: const Icon(Icons.list),
@@ -589,10 +584,15 @@ class _WatchPageState extends State<_WatchPage> {
               );
             },
           ),
-          const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
+          if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS))
+            const Positioned(top: 0, left: 0, right: 0, child: MovieAppBar()),
         ],
-      ),
-    );
+      );
+      
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      return content;
+    }
+    return AppShell(body: content);
   }
 
   Widget _buildTvWatchPage({
@@ -945,10 +945,7 @@ class _WatchPageState extends State<_WatchPage> {
         seasonNumber: seasonNumber,
       );
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not save. Try again.')),
-      );
+      // Background sync, fail silently
     }
   }
 
@@ -967,10 +964,7 @@ class _WatchPageState extends State<_WatchPage> {
           episode: episode,
         );
       } catch (_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not save. Try again.')),
-        );
+        // Background sync, fail silently
       }
     }
 

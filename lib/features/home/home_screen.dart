@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 24),
-                                  const ContinueWatchingSection(),
+                                  // const ContinueWatchingSection(),
                                   if (data.notices.isNotEmpty) ...[
                                     const SizedBox(height: 18),
                                     Column(

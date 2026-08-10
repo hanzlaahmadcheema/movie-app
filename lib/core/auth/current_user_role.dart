@@ -7,16 +7,19 @@ class CurrentUserRole {
     required this.uid,
     required this.role,
     required this.status,
+    required this.isVerified,
   });
 
   const CurrentUserRole.signedOut()
     : uid = '',
       role = UserRoleValue.user,
-      status = UserAccountStatus.active;
+      status = UserAccountStatus.active,
+      isVerified = false;
 
   final String uid;
   final UserRoleValue role;
   final UserAccountStatus status;
+  final bool isVerified;
 
   bool get isSignedIn => uid.trim().isNotEmpty;
   bool get isAdmin => role == UserRoleValue.admin || role == UserRoleValue.superAdmin;
@@ -40,17 +43,20 @@ class CurrentUserRole {
         .toString()
         .trim()
         .toLowerCase();
+    final role = switch (roleValue) {
+      'admin' => UserRoleValue.admin,
+      'super_admin' => UserRoleValue.superAdmin,
+      _ => UserRoleValue.user,
+    };
+    final isAdminOrSuper = role == UserRoleValue.admin || role == UserRoleValue.superAdmin;
     return CurrentUserRole(
       uid: uid,
-      role: switch (roleValue) {
-        'admin' => UserRoleValue.admin,
-        'super_admin' => UserRoleValue.superAdmin,
-        _ => UserRoleValue.user,
-      },
+      role: role,
       status: switch (statusValue) {
         'blocked' => UserAccountStatus.blocked,
         _ => UserAccountStatus.active,
       },
+      isVerified: isAdminOrSuper || json?['isVerified'] == true || json?['verified'] == true,
     );
   }
 }
