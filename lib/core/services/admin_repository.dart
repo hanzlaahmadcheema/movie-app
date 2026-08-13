@@ -762,6 +762,9 @@ class AdminRepository {
   DocumentReference<Map<String, dynamic>> get _appConfigDoc =>
       _firestore!.doc(AdminPaths.appConfigMain);
 
+  AppRemoteConfig? _cachedConfig;
+  DateTime? _configFetchedTime;
+
   Stream<AppRemoteConfig> watchPublicAppConfig() async* {
     final firestore = _firestore;
     if (firestore == null && appConfigLoader == null) {
@@ -770,15 +773,24 @@ class AdminRepository {
     }
     try {
       await for (final snapshot in _appConfigDoc.snapshots()) {
-        yield AppRemoteConfig.fromDoc(snapshot);
+        final config = AppRemoteConfig.fromDoc(snapshot);
+        _cachedConfig = config;
+        _configFetchedTime = DateTime.now();
+        yield config;
       }
     } catch (error) {
       _logFirestoreFallback('watchPublicAppConfig', error);
-      yield const AppRemoteConfig();
+      yield _cachedConfig ?? const AppRemoteConfig();
     }
   }
 
-  Future<AppRemoteConfig> loadPublicAppConfig() async {
+  Future<AppRemoteConfig> loadPublicAppConfig({bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _cachedConfig != null &&
+        _configFetchedTime != null &&
+        DateTime.now().difference(_configFetchedTime!) < const Duration(minutes: 10)) {
+      return _cachedConfig!;
+    }
     final firestore = _firestore;
     if (firestore == null && appConfigLoader == null) {
       return const AppRemoteConfig();
@@ -786,10 +798,13 @@ class AdminRepository {
     try {
       final snapshot =
           await appConfigLoader?.call() ?? await _appConfigDoc.get();
-      return AppRemoteConfig.fromDoc(snapshot);
+      final config = AppRemoteConfig.fromDoc(snapshot);
+      _cachedConfig = config;
+      _configFetchedTime = DateTime.now();
+      return config;
     } catch (error) {
       _logFirestoreFallback('loadPublicAppConfig', error);
-      return const AppRemoteConfig();
+      return _cachedConfig ?? const AppRemoteConfig();
     }
   }
 

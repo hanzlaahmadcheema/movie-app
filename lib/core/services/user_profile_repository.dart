@@ -6,6 +6,7 @@ class UserProfileRepository {
   UserProfileRepository._();
 
   static final UserProfileRepository instance = UserProfileRepository._();
+  String? _lastUpsertedUid;
 
   FirebaseFirestore? get _firestore {
     if (Firebase.apps.isEmpty) {
@@ -14,7 +15,12 @@ class UserProfileRepository {
     return FirebaseFirestore.instance;
   }
 
-  Future<void> upsertProfile(User user) async {
+  void clearSession() => _lastUpsertedUid = null;
+
+  Future<void> upsertProfile(User user, {bool force = false}) async {
+    if (!force && _lastUpsertedUid == user.uid) {
+      return;
+    }
     final firestore = _firestore;
     if (firestore == null) {
       return Future<void>.value();
@@ -47,5 +53,7 @@ class UserProfileRepository {
       'lastLoginAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
+
+    _lastUpsertedUid = user.uid;
   }
 }
