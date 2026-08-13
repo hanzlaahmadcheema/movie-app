@@ -33,8 +33,25 @@ class StreamingNavigationPolicy {
       );
     }
 
+    const blockedSchemes = {
+      'intent',
+      'market',
+      'javascript',
+      'whatsapp',
+      'tg',
+      'telegram',
+      'mailto',
+      'tel',
+      'sms',
+    };
+    if (blockedSchemes.contains(uri.scheme.toLowerCase())) {
+      return StreamingNavigationDecision.block(
+        'Blocked unsupported/external scheme: ${uri.scheme}',
+      );
+    }
+
     const passiveSchemes = {'about', 'data', 'blob'};
-    if (passiveSchemes.contains(uri.scheme)) {
+    if (passiveSchemes.contains(uri.scheme.toLowerCase())) {
       return const StreamingNavigationDecision.allow();
     }
 

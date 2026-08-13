@@ -188,6 +188,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
     if (controller.platform is AndroidWebViewController) {
       final androidController = controller.platform as AndroidWebViewController;
       unawaited(androidController.setMediaPlaybackRequiresUserGesture(false));
+      androidController.setOnPlatformPermissionRequest((request) => request.deny());
       unawaited(
         androidController.setCustomWidgetCallbacks(
           onShowCustomWidget: _showFullscreenWidget,

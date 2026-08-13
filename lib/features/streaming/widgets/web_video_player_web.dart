@@ -31,10 +31,24 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
     }
   }
 
+  bool get _isDirectStream {
+    final path = widget.url.path.toLowerCase();
+    return path.endsWith('.m3u8') || path.endsWith('.mp4');
+  }
+
   void _registerView() {
     _viewType =
         'movie-app-player-${identityHashCode(this)}-${widget.url.hashCode}';
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (_) {
+      if (_isDirectStream) {
+        return html.VideoElement()
+          ..src = widget.url.toString()
+          ..style.border = '0'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..controls = true
+          ..autoplay = true;
+      }
       final iframe = html.IFrameElement()
         ..src = widget.url.toString()
         ..style.border = '0'
