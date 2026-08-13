@@ -35,14 +35,19 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
     _viewType =
         'movie-app-player-${identityHashCode(this)}-${widget.url.hashCode}';
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (_) {
-      return html.IFrameElement()
+      final iframe = html.IFrameElement()
         ..src = widget.url.toString()
         ..style.border = '0'
         ..style.width = '100%'
         ..style.height = '100%'
-        ..allow = 'autoplay; fullscreen; picture-in-picture'
+        ..allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer'
         ..allowFullscreen = true
         ..referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer');
+      iframe.setAttribute('allowfullscreen', 'true');
+      iframe.setAttribute('webkitallowfullscreen', 'true');
+      iframe.setAttribute('mozallowfullscreen', 'true');
+      return iframe;
     });
   }
 

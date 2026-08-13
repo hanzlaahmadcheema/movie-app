@@ -8,6 +8,18 @@ import '../core/navigation/app_navigation_observer.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
 
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
+}
+
 class MovieApp extends StatefulWidget {
   const MovieApp({super.key, this.navigationObserver});
 
@@ -48,10 +60,6 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
         unawaited(_navigationObserver.persistCurrentRoute());
         break;
       case AppLifecycleState.resumed:
-        // Android can emit inactive/resumed for transient system UI such as the
-        // notification shade. Resume must not navigate, remount MaterialApp, or
-        // re-run splash/auth bootstrap; cold-start routing is handled only by
-        // the initial splash route.
         break;
     }
   }
@@ -66,6 +74,7 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
       title: 'MovieApp',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
+      scrollBehavior: const AppScrollBehavior(),
       navigatorObservers: [_navigationObserver],
       initialRoute: _initialRoute,
       onGenerateInitialRoutes: _generateInitialRoutes,
