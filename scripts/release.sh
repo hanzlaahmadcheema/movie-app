@@ -45,13 +45,23 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 # ==========================================
-# 3. Verify required tools exist
+# 3. Verify required tools & signing config
 # ==========================================
 for tool in git flutter dart; do
   if ! command -v $tool &> /dev/null; then
     fatal "$tool is required but not installed."
   fi
 done
+
+if [ ! -f "key.properties" ]; then
+  info "Generating key.properties..."
+  cat << 'EOF' > key.properties
+storePassword=android123
+keyPassword=android123
+keyAlias=upload
+storeFile=app/upload-keystore.jks
+EOF
+fi
 
 GH_AVAILABLE=false
 if command -v gh &> /dev/null; then
