@@ -64,6 +64,8 @@ service cloud.firestore {
         data.year.size() <= 20 &&
         optionalString(data, 'posterPath', 300) &&
         optionalString(data, 'backdropPath', 300) &&
+        optionalString(data, 'imdbId', 50) &&
+        (!('originCountryCodes' in data) || data.originCountryCodes is list) &&
         data.posterUrl is string &&
         data.posterUrl.size() <= 600 &&
         data.backdropUrl is string &&
@@ -155,6 +157,8 @@ service cloud.firestore {
         'year',
         'posterPath',
         'backdropPath',
+        'imdbId',
+        'originCountryCodes',
         'posterUrl',
         'backdropUrl',
         'voteAverage',
@@ -187,6 +191,8 @@ service cloud.firestore {
         'year',
         'posterPath',
         'backdropPath',
+        'imdbId',
+        'originCountryCodes',
         'posterUrl',
         'backdropUrl',
         'voteAverage',
@@ -222,6 +228,8 @@ service cloud.firestore {
         'year',
         'posterPath',
         'backdropPath',
+        'imdbId',
+        'originCountryCodes',
         'posterUrl',
         'backdropUrl',
         'voteAverage',
@@ -415,6 +423,7 @@ service cloud.firestore {
         'jellyfinWebEnabled',
         'tailscaleRequiredMessage',
         'jellyfinSetupGuide',
+        'paymentWhatsappLink',
         'updatedAt'
       ]) &&
         optionalBool(data, 'maintenanceMode') &&
@@ -436,6 +445,7 @@ service cloud.firestore {
         optionalBool(data, 'jellyfinWebEnabled') &&
         optionalString(data, 'tailscaleRequiredMessage', 300) &&
         optionalString(data, 'jellyfinSetupGuide', 4000) &&
+        optionalString(data, 'paymentWhatsappLink', 1000) &&
         data.updatedAt is timestamp;
     }
 

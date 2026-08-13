@@ -42,8 +42,13 @@ class CachedTmdbImage extends StatelessWidget {
       url,
       imageType,
     );
+    final double currentWidth = width ?? 0;
+    final int targetCacheWidth = currentWidth > 0
+        ? (currentWidth * 2).toInt()
+        : (imageType == LocalImageCacheService.imageTypeBackdrop ? 800 : 350);
+
     if (!LocalImageCacheService.isCacheableTmdbUrl(normalizedUrl)) {
-      return _networkImage(normalizedUrl, fallbackWidget);
+      return _networkImage(normalizedUrl, fallbackWidget, targetCacheWidth);
     }
 
     return FutureBuilder<File?>(
@@ -59,14 +64,15 @@ class CachedTmdbImage extends StatelessWidget {
             fit: fit,
             width: width,
             height: height,
+            cacheWidth: targetCacheWidth,
             filterQuality: filterQuality,
             errorBuilder: (context, error, stackTrace) =>
-                _networkImage(normalizedUrl, fallbackWidget),
+                _networkImage(normalizedUrl, fallbackWidget, targetCacheWidth),
           );
         }
 
         if (snapshot.hasError) {
-          return _networkImage(normalizedUrl, fallbackWidget);
+          return _networkImage(normalizedUrl, fallbackWidget, targetCacheWidth);
         }
 
         return Stack(
@@ -86,12 +92,13 @@ class CachedTmdbImage extends StatelessWidget {
     );
   }
 
-  Widget _networkImage(String imageUrl, Widget fallbackWidget) {
+  Widget _networkImage(String imageUrl, Widget fallbackWidget, int? targetCacheWidth) {
     return Image.network(
       imageUrl,
       fit: fit,
       width: width,
       height: height,
+      cacheWidth: targetCacheWidth,
       filterQuality: filterQuality,
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;

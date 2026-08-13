@@ -107,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 24),
-                                  // const ContinueWatchingSection(),
                                   if (data.notices.isNotEmpty) ...[
                                     const SizedBox(height: 18),
                                     Column(
@@ -274,21 +273,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final featured = futures[5] as List<FeaturedContentConfig>;
     final notices = futures[6] as List<AdminNotice>;
 
-    final heroItems = await _resolveAdminItems(
-      repository: repository,
-      ids: banners
-          .map(
-            (banner) =>
-                (tmdbId: banner.tmdbId, contentType: banner.contentType),
-          )
-          .toList(growable: false),
-    );
-    final featuredItems = await _resolveAdminItems(
-      repository: repository,
-      ids: featured
-          .map((item) => (tmdbId: item.tmdbId, contentType: item.contentType))
-          .toList(growable: false),
-    );
+    final adminResults = await Future.wait<List<MovieItem>>([
+      _resolveAdminItems(
+        repository: repository,
+        ids: banners
+            .map(
+              (banner) =>
+                  (tmdbId: banner.tmdbId, contentType: banner.contentType),
+            )
+            .toList(growable: false),
+      ),
+      _resolveAdminItems(
+        repository: repository,
+        ids: featured
+            .map((item) => (tmdbId: item.tmdbId, contentType: item.contentType))
+            .toList(growable: false),
+      ),
+    ]);
+    final heroItems = adminResults[0];
+    final featuredItems = adminResults[1];
 
     return HomeContentData(
       heroItems: heroItems,
@@ -305,16 +308,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required TmdbRepository repository,
     required List<({int tmdbId, AdminContentType contentType})> ids,
   }) async {
-    final items = <MovieItem>[];
-    for (final entry in ids) {
-      final item = entry.contentType == AdminContentType.series
-          ? await repository.seriesById(entry.tmdbId)
-          : await repository.movieById(entry.tmdbId);
-      if (item != null) {
-        items.add(item);
-      }
-    }
-    return items;
+    if (ids.isEmpty) return const [];
+    final futures = ids.map((entry) {
+      return entry.contentType == AdminContentType.series
+          ? repository.seriesById(entry.tmdbId)
+          : repository.movieById(entry.tmdbId);
+    });
+    final results = await Future.wait(futures);
+    return results.whereType<MovieItem>().toList(growable: false);
   }
 }
 

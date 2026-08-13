@@ -191,8 +191,6 @@ class _TvHomeScreenState extends State<TvHomeScreen> {
                     children: [
                       TvHeroBanner(items: data.heroItems),
                       const SizedBox(height: 32),
-                      const TvContinueWatchingRow(),
-                      const SizedBox(height: 24),
                       TvContentRow(title: 'Trending', items: data.trendingMovies, onFocus: _scrollToCenter),
                       TvContentRow(title: 'Popular Movies', items: data.popularMovies, onFocus: _scrollToCenter),
                       TvContentRow(title: 'Popular Series', items: data.popularSeries, onFocus: _scrollToCenter),

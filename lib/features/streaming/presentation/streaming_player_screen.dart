@@ -77,9 +77,14 @@ class _StreamingPlayerScreenState extends State<StreamingPlayerScreen> {
 }
 
 class StreamingPlayerPanel extends StatefulWidget {
-  const StreamingPlayerPanel({required this.request, super.key});
+  const StreamingPlayerPanel({
+    required this.request,
+    this.topRightActions = const <Widget>[],
+    super.key,
+  });
 
   final StreamingEmbedRequest? request;
+  final List<Widget> topRightActions;
 
   @override
   State<StreamingPlayerPanel> createState() => _StreamingPlayerPanelState();
@@ -503,19 +508,35 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
         fit: StackFit.expand,
         children: [
           _buildPlayerBody(),
-          if (candidates.isNotEmpty)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: SafeArea(
-                child: _ServerDropdownSelector(
-                  candidates: candidates,
-                  currentIndex: currentIndex,
-                  enabled: playerController?.canUseControls ?? false,
-                  onSelected: (index) => playerController?.selectCandidate(index),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const Spacer(),
+                    if (candidates.isNotEmpty) ...[
+                      ServerDropdownSelector(
+                        candidates: candidates,
+                        currentIndex: currentIndex,
+                        enabled: playerController?.canUseControls ?? false,
+                        onSelected: (index) => playerController?.selectCandidate(index),
+                      ),
+                      if (widget.topRightActions.isNotEmpty) const SizedBox(width: 8),
+                    ],
+                    ...widget.topRightActions,
+                  ],
                 ),
               ),
             ),
+          ),
         ],
       );
     }
@@ -840,12 +861,13 @@ class _ServerChip extends StatelessWidget {
   }
 }
 
-class _ServerDropdownSelector extends StatelessWidget {
-  const _ServerDropdownSelector({
+class ServerDropdownSelector extends StatelessWidget {
+  const ServerDropdownSelector({
     required this.candidates,
     required this.currentIndex,
     required this.enabled,
     required this.onSelected,
+    super.key,
   });
 
   final List<StreamingEmbedResult> candidates;
@@ -856,21 +878,21 @@ class _ServerDropdownSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (candidates.isEmpty) return const SizedBox();
-    
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7),
+        color: Colors.black.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white24),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: currentIndex >= 0 ? currentIndex : null,
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
           dropdownColor: Colors.black87,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
           onChanged: enabled ? (int? newValue) {
             if (newValue != null) {
               onSelected(newValue);

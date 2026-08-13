@@ -77,8 +77,8 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
 
   String _resolveInitialRoute() {
     final routeName = PlatformDispatcher.instance.defaultRouteName.trim();
-    if (routeName.isEmpty || routeName == '/') {
-      return AppRoutes.splash;
+    if (routeName.isEmpty || routeName == '/' || routeName == AppRoutes.splash) {
+      return AppRoutes.home;
     }
     return routeName;
   }

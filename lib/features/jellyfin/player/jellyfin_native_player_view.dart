@@ -47,7 +47,6 @@ class JellyfinNativePlayerView extends StatefulWidget {
 class _JellyfinNativePlayerViewState extends State<JellyfinNativePlayerView>
     with WidgetsBindingObserver {
   static const _playerAspectRatio = 16 / 9;
-  static const _progressSaveInterval = Duration(seconds: 15);
   static const _controlsAutoHideDelay = Duration(seconds: 3);
   static const _speedOptions = <double>[0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -132,9 +131,6 @@ class _JellyfinNativePlayerViewState extends State<JellyfinNativePlayerView>
         return;
       }
       _progressTimer?.cancel();
-      _progressTimer = Timer.periodic(_progressSaveInterval, (_) {
-        unawaited(_syncProgress());
-      });
       setState(() {
         _candidate = candidate;
         _controller = controller;

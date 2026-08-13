@@ -35,6 +35,9 @@ class LocalImageCacheService {
   static const _tmdbImageHost = 'image.tmdb.org';
   static const _cacheFolderName = 'tmdb_image_cache';
 
+  static final Map<String, File> _memCache = {};
+  DateTime? _lastCleanupTime;
+
   final ImageCacheDao _dao;
   final ImageBytesDownloader _downloader;
   final CacheDirectoryProvider _cacheDirectoryProvider;
@@ -49,13 +52,22 @@ class LocalImageCacheService {
       return null;
     }
 
+    final cachedMemory = _memCache[normalizedUrl];
+    if (cachedMemory != null) {
+      if (await cachedMemory.exists()) {
+        return cachedMemory;
+      }
+      _memCache.remove(normalizedUrl);
+    }
+
     final now = _nowProvider();
     final entry = await _dao.findByRemoteUrl(normalizedUrl);
     if (entry != null) {
       final file = File(entry.localPath);
       if (await file.exists()) {
-        await _dao.touch(normalizedUrl, now);
-        unawaited(cleanupOldCacheFiles());
+        _memCache[normalizedUrl] = file;
+        unawaited(_dao.touch(normalizedUrl, now));
+        _maybeCleanupOldCacheFiles();
         return file;
       }
     }
@@ -65,8 +77,18 @@ class LocalImageCacheService {
       imageType: imageType,
       now: now,
     );
-    unawaited(cleanupOldCacheFiles());
+    _memCache[normalizedUrl] = file;
+    _maybeCleanupOldCacheFiles();
     return file;
+  }
+
+  void _maybeCleanupOldCacheFiles() {
+    final now = _nowProvider();
+    if (_lastCleanupTime == null ||
+        now.difference(_lastCleanupTime!) > const Duration(hours: 24)) {
+      _lastCleanupTime = now;
+      unawaited(cleanupOldCacheFiles());
+    }
   }
 
   Future<void> cleanupOldCacheFiles({

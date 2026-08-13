@@ -292,20 +292,34 @@ class TmdbRepository {
     );
   }
 
+  static final Map<String, dynamic> _apiMemoryCache = {};
+
   Future<MovieItem?> movieById(int tmdbId) async {
     if (tmdbId <= 0) {
       return null;
     }
+    final cacheKey = 'movie_$tmdbId';
+    final cached = _apiMemoryCache[cacheKey];
+    if (cached is MovieItem) return cached;
+
     final data = await _client.get('/movie/$tmdbId');
-    return _itemFromJson(data, fallbackMediaType: MediaType.movie);
+    final item = _itemFromJson(data, fallbackMediaType: MediaType.movie);
+    _apiMemoryCache[cacheKey] = item;
+    return item;
   }
 
   Future<MovieItem?> seriesById(int tmdbId) async {
     if (tmdbId <= 0) {
       return null;
     }
+    final cacheKey = 'tv_$tmdbId';
+    final cached = _apiMemoryCache[cacheKey];
+    if (cached is MovieItem) return cached;
+
     final data = await _client.get('/tv/$tmdbId');
-    return _itemFromJson(data, fallbackMediaType: MediaType.tv);
+    final item = _itemFromJson(data, fallbackMediaType: MediaType.tv);
+    _apiMemoryCache[cacheKey] = item;
+    return item;
   }
 
   Future<List<TmdbOption>> movieGenres() async {
@@ -443,6 +457,13 @@ class TmdbRepository {
     Map<String, String?> query = const {},
     MediaType fallbackMediaType = MediaType.movie,
   }) async {
+    final queryStr = query.entries.map((e) => '${e.key}=${e.value}').join('&');
+    final cacheKey = 'paged:$path?$queryStr';
+    final cached = _apiMemoryCache[cacheKey];
+    if (cached is TmdbPage<MovieItem>) {
+      return cached;
+    }
+
     final data = await _client.get(path, query: query);
     if (data is! Map<String, dynamic>) {
       return const TmdbPage<MovieItem>(
@@ -471,12 +492,14 @@ class TmdbRepository {
         .where((item) => item.title.isNotEmpty && item.posterUrl.isNotEmpty)
         .toList();
 
-    return TmdbPage<MovieItem>(
+    final page = TmdbPage<MovieItem>(
       items: items,
       page: _asInt(data['page'], fallback: 1),
       totalPages: _normalizedTotalPages(data['total_pages']),
       totalResults: _asInt(data['total_results'], fallback: items.length),
     );
+    _apiMemoryCache[cacheKey] = page;
+    return page;
   }
 
   Future<List<TmdbOption>> _options(String path) async {

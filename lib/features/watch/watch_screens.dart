@@ -68,7 +68,76 @@ class _WatchPageState extends State<_WatchPage> {
   String? _openedContentKey;
   StreamingEmbedRequest? activeRequest;
 
+  bool _showAutoPlayCountdown = false;
+  Episode? _nextEpisodeToPlay;
+  int? _nextSeasonNumberToPlay;
+
   MovieItem? get _item => widget.request?.item;
+
+  Future<void> _triggerNextEpisodeCountdown(
+    MovieItem item,
+    List<TmdbSeason> seasons,
+  ) async {
+    final req = activeRequest;
+    if (!widget.isSeries ||
+        req == null ||
+        req.seasonNumber == null ||
+        req.episodeNumber == null) {
+      return;
+    }
+    final currentSeason = req.seasonNumber!;
+    final currentEpNum = req.episodeNumber!;
+
+    try {
+      final currentEpisodes =
+          await (episodesFuture ?? _loadEpisodes(item.id, currentSeason));
+      final currentIndex = currentEpisodes.indexWhere(
+        (e) => e.number == currentEpNum,
+      );
+
+      if (currentIndex >= 0 && currentIndex + 1 < currentEpisodes.length) {
+        final nextEp = currentEpisodes[currentIndex + 1];
+        if (mounted) {
+          setState(() {
+            _nextEpisodeToPlay = nextEp;
+            _nextSeasonNumberToPlay = currentSeason;
+            _showAutoPlayCountdown = true;
+          });
+        }
+      } else {
+        final nextSeasonObj = seasons.firstWhere(
+          (s) => s.number > currentSeason,
+          orElse: () => const TmdbSeason(number: -1, name: '', episodeCount: 0),
+        );
+        if (nextSeasonObj.number > 0) {
+          final nextSeasonEps = await _loadEpisodes(
+            item.id,
+            nextSeasonObj.number,
+          );
+          if (nextSeasonEps.isNotEmpty && mounted) {
+            setState(() {
+              _nextEpisodeToPlay = nextSeasonEps.first;
+              _nextSeasonNumberToPlay = nextSeasonObj.number;
+              _showAutoPlayCountdown = true;
+            });
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  void _playNextEpisode(MovieItem item) {
+    final ep = _nextEpisodeToPlay;
+    final seasonNum = _nextSeasonNumberToPlay;
+    setState(() {
+      _showAutoPlayCountdown = false;
+      _nextEpisodeToPlay = null;
+      _nextSeasonNumberToPlay = null;
+    });
+    if (ep != null && seasonNum != null) {
+      _setEpisode(item, seasonNum, ep);
+    }
+  }
 
   @override
   void initState() {
@@ -82,30 +151,28 @@ class _WatchPageState extends State<_WatchPage> {
     }
     _persistRouteState();
     final request = widget.request;
+    final item = _item;
     if (widget.isSeries) {
-      selectedSeasonNumber = request?.seasonNumber;
-      if (request?.seasonNumber != null && _item != null) {
-        episodesFuture = _loadEpisodes(_item!.id, request!.seasonNumber!);
-      }
-      if (request?.autoPlay == true &&
-          request?.seasonNumber != null &&
-          request?.episodeNumber != null &&
-          _item != null) {
+      final seasonNum = request?.seasonNumber ?? 1;
+      final episodeNum = request?.episodeNumber ?? 1;
+      selectedSeasonNumber = seasonNum;
+      if (item != null) {
+        episodesFuture = _loadEpisodes(item.id, seasonNum);
         activeRequest =
             StreamingEmbedRequest.episode(
-              item: _item!,
-              seasonNumber: request!.seasonNumber!,
-              episodeNumber: request.episodeNumber!,
+              item: item,
+              seasonNumber: seasonNum,
+              episodeNumber: episodeNum,
               episodeTitle: null,
             ).copyWith(
-              preferredProviderId: request.selectedProviderId,
-              jellyfinPlaybackModeOverride: request.playbackMode,
-              resumePositionSeconds: request.resumePositionSeconds,
-              resumeDurationSeconds: request.resumeDurationSeconds,
+              preferredProviderId: request?.selectedProviderId,
+              jellyfinPlaybackModeOverride: request?.playbackMode,
+              resumePositionSeconds: request?.resumePositionSeconds,
+              resumeDurationSeconds: request?.resumeDurationSeconds,
             );
       }
-    } else if (_item != null) {
-      activeRequest = StreamingEmbedRequest.movie(_item!).copyWith(
+    } else if (item != null) {
+      activeRequest = StreamingEmbedRequest.movie(item).copyWith(
         preferredProviderId: request?.selectedProviderId,
         jellyfinPlaybackModeOverride: request?.playbackMode,
         resumePositionSeconds: request?.resumePositionSeconds,
@@ -213,12 +280,14 @@ class _WatchPageState extends State<_WatchPage> {
                                 episodesFuture = _loadEpisodes(item.id, autoSeason);
                               });
                               
-                              if (activity.seasonNumber != null && activity.episodeNumber != null) {
+                              final actSeason = activity.seasonNumber;
+                              final actEpisode = activity.episodeNumber;
+                              if (actSeason != null && actEpisode != null) {
                                 setState(() {
                                   activeRequest = StreamingEmbedRequest.episode(
                                     item: item,
-                                    seasonNumber: activity.seasonNumber!,
-                                    episodeNumber: activity.episodeNumber!,
+                                    seasonNumber: actSeason,
+                                    episodeNumber: actEpisode,
                                     episodeTitle: activity.episodeTitle,
                                   ).copyWith(
                                     preferredProviderId: widget.request?.selectedProviderId,
@@ -231,14 +300,32 @@ class _WatchPageState extends State<_WatchPage> {
                                 try {
                                   final eps = await _loadEpisodes(item.id, autoSeason);
                                   if (eps.isNotEmpty && mounted && activeRequest == null) {
-                                    setState(() {
-                                      activeRequest = StreamingEmbedRequest.episode(
-                                        item: item,
-                                        seasonNumber: autoSeason,
-                                        episodeNumber: eps.first.number,
-                                        episodeTitle: eps.first.title,
-                                      );
-                                    });
+                                    final actSeason = activity.seasonNumber;
+                                    final actEpisode = activity.episodeNumber;
+                                    if (actSeason != null && actEpisode != null) {
+                                      setState(() {
+                                        activeRequest = StreamingEmbedRequest.episode(
+                                          item: item,
+                                          seasonNumber: actSeason,
+                                          episodeNumber: actEpisode,
+                                          episodeTitle: activity.episodeTitle,
+                                        ).copyWith(
+                                          preferredProviderId: widget.request?.selectedProviderId,
+                                          jellyfinPlaybackModeOverride: widget.request?.playbackMode,
+                                          resumePositionSeconds: widget.request?.resumePositionSeconds,
+                                          resumeDurationSeconds: widget.request?.resumeDurationSeconds,
+                                        );
+                                      });
+                                    } else {
+                                      setState(() {
+                                        activeRequest = StreamingEmbedRequest.episode(
+                                          item: item,
+                                          seasonNumber: autoSeason,
+                                          episodeNumber: eps.first.number,
+                                          episodeTitle: eps.first.title,
+                                        );
+                                      });
+                                    }
                                   }
                                 } catch (_) {}
                               }
@@ -332,27 +419,52 @@ class _WatchPageState extends State<_WatchPage> {
                                         selectionPrompt: widget.isSeries
                                             ? 'Select an episode from the menu to start playback.'
                                             : 'Preparing player...',
-                                      ),
-                                      Positioned(
-                                        top: 16,
-                                        left: 16,
-                                        child: IconButton(
-                                          icon: const Icon(Icons.arrow_back, color: Colors.white),
-                                          onPressed: () => Navigator.of(context).pop(),
-                                        ),
-                                      ),
-                                      if (widget.isSeries)
-                                        Positioned(
-                                          top: 16,
-                                          right: 150,
-                                          child: Builder(
-                                            builder: (ctx) => ElevatedButton.icon(
-                                              icon: const Icon(Icons.list),
-                                              label: const Text('Episodes'),
-                                              onPressed: () => Scaffold.of(ctx).openEndDrawer(),
+                                        topRightActions: [
+                                          if (widget.isSeries) ...[
+                                            Builder(
+                                              builder: (ctx) => OutlinedButton.icon(
+                                                icon: const Icon(Icons.list, size: 16, color: Colors.white),
+                                                label: const Text('Episodes', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+                                                style: OutlinedButton.styleFrom(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                  minimumSize: const Size(0, 36),
+                                                  backgroundColor: Colors.black.withValues(alpha: 0.75),
+                                                  side: const BorderSide(color: Colors.white24),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                ),
+                                                onPressed: () => Scaffold.of(ctx).openEndDrawer(),
+                                              ),
                                             ),
-                                          ),
-                                        ),
+                                            const SizedBox(width: 8),
+                                            OutlinedButton.icon(
+                                              icon: const Icon(Icons.skip_next, size: 16, color: Colors.black),
+                                              label: const Text('Next Ep', style: TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.bold)),
+                                              style: OutlinedButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                minimumSize: const Size(0, 36),
+                                                backgroundColor: AppColors.primary,
+                                                side: BorderSide.none,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                              onPressed: () => _triggerNextEpisodeCountdown(item, seasons),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                       if (_showAutoPlayCountdown &&
+                                           _nextEpisodeToPlay != null &&
+                                           _nextSeasonNumberToPlay != null)
+                                         NextEpisodeCountdownOverlay(
+                                           nextEpisodeTitle: _nextEpisodeToPlay!.title,
+                                           nextSeasonNumber: _nextSeasonNumberToPlay!,
+                                           nextEpisodeNumber: _nextEpisodeToPlay!.number,
+                                           onPlayNow: () => _playNextEpisode(item),
+                                           onCancel: () => setState(() {
+                                             _showAutoPlayCountdown = false;
+                                             _nextEpisodeToPlay = null;
+                                             _nextSeasonNumberToPlay = null;
+                                           }),
+                                         ),
                                     ],
                                   ),
                                 );
@@ -832,10 +944,18 @@ class _WatchPageState extends State<_WatchPage> {
     return TmdbRepository(config: AppConfig.fromEnv()).detail(item);
   }
 
-  Future<List<Episode>> _loadEpisodes(int tvId, int seasonNumber) {
-    return TmdbRepository(
+  static final Map<String, List<Episode>> _episodesCache = {};
+
+  Future<List<Episode>> _loadEpisodes(int tvId, int seasonNumber) async {
+    final cacheKey = '$tvId-$seasonNumber';
+    if (_episodesCache.containsKey(cacheKey)) {
+      return _episodesCache[cacheKey]!;
+    }
+    final episodes = await TmdbRepository(
       config: AppConfig.fromEnv(),
     ).tvSeasonEpisodes(tvId: tvId, seasonNumber: seasonNumber);
+    _episodesCache[cacheKey] = episodes;
+    return episodes;
   }
 
   Future<bool> _requireUser(String message) async {
@@ -1592,6 +1712,156 @@ class _Reaction extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class NextEpisodeCountdownOverlay extends StatefulWidget {
+  const NextEpisodeCountdownOverlay({
+    required this.nextEpisodeTitle,
+    required this.nextSeasonNumber,
+    required this.nextEpisodeNumber,
+    required this.onPlayNow,
+    required this.onCancel,
+    super.key,
+  });
+
+  final String nextEpisodeTitle;
+  final int nextSeasonNumber;
+  final int nextEpisodeNumber;
+  final VoidCallback onPlayNow;
+  final VoidCallback onCancel;
+
+  @override
+  State<NextEpisodeCountdownOverlay> createState() =>
+      _NextEpisodeCountdownOverlayState();
+}
+
+class _NextEpisodeCountdownOverlayState
+    extends State<NextEpisodeCountdownOverlay> {
+  int _secondsRemaining = 5;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
+        widget.onPlayNow();
+      } else {
+        setState(() {
+          _secondsRemaining--;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 24,
+      right: 24,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          width: 340,
+          decoration: BoxDecoration(
+            color: const Color(0xEE1A1A1D),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 16,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: CircularProgressIndicator(
+                          value: _secondsRemaining / 5.0,
+                          color: AppColors.primary,
+                          backgroundColor: Colors.white24,
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      Text(
+                        '$_secondsRemaining',
+                        style: AppTextStyles.title.copyWith(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Up Next in ${_secondsRemaining}s',
+                          style: AppTextStyles.tag.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'S${widget.nextSeasonNumber} E${widget.nextEpisodeNumber} • ${widget.nextEpisodeTitle}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.medium.copyWith(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: widget.onCancel,
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      foregroundColor: Colors.white70,
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton.icon(
+                    onPressed: widget.onPlayNow,
+                    style: FilledButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: AppColors.primary,
+                    ),
+                    icon: const Icon(Icons.play_arrow, size: 18),
+                    label: const Text('Play Now'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

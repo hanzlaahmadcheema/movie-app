@@ -9,11 +9,13 @@ class EmbeddedWatchPlayerPanel extends StatelessWidget {
   const EmbeddedWatchPlayerPanel({
     required this.request,
     required this.selectionPrompt,
+    this.topRightActions = const <Widget>[],
     super.key,
   });
 
   final StreamingEmbedRequest? request;
   final String selectionPrompt;
+  final List<Widget> topRightActions;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,9 @@ class EmbeddedWatchPlayerPanel extends StatelessWidget {
             : AspectRatio(aspectRatio: 16 / 9, child: placeholder),
       );
     }
-    return StreamingPlayerPanel(request: request);
+    return StreamingPlayerPanel(
+      request: request,
+      topRightActions: topRightActions,
+    );
   }
 }

@@ -14,7 +14,6 @@ import '../features/search/search_screens.dart';
 import '../features/jellyfin/player/jellyfin_native_player_screen.dart';
 import '../features/settings/jellyfin_login_screen.dart';
 import '../features/settings/jellyfin_settings_screen.dart';
-import '../features/splash/splash_screen.dart';
 import '../features/streaming/presentation/streaming_player_screen.dart';
 import '../features/trailer/trailer_player_screen.dart';
 import '../features/watch/watch_screens.dart';
@@ -177,7 +176,7 @@ class AppRoutes {
 
   static Map<String, WidgetBuilder> get routes {
     return {
-      splash: (_) => const SplashScreen(),
+      splash: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvHomeScreen() : const HomeScreen()),
       home: (_) => _appScreen(DeviceDetector.instance.isTv ? const TvHomeScreen() : const HomeScreen()),
       movies: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.movies)),
       series: (_) => _appScreen(const CatalogScreen(kind: CatalogKind.series)),
@@ -253,8 +252,10 @@ class AppRoutes {
         return _seriesWatchRoute(settings, watchRequest);
       }
       final tmdbId = int.tryParse(pathSegments[1]);
-      final seasonNumber = int.tryParse(pathSegments[2]);
-      final episodeNumber = int.tryParse(pathSegments[3]);
+      final seasonNumber =
+          pathSegments.length > 2 ? int.tryParse(pathSegments[2]) : null;
+      final episodeNumber =
+          pathSegments.length > 3 ? int.tryParse(pathSegments[3]) : null;
       return _tmdbItemRoute(
         settings: settings,
         tmdbId: tmdbId,

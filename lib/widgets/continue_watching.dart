@@ -28,29 +28,11 @@ class _ContinueWatchingSectionState extends State<ContinueWatchingSection> {
       stream: AuthService.instance.authStateChanges,
       builder: (context, authSnapshot) {
         final user = authSnapshot.data;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: SectionHeader(
-                title: 'Continue Watching',
-                onMore: user == null
-                    ? null
-                    : () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.continueWatching,
-                      ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (user == null)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: ContinueWatchingAuthRequired(compact: true),
-              )
-            else
-              StreamBuilder<List<UserContentRecord>>(
+        if (user == null) {
+          return const SizedBox.shrink();
+        }
+
+        return StreamBuilder<List<UserContentRecord>>(
                 stream: UserActivityRepository.instance.activityListStream(
                   user,
                 ),
@@ -66,27 +48,41 @@ class _ContinueWatchingSectionState extends State<ContinueWatchingSection> {
                   }
                   final records = snapshot.data!;
                   if (records.isEmpty) {
-                    return const ContinueWatchingEmpty(compact: true);
+                    return const SizedBox.shrink();
                   }
-                  return SizedBox(
-                    width: double.infinity,
-                    height: 180,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: records.take(10).length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 10),
-                      itemBuilder: (context, index) => SizedBox(
-                        width: 320,
-                        child: ContinueWatchingTile(record: records[index]),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: SectionHeader(
+                          title: 'Continue Watching',
+                          onMore: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.continueWatching,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 180,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: records.take(10).length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 10),
+                          itemBuilder: (context, index) => SizedBox(
+                            width: 320,
+                            child: ContinueWatchingTile(record: records[index]),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
-              ),
-          ],
-        );
+              );
       },
     );
   }
@@ -214,12 +210,17 @@ class ContinueWatchingTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     const SizedBox(height: 6),
-                    if (selectedServer == 'Jellyfin' && durationSeconds != null && durationSeconds > 0) ...[
+                    if (durationSeconds != null && durationSeconds > 0) ...[
                       Builder(
                         builder: (context) {
                           final progress = (activity.positionSeconds / durationSeconds).clamp(0.0, 1.0);
-                          final remainingSeconds = durationSeconds - activity.positionSeconds;
+                          final remainingSeconds = (durationSeconds - activity.positionSeconds).clamp(0, durationSeconds);
                           final remainingMinutes = (remainingSeconds / 60).round();
+                          final hours = remainingMinutes ~/ 60;
+                          final mins = remainingMinutes % 60;
+                          final String label = hours > 0
+                              ? '${hours}h ${mins}m remaining'
+                              : '$remainingMinutes min remaining';
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -234,7 +235,7 @@ class ContinueWatchingTile extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '$remainingMinutes min remaining',
+                                label,
                                 style: AppTextStyles.small.copyWith(
                                   color: Colors.white.withValues(alpha: 0.8),
                                 ),
@@ -243,14 +244,17 @@ class ContinueWatchingTile extends StatelessWidget {
                           );
                         },
                       ),
-                    ] else ...[
-                      Text(
-                        'Exact resume time is unavailable for embedded players.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.small.copyWith(
-                          color: Colors.white.withValues(alpha: 0.58),
-                        ),
+                    ] else if (activity.positionSeconds > 0) ...[
+                      Builder(
+                        builder: (context) {
+                          final minsWatched = (activity.positionSeconds / 60).round();
+                          return Text(
+                            '$minsWatched min watched',
+                            style: AppTextStyles.small.copyWith(
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ],

@@ -40,16 +40,21 @@ class CachedTmdbImage extends StatelessWidget {
       );
     }
 
-    final normalizedUrl = _normalizeTmdbImageUrl(url, imageType);
-    return _networkImage(normalizedUrl, fallbackWidget);
+    final double currentWidth = width ?? 0;
+    final int targetCacheWidth = currentWidth > 0
+        ? (currentWidth * 2).toInt()
+        : (imageType == _imageTypeBackdrop ? 800 : 350);
+    final String normalizedUrl = _normalizeTmdbImageUrl(url, imageType);
+    return _networkImage(normalizedUrl, fallbackWidget, targetCacheWidth);
   }
 
-  Widget _networkImage(String imageUrl, Widget fallbackWidget) {
+  Widget _networkImage(String imageUrl, Widget fallbackWidget, int? targetCacheWidth) {
     return Image.network(
       imageUrl,
       fit: fit,
       width: width,
       height: height,
+      cacheWidth: targetCacheWidth,
       filterQuality: filterQuality,
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;

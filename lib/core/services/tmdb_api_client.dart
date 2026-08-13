@@ -19,7 +19,9 @@ class TmdbApiException implements Exception {
 class TmdbApiClient {
   TmdbApiClient({required AppConfig config, http.Client? httpClient})
     : _config = config,
-      _httpClient = httpClient ?? http.Client();
+      _httpClient = httpClient ?? _sharedClient;
+
+  static final http.Client _sharedClient = http.Client();
 
   final AppConfig _config;
   final http.Client _httpClient;
