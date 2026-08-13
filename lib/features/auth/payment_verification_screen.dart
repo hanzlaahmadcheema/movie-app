@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/app_theme.dart';
@@ -9,10 +10,60 @@ import '../../widgets/state_views.dart';
 class PaymentVerificationScreen extends StatelessWidget {
   const PaymentVerificationScreen({super.key});
 
-  Future<void> _launchWhatsApp(String link) async {
-    final uri = Uri.tryParse(link);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _launchWhatsApp(BuildContext context, String rawLink) async {
+    final trimmed = rawLink.trim();
+    if (trimmed.isEmpty) return;
+
+    String targetUrl = trimmed;
+    final digitsOnly = trimmed.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (!trimmed.startsWith('http://') &&
+        !trimmed.startsWith('https://') &&
+        !trimmed.startsWith('whatsapp://')) {
+      if (digitsOnly.length >= 7) {
+        targetUrl = 'https://wa.me/$digitsOnly';
+      } else {
+        targetUrl = 'https://$trimmed';
+      }
+    }
+
+    final primaryUri = Uri.parse(targetUrl);
+    bool launched = false;
+
+    try {
+      launched = await launchUrl(primaryUri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+
+    if (!launched) {
+      try {
+        launched = await launchUrl(primaryUri, mode: LaunchMode.platformDefault);
+      } catch (_) {}
+    }
+
+    if (!launched && targetUrl.contains('wa.me/')) {
+      final phone = targetUrl.split('wa.me/').last.split('?').first;
+      final waSchemeUri = Uri.parse('whatsapp://send?phone=$phone');
+      try {
+        launched = await launchUrl(waSchemeUri, mode: LaunchMode.externalApplication);
+      } catch (_) {}
+    }
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not launch WhatsApp directly: $targetUrl'),
+          action: SnackBarAction(
+            label: 'Copy Link',
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: targetUrl));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Payment link copied to clipboard!')),
+              );
+            },
+          ),
+          duration: const Duration(seconds: 6),
+        ),
+      );
     }
   }
 
@@ -51,7 +102,10 @@ class PaymentVerificationScreen extends StatelessWidget {
                 );
               }
               
-              final link = configSnapshot.data!.paymentWhatsappLink;
+              final rawLink = configSnapshot.data!.paymentWhatsappLink;
+              final link = rawLink.trim().isNotEmpty
+                  ? rawLink
+                  : 'https://wa.me/923266900001';
               
               return Center(
                 child: Padding(
@@ -77,22 +131,30 @@ class PaymentVerificationScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      if (link.trim().isNotEmpty)
-                        ElevatedButton.icon(
-                          onPressed: () => _launchWhatsApp(link),
-                          icon: const Icon(Icons.open_in_new),
-                          label: const Text('Make Payment via WhatsApp'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          ),
-                        )
-                      else
-                        Text(
-                          'Payment link is not configured.',
-                          style: TextStyle(color: Colors.red.withValues(alpha: 0.8)),
+                      ElevatedButton.icon(
+                        onPressed: () => _launchWhatsApp(context, link),
+                        icon: const Icon(Icons.open_in_new),
+                        label: const Text('Make Payment via WhatsApp'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: link));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Payment link copied!')),
+                          );
+                        },
+                        icon: const Icon(Icons.copy, size: 16),
+                        label: const Text('Copy Payment Link'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
