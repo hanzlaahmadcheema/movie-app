@@ -1,5 +1,8 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+const _defaultTmdbToken =
+    'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZTYxYzBjNGQyNTA0ZjU5YjdkZDVhODM5ODNkOTA0YyIsIm5iZiI6MTY5NjYyNzUyOC42MTksInN1YiI6IjY1MjA3YjQ4MDcyMTY2MDExYzA0YjBjOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.JZYP2oRCpO9E1qcw7CqOwuW1ezS39URk-YB4JBb1i-0';
+
 class AppConfig {
   const AppConfig({
     required this.tmdbReadAccessToken,
@@ -45,6 +48,7 @@ class AppConfig {
       tmdbReadAccessToken: _firstNonEmpty(
         tmdbReadAccessToken,
         _dotenvValue('TMDB_READ_ACCESS_TOKEN'),
+        fallback: _defaultTmdbToken,
       ),
       tmdbImageBaseUrl:
           _dotenvValue('TMDB_IMAGE_BASE_URL')?.trim() ??

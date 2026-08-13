@@ -464,7 +464,17 @@ class TmdbRepository {
       return cached;
     }
 
-    final data = await _client.get(path, query: query);
+    dynamic data;
+    try {
+      data = await _client.get(path, query: query);
+    } catch (_) {
+      return const TmdbPage<MovieItem>(
+        items: [],
+        page: 1,
+        totalPages: 1,
+        totalResults: 0,
+      );
+    }
     if (data is! Map<String, dynamic>) {
       return const TmdbPage<MovieItem>(
         items: [],
