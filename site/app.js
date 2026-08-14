@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Render QR Code for APK Direct Download Link
   const qrContainer = document.getElementById('qrCanvasContainer');
-  const apkDownloadUrl = 'https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk';
+  const apkDownloadUrl = 'https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.16.1/app-release.apk';
 
   if (qrContainer) {
     try {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const downloadBtns = document.querySelectorAll('a[href*="app-release.apk"]');
   downloadBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      showToast('Downloading HA MovieApp v1.9.1 APK...');
+      showToast('Downloading HA MovieApp v1.16.1 APK...');
     });
   });
 
