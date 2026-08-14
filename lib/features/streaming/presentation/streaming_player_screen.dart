@@ -891,7 +891,7 @@ class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
         ? widget.candidates[widget.currentIndex]
         : null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(21, 18, 21, 20),
+      padding: const EdgeInsets.fromLTRB(21, 32, 21, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1019,6 +1019,7 @@ class ServerDropdownSelector extends StatelessWidget {
 
     return Container(
       height: 36,
+      margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.75),
