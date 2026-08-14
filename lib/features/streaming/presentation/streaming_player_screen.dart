@@ -348,8 +348,18 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           }
 
           const cleanPage = function() {
-            // Instantly delete download links and ad containers
-            document.querySelectorAll('a[href*="/dl/"], a[href^="/dl/"], div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
+            // Instantly delete Nxsha App promo bar, download links, and ad containers
+            document.querySelectorAll('a[href*="nxsha.app"], a[href*="/dl/"], a[href^="/dl/"], div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
+              let p = el;
+              if (el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').includes('nxsha.app')) {
+                while (p && p !== document.body) {
+                  if (p.classList && p.classList.contains('sticky')) {
+                    p.remove();
+                    return;
+                  }
+                  p = p.parentElement;
+                }
+              }
               el.remove();
             });
 
