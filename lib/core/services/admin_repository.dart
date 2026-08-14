@@ -743,6 +743,15 @@ class AdminRepository {
       maintenanceMode: false,
       fallbackAllowed: true,
     ),
+    ProviderConfigRecord(
+      id: 'nxsha',
+      providerId: 'nxsha',
+      displayName: 'Nxsha',
+      enabled: true,
+      priority: -10,
+      maintenanceMode: false,
+      fallbackAllowed: true,
+    ),
   ];
 
   FirebaseFirestore? get _firestore {

@@ -258,7 +258,7 @@ class AdminProvidersScreen extends StatelessWidget {
             return AppEmptyState(
               title: 'No provider configs',
               message:
-                  'Add provider settings for Jellyfin, Hindi Player, VidSrc, 2Embed, Videasy, StreamVault, 111Movies, and VidKing.',
+                  'Add provider settings for Jellyfin, Nxsha, VidSrc, Videasy, StreamVault, 111Movies, VidKing, 2Embed, and Hindi Player.',
               actionLabel: 'Seed Providers',
               onAction: () => _seedProviders(context),
             );

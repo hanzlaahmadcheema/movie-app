@@ -84,11 +84,16 @@ class EmbedUrlBuilder {
     }
 
     final domain = baseUri.toString().replaceFirst(RegExp(r'/$'), '');
+    final fallbackId = request.tmdbId?.toString() ?? request.normalizedImdbId ?? '';
+    final preferredId = (request.preferredId?.isNotEmpty == true)
+        ? request.preferredId!
+        : fallbackId;
+
     var value = template
         .replaceAll('{domain}', domain)
-        .replaceAll('{id}', request.preferredId!)
-        .replaceAll('{tmdbId}', request.tmdbId?.toString() ?? '')
-        .replaceAll('{imdbId}', request.normalizedImdbId ?? '')
+        .replaceAll('{id}', preferredId)
+        .replaceAll('{tmdbId}', request.tmdbId?.toString() ?? preferredId)
+        .replaceAll('{imdbId}', request.normalizedImdbId ?? preferredId)
         .replaceAll('{season}', request.seasonNumber?.toString() ?? '')
         .replaceAll('{episode}', request.episodeNumber?.toString() ?? '');
     if (!value.startsWith('http://') && !value.startsWith('https://')) {

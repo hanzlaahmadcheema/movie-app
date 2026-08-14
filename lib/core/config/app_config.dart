@@ -123,14 +123,14 @@ class AppConfig {
       ),
       streamingNxshaEnabled: _bool(
         _dotenvValue('STREAMING_NXSHA_ENABLED'),
-        fallback: false,
+        fallback: true,
       ),
       streamingNxshaMovieTemplate:
           _dotenvValue('STREAMING_NXSHA_MOVIE_TEMPLATE')?.trim() ??
-          '{domain}/embed/movie/{id}',
+          '{domain}/embed/movie/{tmdbId}',
       streamingNxshaEpisodeTemplate:
           _dotenvValue('STREAMING_NXSHA_EPISODE_TEMPLATE')?.trim() ??
-          '{domain}/embed/tv/{id}/{season}/{episode}',
+          '{domain}/embed/tv/{tmdbId}/{season}/{episode}',
       streamingVidSrcDomains: _csv(
         _dotenvValue('STREAMING_VIDSRC_DOMAINS'),
         fallback:
@@ -147,7 +147,7 @@ class AppConfig {
       ),
       streamingTwoEmbedEnabled: _bool(
         _dotenvValue('STREAMING_2EMBED_ENABLED'),
-        fallback: false,
+        fallback: true,
       ),
       streamingTwoEmbedMovieTemplate:
           _dotenvValue('STREAMING_2EMBED_MOVIE_TEMPLATE')?.trim() ??
