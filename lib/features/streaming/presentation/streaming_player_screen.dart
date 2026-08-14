@@ -284,24 +284,33 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             const style = document.createElement('style');
             style.id = '_easylist_cosmetic_style';
             style.innerHTML = `
-              /* HA Player Recolor Engine: Replace #EAB308 (yellow/amber) with App Primary (#0FEFFD) */
-              [class*="amber"], [class*="yellow"], [style*="234, 179, 8"], [style*="234,179,8"], [style*="EAB308"], [style*="eab308"], [style*="245, 158, 11"] {
+              /* HA Player Recolor Engine: Replace all variations of #eab308 (amber/yellow/gold) with App Primary (#0FEFFD) */
+              [class*="amber"], [class*="yellow"], [class*="gold"],
+              [style*="234, 179, 8"], [style*="234,179,8"], [style*="EAB308"], [style*="eab308"],
+              [style*="245, 158, 11"], [style*="245,158,11"], [style*="F59E0B"], [style*="f59e0b"],
+              [style*="217, 119, 6"], [style*="D97706"], [style*="d97706"],
+              [style*="202, 138, 4"], [style*="CA8A04"], [style*="ca8a04"] {
                 color: #0FEFFD !important;
               }
-              .bg-amber-500, .bg-yellow-500, [class*="bg-amber"], [class*="bg-yellow"] {
+              .bg-amber-500, .bg-yellow-500, .bg-amber-400, .bg-yellow-400, .bg-amber-600, .bg-yellow-600,
+              [class*="bg-amber"], [class*="bg-yellow"], [class*="bg-gold"] {
                 background-color: #0FEFFD !important;
                 color: #000000 !important;
               }
-              .text-amber-500, .text-yellow-500, [class*="text-amber"], [class*="text-yellow"] {
+              .text-amber-500, .text-yellow-500, .text-amber-400, .text-yellow-400, .text-amber-600, .text-yellow-600,
+              [class*="text-amber"], [class*="text-yellow"], [class*="text-gold"] {
                 color: #0FEFFD !important;
               }
-              .border-amber-500, .border-yellow-500, [class*="border-amber"], [class*="border-yellow"] {
+              .border-amber-500, .border-yellow-500, .border-amber-400, .border-yellow-400,
+              [class*="border-amber"], [class*="border-yellow"], [class*="border-gold"] {
                 border-color: #0FEFFD !important;
               }
-              .fill-amber-500, .fill-yellow-500, [class*="fill-amber"], [class*="fill-yellow"], svg[fill*="EAB308"], svg[fill*="eab308"] {
+              .fill-amber-500, .fill-yellow-500, [class*="fill-amber"], [class*="fill-yellow"],
+              svg[fill*="EAB308"], svg[fill*="eab308"], svg[fill*="f59e0b"], svg[fill*="F59E0B"] {
                 fill: #0FEFFD !important;
               }
-              .stroke-amber-500, .stroke-yellow-500, [class*="stroke-amber"], [class*="stroke-yellow"], svg[stroke*="EAB308"], svg[stroke*="eab308"] {
+              .stroke-amber-500, .stroke-yellow-500, [class*="stroke-amber"], [class*="stroke-yellow"],
+              svg[stroke*="EAB308"], svg[stroke*="eab308"], svg[stroke*="f59e0b"], svg[stroke*="F59E0B"] {
                 stroke: #0FEFFD !important;
               }
 
