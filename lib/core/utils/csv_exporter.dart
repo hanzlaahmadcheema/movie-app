@@ -15,21 +15,22 @@ class CsvExporter {
     final buffer = StringBuffer();
     // CSV Header
     buffer.writeln(
-      'UID,Display Name,Email,Email Verified,Role,Status,Created At,Last Login At',
+      'UID,Display Name,Email,Email Verified,Subscribed (Payment Verified),Role,Status,Created At,Last Login At',
     );
 
     for (final user in userRecords) {
       final uid = _escapeCsv(user['uid'] ?? '');
       final name = _escapeCsv(user['displayName'] ?? 'N/A');
       final email = _escapeCsv(user['email'] ?? 'N/A');
-      final verified = user['emailVerified'] == true ? 'Yes' : 'No';
+      final emailVerified = user['emailVerified'] == true ? 'Yes' : 'No';
+      final paymentVerified = user['paymentVerified'] == true ? 'Yes (Subscribed)' : 'No';
       final role = _escapeCsv(user['role'] ?? 'user');
       final status = _escapeCsv(user['status'] ?? 'active');
       final createdAt = _escapeCsv(user['createdAt'] ?? '');
       final lastLoginAt = _escapeCsv(user['lastLoginAt'] ?? '');
 
       buffer.writeln(
-        '"$uid","$name","$email","$verified","$role","$status","$createdAt","$lastLoginAt"',
+        '"$uid","$name","$email","$emailVerified","$paymentVerified","$role","$status","$createdAt","$lastLoginAt"',
       );
     }
 

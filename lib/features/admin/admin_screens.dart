@@ -373,11 +373,17 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         lastLoginAtStr = data['lastLoginAt'].toString();
       }
 
+      final isVerified = data['isVerified'] == true ||
+          data['verified'] == true ||
+          data['role'] == 'admin' ||
+          data['role'] == 'super_admin';
+
       return <String, dynamic>{
         'uid': data['uid'] ?? doc.id,
         'displayName': data['displayName'] ?? 'N/A',
         'email': data['email'] ?? 'N/A',
         'emailVerified': data['emailVerified'] == true,
+        'paymentVerified': isVerified,
         'role': data['role'] ?? 'user',
         'status': data['status'] ?? 'active',
         'createdAt': createdAtStr,
