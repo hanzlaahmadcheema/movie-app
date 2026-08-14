@@ -188,16 +188,14 @@ class StreamingPlayerController extends ChangeNotifier {
     if (expectedAttempt != _attempt || currentCandidate == null) {
       return;
     }
-    _status = StreamingPlayerStatus.pageLoaded;
-    _progress = 95;
-    _message = 'Checking ${currentCandidate!.server.displayName}...';
+    _status = StreamingPlayerStatus.ready;
+    _progress = 100;
+    _message = null;
     _currentDiagnostic = _currentDiagnostic?.copyWith(
       loadFinishedAt: DateTime.now(),
     );
     _readyGraceTimer?.cancel();
-    _readyGraceTimer = Timer(const Duration(seconds: 3), () {
-      markReady(expectedAttempt);
-    });
+    _timeout?.cancel();
     notifyListeners();
   }
 

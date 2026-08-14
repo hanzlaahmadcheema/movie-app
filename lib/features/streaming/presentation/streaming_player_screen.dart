@@ -250,6 +250,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
 
   void _handlePageStarted(String url) {
     _debugHost('Page started', url);
+    _playerController?.markReady(_loadedAttempt);
     _suppressUnwantedPopupsAndAds();
   }
 
