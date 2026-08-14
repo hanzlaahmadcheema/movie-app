@@ -73,7 +73,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 5. Lightweight Toast Notification System
+  // 5. Scroll Reveal Intersection Observer Animations
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px 0px -40px 0px',
+    threshold: 0.1
+  };
+
+  const scrollObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.glass-card, .timeline-item, .section-header').forEach(el => {
+    el.classList.add('animate-on-scroll');
+    scrollObserver.observe(el);
+  });
+
+  // 6. Lightweight Toast Notification System
   function showToast(message) {
     let toast = document.getElementById('site-toast');
     if (!toast) {
@@ -90,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         font-size: 0.9rem;
         padding: 12px 24px;
         border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
         z-index: 9999;
         transform: translateY(100px);
         opacity: 0;
