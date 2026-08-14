@@ -250,6 +250,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
 
   void _handlePageStarted(String url) {
     _debugHost('Page started', url);
+    _suppressUnwantedPopupsAndAds();
   }
 
   void _handlePageFinished(String url) {
@@ -278,11 +279,37 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           window.confirm = function() { return false; };
           window.prompt = function() { return null; };
 
+          if (!window._adClickShieldAttached) {
+            window._adClickShieldAttached = true;
+            document.addEventListener('click', function(e) {
+              let el = e.target;
+              while (el && el !== document.body && el !== document.documentElement) {
+                if (el.tagName === 'A' && el.href) {
+                  try {
+                    const u = new URL(el.href);
+                    if (u.host !== location.host && !u.host.includes('nxsha')) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return false;
+                    }
+                  } catch(err) {}
+                }
+                if (el.style && (el.style.zIndex > 1000 || el.style.position === 'fixed')) {
+                  if (!el.querySelector('video') && !el.classList.contains('jwplayer') && !el.classList.contains('vjs-tech')) {
+                    el.remove();
+                  }
+                }
+                el = el.parentElement;
+              }
+            }, true);
+          }
+
           const cleanPage = function() {
-            const targets = document.querySelectorAll('iframe[src*="ad"], iframe[src*="pop"], div[id*="pop"], div[class*="ad-"], div[style*="z-index: 999999"], div[style*="z-index: 2147483647"], a[target="_blank"]');
-            targets.forEach(function(el) {
+            const selector = 'iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], div[id*="pop"], div[class*="ad-"], div[class*="pop"], div[style*="z-index: 999999"], div[style*="z-index: 2147483647"], a[target="_blank"]';
+            document.querySelectorAll(selector).forEach(function(el) {
               if (el.tagName === 'A') {
                 el.removeAttribute('target');
+                el.onclick = function(e) { e.preventDefault(); e.stopPropagation(); return false; };
               } else {
                 el.remove();
               }
@@ -290,7 +317,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           };
           cleanPage();
           if (!window._adCleanerInterval) {
-            window._adCleanerInterval = setInterval(cleanPage, 1000);
+            window._adCleanerInterval = setInterval(cleanPage, 500);
           }
         } catch (e) {}
       })();
