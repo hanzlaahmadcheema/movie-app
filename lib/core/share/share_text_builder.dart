@@ -6,7 +6,7 @@ class ShareTextBuilder {
   static String forItem(MovieItem item) {
     final buffer = StringBuffer()
       ..write('Watch ${item.title}')
-      ..write(' on MovieApp.');
+      ..write(' on HA MovieApp.');
 
     final details = <String>[
       item.mediaType == MediaType.tv ? 'TV Series' : 'Movie',
@@ -20,7 +20,7 @@ class ShareTextBuilder {
         ..write(details.join(' • '));
     }
 
-    buffer.write('\nBrowse it in the MovieApp catalog.');
+    buffer.write('\nBrowse it in the HA MovieApp catalog.');
     return buffer.toString();
   }
 

@@ -720,7 +720,7 @@ class HomeFooter extends StatelessWidget {
           runSpacing: 16,
           children: [
             Text(
-              'MovieApp',
+              'HA MovieApp',
               style: AppTextStyles.medium.copyWith(color: AppColors.primary),
             ),
             Wrap(

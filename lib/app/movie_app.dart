@@ -71,7 +71,7 @@ class _MovieAppState extends State<MovieApp> with WidgetsBindingObserver {
     }
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'MovieApp',
+      title: 'HA MovieApp',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       scrollBehavior: const AppScrollBehavior(),

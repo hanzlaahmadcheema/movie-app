@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: 22),
               Text(
-                'MovieApp',
+                'HA MovieApp',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,

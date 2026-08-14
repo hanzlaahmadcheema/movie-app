@@ -1,11 +1,11 @@
 {
-    "name": "MovieApp",
-    "short_name": "MovieApp",
+    "name": "HA MovieApp",
+    "short_name": "HA MovieApp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#111214",
-    "theme_color": "#13F2C2",
-    "description": "Flutter movie and series discovery app.",
+    "theme_color": "#0FEFFD",
+    "description": "HA MovieApp - Stream movies & TV series seamlessly.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -210,7 +210,7 @@ class _LogoButton extends StatelessWidget {
             if (!compact) ...[
               const SizedBox(width: 10),
               const Text(
-                'MovieApp',
+                'HA MovieApp',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
             ],
