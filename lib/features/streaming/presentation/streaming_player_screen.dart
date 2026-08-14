@@ -283,6 +283,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             const style = document.createElement('style');
             style.id = '_easylist_cosmetic_style';
             style.innerHTML = `
+              a[href*="/dl/"], a[href^="/dl/"],
               div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc],
               iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
               div[style*="2147483"], div[style*="z-index: 214748364"], div[style*="z-index: 2147483647"],
@@ -314,6 +315,12 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             document.addEventListener('click', function(e) {
               let el = e.target;
               while (el && el !== document.body && el !== document.documentElement) {
+                if (el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').includes('/dl/')) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  el.remove();
+                  return false;
+                }
                 if (el.getAttribute && (el.getAttribute('data-shb') || el.classList.contains('D1BnW') || el.classList.contains('_0Or05'))) {
                   el.remove();
                   e.preventDefault();
@@ -341,8 +348,8 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           }
 
           const cleanPage = function() {
-            // Instantly delete exact ad containers provided by user
-            document.querySelectorAll('div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
+            // Instantly delete download button and ad containers provided by user
+            document.querySelectorAll('a[href*="/dl/"], a[href^="/dl/"], div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
               el.remove();
             });
 

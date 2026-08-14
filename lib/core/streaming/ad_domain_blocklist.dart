@@ -45,6 +45,7 @@ class AdDomainBlocklist {
     if (path.contains('/ad/') ||
         path.contains('/pop/') ||
         path.contains('/banner/') ||
+        path.contains('/dl/') ||
         path.contains('popunder') ||
         path.contains('clickthrough')) {
       return true;
@@ -54,6 +55,7 @@ class AdDomainBlocklist {
   }
 
   static const String easyListCosmeticCss = '''
+    a[href*="/dl/"], a[href^="/dl/"],
     div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc],
     iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
     div[style*="2147483"], div[style*="z-index: 214748364"], div[style*="z-index: 2147483647"],
