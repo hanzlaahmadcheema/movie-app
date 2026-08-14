@@ -151,7 +151,7 @@ class StreamingProviderRegistry {
         StreamingServer(
           id: 'nxsha',
           providerId: 'nxsha',
-          displayName: 'Nxsha',
+          displayName: 'HA Player',
           priority: -10, // Default player
           baseUri: nxshaEndpoints.first.url,
           supportedContentTypes: StreamingContentType.values.toSet(),

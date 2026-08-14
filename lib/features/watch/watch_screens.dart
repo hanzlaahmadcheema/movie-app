@@ -74,6 +74,7 @@ class _WatchPageState extends State<_WatchPage> {
 
   MovieItem? get _item => widget.request?.item;
 
+  // ignore: unused_element
   Future<void> _triggerNextEpisodeCountdown(
     MovieItem item,
     List<TmdbSeason> seasons,
@@ -419,37 +420,7 @@ class _WatchPageState extends State<_WatchPage> {
                                         selectionPrompt: widget.isSeries
                                             ? 'Select an episode from the menu to start playback.'
                                             : 'Preparing player...',
-                                        topRightActions: [
-                                          if (widget.isSeries) ...[
-                                            Builder(
-                                              builder: (ctx) => OutlinedButton.icon(
-                                                icon: const Icon(Icons.list, size: 16, color: Colors.white),
-                                                label: const Text('Episodes', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
-                                                style: OutlinedButton.styleFrom(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                  minimumSize: const Size(0, 36),
-                                                  backgroundColor: Colors.black.withValues(alpha: 0.75),
-                                                  side: const BorderSide(color: Colors.white24),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                                ),
-                                                onPressed: () => Scaffold.of(ctx).openEndDrawer(),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            OutlinedButton.icon(
-                                              icon: const Icon(Icons.skip_next, size: 16, color: Colors.black),
-                                              label: const Text('Next Ep', style: TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.bold)),
-                                              style: OutlinedButton.styleFrom(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                minimumSize: const Size(0, 36),
-                                                backgroundColor: AppColors.primary,
-                                                side: BorderSide.none,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                              ),
-                                              onPressed: () => _triggerNextEpisodeCountdown(item, seasons),
-                                            ),
-                                          ],
-                                        ],
+                                        topRightActions: const [],
                                       ),
                                        if (_showAutoPlayCountdown &&
                                            _nextEpisodeToPlay != null &&

@@ -889,6 +889,7 @@ class _FigmaServerSelectorState extends State<_FigmaServerSelector> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.candidates.length <= 1) return const SizedBox();
     final active =
         widget.currentIndex >= 0 &&
             widget.currentIndex < widget.candidates.length
@@ -1019,7 +1020,7 @@ class ServerDropdownSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (candidates.isEmpty) return const SizedBox();
+    if (candidates.length <= 1) return const SizedBox();
 
     return Container(
       height: 36,

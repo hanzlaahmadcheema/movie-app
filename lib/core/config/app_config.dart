@@ -59,7 +59,7 @@ class AppConfig {
       ),
       streamingVideasyEnabled: _bool(
         _dotenvValue('STREAMING_VIDEASY_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingVideasyMovieTemplate:
           _dotenvValue('STREAMING_VIDEASY_MOVIE_TEMPLATE')?.trim() ??
@@ -101,7 +101,7 @@ class AppConfig {
       ),
       streamingVidKingEnabled: _bool(
         _dotenvValue('STREAMING_VIDKING_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingVidKingMovieTemplate:
           _dotenvValue('STREAMING_VIDKING_MOVIE_TEMPLATE')?.trim() ??
@@ -115,7 +115,7 @@ class AppConfig {
       ),
       streamingHindiPlayerEnabled: _bool(
         _dotenvValue('STREAMING_HINDI_PLAYER_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingNxshaDomains: _csv(
         _dotenvValue('STREAMING_NXSHA_DOMAINS'),
@@ -139,7 +139,7 @@ class AppConfig {
       ),
       streamingVidSrcEnabled: _bool(
         _dotenvValue('STREAMING_VIDSRC_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingTwoEmbedDomains: _csv(
         _dotenvValue('STREAMING_2EMBED_DOMAINS'),
@@ -147,7 +147,7 @@ class AppConfig {
       ),
       streamingTwoEmbedEnabled: _bool(
         _dotenvValue('STREAMING_2EMBED_ENABLED'),
-        fallback: true,
+        fallback: false,
       ),
       streamingTwoEmbedMovieTemplate:
           _dotenvValue('STREAMING_2EMBED_MOVIE_TEMPLATE')?.trim() ??
