@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieApp — Premium Ad-Free Streaming for Android</title>
+  <meta name="description" content="Download MovieApp v1.9.1 APK for Android. Enjoy seamless multi-provider streaming, ad-free native player, continuous playback, and real-time watch sync.">
+  <meta name="keywords" content="MovieApp, Movie App APK, Download Movie App, Android Streaming App, Ad-Free Movie App, v1.9.1 APK">
+  
+  <!-- OpenGraph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MovieApp — Premium Streaming for Android (v1.9.1 APK)">
+  <meta property="og:description" content="Experience lightning-fast movie streaming on Android with multi-provider failover, popup protection, and zero ads.">
+  <meta property="og:url" content="https://movieapp-download.netlify.app">
+  <meta property="og:image" content="https://raw.githubusercontent.com/hanzlaahmadcheema/movie-app/main/web_screenshot.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Schema.org SoftwareApplication JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MovieApp",
+    "operatingSystem": "Android 5.0+",
+    "applicationCategory": "EntertainmentApplication",
+    "downloadUrl": "https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk",
+    "softwareVersion": "1.9.1",
+    "fileSize": "65.8 MB",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Scroll Progress Indicator -->
+  <div id="progress" aria-hidden="true"></div>
+
+  <!-- Ambient Glowing Background Grid & Halos -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-emerald"></div>
+
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="#" class="brand-logo">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </div>
+        <span class="logo-text">Movie<span class="gradient-text">App</span></span>
+        <span class="version-badge">v1.9.1</span>
+      </a>
+
+      <nav class="nav-menu" id="navMenu">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#download" class="nav-link">Download</a>
+        <a href="#changelog" class="nav-link">Releases</a>
+        <a href="#specs" class="nav-link">Specs</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://github.com/hanzlaahmadcheema/movie-app" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="#download" class="btn btn-primary btn-sm">
+          <span>Download APK</span>
+        </a>
+      </div>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="pill-badge">
+          <span class="pill-dot"></span>
+          <span>Latest Release v1.9.1 Official APK</span>
+        </div>
+        <h1 class="hero-title">
+          Stream Everything.<br>
+          <span class="gradient-text">Zero Ads. Unlocked.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Experience high-definition entertainment powered by an intelligent multi-provider engine, popup protection, and seamless cross-device synchronization.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk" class="btn btn-glow btn-lg" id="mainDownloadBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <div class="btn-text-wrapper">
+              <span class="btn-primary-label">Download APK (65.8 MB)</span>
+              <span class="btn-sub-label">Direct Link • Release v1.9.1</span>
+            </div>
+          </a>
+
+          <a href="#changelog" class="btn btn-secondary btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Release Notes
+          </a>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="trust-bar">
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Verified Safe & Clean</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            <span>Android 5.0+ Compatible</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Auto Provider Failover</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Card Mockup Showcase -->
+      <div class="hero-visual">
+        <div class="glass-card mockup-card">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="mockup-title-bar">MovieApp v1.9.1 — Live Release</div>
+          </div>
+          <div class="mockup-screen">
+            <div class="app-screen-content">
+              <div class="screen-hero-banner">
+                <div class="banner-tag">NOW PLAYING</div>
+                <div class="banner-title">Spider-Man: Across the Spider-Verse</div>
+                <div class="banner-meta">
+                  <span class="meta-badge">4K Ultra HD</span>
+                  <span class="meta-badge">5.1 Audio</span>
+                  <span class="meta-rating">★ 8.7</span>
+                </div>
+              </div>
+              <div class="screen-section">
+                <div class="section-heading">Active Failover Engine</div>
+                <div class="provider-pill-grid">
+                  <div class="prov-pill active">
+                    <span class="status-dot green"></span> VidSrc (Primary)
+                  </div>
+                  <div class="prov-pill active">
+                    <span class="status-dot green"></span> Videasy (Ready)
+                  </div>
+                  <div class="prov-pill active">
+                    <span class="status-dot green"></span> 111Movies (Backup)
+                  </div>
+                  <div class="prov-pill active">
+                    <span class="status-dot green"></span> VidKing (Ready)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Engineered for <span class="gradient-text">Flawless Playback</span></h2>
+        <p class="section-subtitle">Discover the technology behind the fastest and cleanest movie streaming application on Android.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-cyan">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <h3 class="feature-title">Popup & Scheme Guard</h3>
+          <p class="feature-desc">Integrated navigation policy blocks unexpected popups, target blank requests, and malicious non-web schemes (`intent://`, `market://`) automatically.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-emerald">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+          <h3 class="feature-title">Instant Provider Failover</h3>
+          <p class="feature-desc">Never get stuck on broken links. If a server experiences downtime, MovieApp dynamically switches to the next verified source within milliseconds.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-purple">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          </div>
+          <h3 class="feature-title">Continuous Playback</h3>
+          <p class="feature-desc">State preservation guarantees continuous stream playback during device orientation rotation, window resizing, or background shade toggling.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-cyan">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          </div>
+          <h3 class="feature-title">Real-Time Cloud Sync</h3>
+          <p class="feature-desc">Synchronize watch progress, continue watching lists, and user bookmarks across mobile, tablet, and desktop with 90% reduced payload caching.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-emerald">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+          </div>
+          <h3 class="feature-title">Direct HLS & Native HTML5</h3>
+          <p class="feature-desc">Prefers authorized direct HLS/MP4 streams rendered inside native ExoPlayer / HTML5 controls for an uncompromised cinema experience.</p>
+        </div>
+
+        <div class="glass-card feature-card">
+          <div class="feature-icon icon-purple">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </div>
+          <h3 class="feature-title">Ultra Dark UI Aesthetics</h3>
+          <p class="feature-desc">Meticulously designed dark OLED interfaces with smooth micro-interactions, responsive carousel touch gestures, and zero render clutter.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download & QR Code Section -->
+  <section class="download-section" id="download">
+    <div class="container">
+      <div class="glass-card download-box">
+        <div class="download-grid">
+          <div class="download-info">
+            <div class="pill-badge">
+              <span>Direct Android Release</span>
+            </div>
+            <h2 class="download-title">Get MovieApp for Android</h2>
+            <p class="download-subtitle">Download the official release APK file directly to your phone or tablet. Fast, free, and free of third-party bloatware.</p>
+            
+            <div class="build-specs-list">
+              <div class="spec-row">
+                <span class="spec-label">Version</span>
+                <span class="spec-value">v1.9.1 (Latest Stable)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">File Size</span>
+                <span class="spec-value">65.8 MB</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">File Format</span>
+                <span class="spec-value">Android Application Package (.apk)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Architecture</span>
+                <span class="spec-value">Universal (arm64-v8a, armeabi-v7a)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Min Requirement</span>
+                <span class="spec-value">Android 5.0 (Lollipop) or higher</span>
+              </div>
+            </div>
+
+            <div class="download-cta-area">
+              <a href="https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk" class="btn btn-glow btn-xl">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Download app-release.apk</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- QR Code & Scan Area -->
+          <div class="qr-container">
+            <div class="qr-card">
+              <div class="qr-header">Scan to Install on Mobile</div>
+              <div class="qr-box" id="qrCanvasContainer">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk&color=ffffff&bcolor=0d1117" alt="QR Code for MovieApp APK Download" class="qr-img">
+              </div>
+              <div class="qr-hint">Point your smartphone camera to download instantly</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Releases & Updates Changelog Section -->
+  <section class="changelog-section" id="changelog">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Release History & <span class="gradient-text">Updates Log</span></h2>
+        <p class="section-subtitle">Full transparency on every improvement, feature additions, and security patch.</p>
+      </div>
+
+      <div class="timeline">
+        <!-- Release Item 1.9.1 -->
+        <div class="timeline-item active-release">
+          <div class="timeline-marker"></div>
+          <div class="glass-card timeline-content">
+            <div class="timeline-header">
+              <div>
+                <span class="release-version">Version 1.9.1</span>
+                <span class="release-tag latest">CURRENT STABLE</span>
+              </div>
+              <span class="release-date">August 2026</span>
+            </div>
+            <ul class="changelog-list">
+              <li><span class="badge-feature fix">FIX</span> Refined continuous video stream state preservation across Android orientation changes and full-screen toggles.</li>
+              <li><span class="badge-feature fix">FIX</span> Added fallback TMDB read access token handler for Web environments.</li>
+              <li><span class="badge-feature feat">FEAT</span> Enhanced WebView navigation guard with strict non-web scheme rejection (`intent://`, `market://`, `whatsapp://`).</li>
+              <li><span class="badge-feature perf">PERF</span> Reduced Cloud Firestore request load by 80–90% using 5-minute role caching and session deduplication.</li>
+              <li><span class="badge-feature sec">SEC</span> Blocked multi-window popup requests (`onCreateWindow` rejection) on Android WebViews.</li>
+            </ul>
+            <div class="timeline-footer">
+              <a href="https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk" class="btn btn-outline btn-xs">Download v1.9.1 APK (65.8 MB)</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Release Item 1.9.0 -->
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="glass-card timeline-content">
+            <div class="timeline-header">
+              <div>
+                <span class="release-version">Version 1.9.0</span>
+                <span class="release-tag">MAJOR UPDATE</span>
+              </div>
+              <span class="release-date">August 2026</span>
+            </div>
+            <ul class="changelog-list">
+              <li><span class="badge-feature feat">FEAT</span> Introduced multi-provider streaming fallback engine with VidSrc, Videasy, 111Movies, VidKing, and Nxsha.</li>
+              <li><span class="badge-feature feat">FEAT</span> Integrated direct HTML5 / ExoPlayer stream track selector for authorized HLS and MP4 links.</li>
+              <li><span class="badge-feature perf">PERF</span> Accelerated web startup by removing heavy splash keyframe animations.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Release Item 1.8.5 -->
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="glass-card timeline-content">
+            <div class="timeline-header">
+              <div>
+                <span class="release-version">Version 1.8.5</span>
+                <span class="release-tag">MAINTENANCE</span>
+              </div>
+              <span class="release-date">July 2026</span>
+            </div>
+            <ul class="changelog-list">
+              <li><span class="badge-feature fix">FIX</span> Resolved Android gesture scroll bounds on landscape carousel items.</li>
+              <li><span class="badge-feature sec">SEC</span> Updated Firebase SDK dependencies to latest patch security versions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Specs & Safety -->
+  <section class="specs-section" id="specs">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Technical <span class="gradient-text">Specifications</span></h2>
+        <p class="section-subtitle">Built with Flutter, Dart 3, and Cloud Infrastructure for maximum reliability.</p>
+      </div>
+
+      <div class="specs-grid">
+        <div class="glass-card spec-card">
+          <div class="spec-card-title">Security Verification</div>
+          <div class="spec-card-body">
+            <div class="check-list-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>V2 APK Signed with Verified Production Key</span>
+            </div>
+            <div class="check-list-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Zero Malware, Adware, or Telemetry Tracking</span>
+            </div>
+            <div class="check-list-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Direct GitHub Releases Hosting Authentication</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card spec-card">
+          <div class="spec-card-title">Installation Guide</div>
+          <div class="spec-card-body">
+            <ol class="step-list">
+              <li>Download the <strong>app-release.apk</strong> file using the button above.</li>
+              <li>Open Android <strong>Settings → Security</strong> and enable <em>"Install from Unknown Sources"</em> if prompted.</li>
+              <li>Tap the downloaded file in your notification bar or file manager to install.</li>
+              <li>Launch MovieApp and start streaming instantly!</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <a href="#" class="brand-logo">
+          <div class="logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
+          <span class="logo-text">Movie<span class="gradient-text">App</span></span>
+        </a>
+        <p class="footer-desc">The ultimate high-performance, ad-protected streaming experience for Android devices.</p>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <a href="#features">Features</a>
+          <a href="#download">Download APK</a>
+          <a href="#changelog">Release Notes</a>
+          <a href="#specs">Specifications</a>
+        </div>
+        <div class="footer-col">
+          <h4>Project Links</h4>
+          <a href="https://github.com/hanzlaahmadcheema/movie-app" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://github.com/hanzlaahmadcheema/movie-app/releases" target="_blank" rel="noopener">All GitHub Releases</a>
+          <a href="https://movie-app-cc2c1.web.app" target="_blank" rel="noopener">Live Web Version</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-content">
+        <p>© 2026 MovieApp. All rights reserved. Open Source project built with Flutter & Dart.</p>
+        <div class="footer-badge">v1.9.1 Production Release</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
