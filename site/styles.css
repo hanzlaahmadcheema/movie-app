@@ -87,6 +87,24 @@ body {
   transition: transform 0.1s linear;
 }
 
+/* 3D Moving Blocks Canvas Layer */
+#webgl-3d-blocks {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.75;
+}
+
+/* Site Sections Z-Index Stacking */
+.hero-section, .features-section, .download-section, .changelog-section, .specs-section, .site-header, .site-footer {
+  position: relative;
+  z-index: 10;
+}
+
 /* Utility Containers */
 .container {
   max-width: 1240px;

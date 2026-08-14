@@ -22,6 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
   <!-- Schema.org SoftwareApplication JSON-LD -->
@@ -46,6 +47,9 @@
 <body>
   <!-- Scroll Progress Indicator -->
   <div id="progress" aria-hidden="true"></div>
+
+  <!-- 3D Moving Blocks WebGL Canvas -->
+  <canvas id="webgl-3d-blocks" aria-hidden="true"></canvas>
 
   <!-- Navigation Header -->
   <header class="site-header">
