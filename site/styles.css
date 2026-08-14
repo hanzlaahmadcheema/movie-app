@@ -153,20 +153,16 @@ body {
   transform: scale(1.03);
 }
 
-.logo-icon {
+.brand-logo-img {
   width: 38px;
   height: 38px;
-  border-radius: var(--radius-md);
-  background: var(--accent-cyan);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #040711;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.brand-logo:hover .logo-icon {
-  transform: rotate(-8deg);
+.brand-logo:hover .brand-logo-img {
+  transform: scale(1.1) rotate(-5deg);
 }
 
 .version-badge {
