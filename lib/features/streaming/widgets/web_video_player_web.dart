@@ -37,6 +37,7 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
   }
 
   static final Set<String> _registeredViews = <String>{};
+  static final Map<String, html.Element> _cachedElements = <String, html.Element>{};
 
   void _registerView() {
     _viewType = 'movie-app-player-${widget.url.toString().hashCode}';
@@ -45,28 +46,36 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
     }
     _registeredViews.add(_viewType);
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (_) {
+      final existing = _cachedElements[_viewType];
+      if (existing != null) {
+        return existing;
+      }
+      final html.Element element;
       if (_isDirectStream) {
-        return html.VideoElement()
+        element = html.VideoElement()
           ..src = widget.url.toString()
           ..style.border = '0'
           ..style.width = '100%'
           ..style.height = '100%'
           ..controls = true
           ..autoplay = true;
+      } else {
+        final iframe = html.IFrameElement()
+          ..src = widget.url.toString()
+          ..style.border = '0'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer'
+          ..allowFullscreen = true
+          ..referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('webkitallowfullscreen', 'true');
+        iframe.setAttribute('mozallowfullscreen', 'true');
+        element = iframe;
       }
-      final iframe = html.IFrameElement()
-        ..src = widget.url.toString()
-        ..style.border = '0'
-        ..style.width = '100%'
-        ..style.height = '100%'
-        ..allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer'
-        ..allowFullscreen = true
-        ..referrerPolicy = 'strict-origin-when-cross-origin';
-      iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer');
-      iframe.setAttribute('allowfullscreen', 'true');
-      iframe.setAttribute('webkitallowfullscreen', 'true');
-      iframe.setAttribute('mozallowfullscreen', 'true');
-      return iframe;
+      _cachedElements[_viewType] = element;
+      return element;
     });
   }
 

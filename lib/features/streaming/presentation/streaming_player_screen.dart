@@ -497,6 +497,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
   }
 
   final GlobalKey _playerBodyKey = GlobalKey();
+  final GlobalKey _webViewKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -653,6 +654,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
         children: [
           ExcludeSemantics(
             child: WebViewWidget(
+              key: _webViewKey,
               controller: _webViewController!,
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                 Factory<OneSequenceGestureRecognizer>(
