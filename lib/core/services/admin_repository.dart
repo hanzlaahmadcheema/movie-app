@@ -239,16 +239,21 @@ class AdminNotice {
   }
 
   Map<String, Object?> toJson() {
-    return {
+    final data = <String, Object?>{
       'title': title.trim(),
       'message': message.trim(),
       'type': type.name,
       'target': target.name,
       'enabled': enabled,
-      'startAt': startAt == null ? null : Timestamp.fromDate(startAt!),
-      'endAt': endAt == null ? null : Timestamp.fromDate(endAt!),
       'updatedAt': FieldValue.serverTimestamp(),
     };
+    if (startAt != null) {
+      data['startAt'] = Timestamp.fromDate(startAt!);
+    }
+    if (endAt != null) {
+      data['endAt'] = Timestamp.fromDate(endAt!);
+    }
+    return data;
   }
 }
 
@@ -958,13 +963,15 @@ class AdminRepository {
   }
 
   Future<void> saveNotice({String? id, required AdminNotice notice}) async {
-    final doc = id == null || id.trim().isEmpty
+    final isNew = id == null || id.trim().isEmpty;
+    final doc = isNew
         ? _collection(AdminPaths.notices).doc()
         : _collection(AdminPaths.notices).doc(id);
-    await doc.set({
-      ...notice.toJson(),
-      'createdAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    final data = notice.toJson();
+    if (isNew) {
+      data['createdAt'] = FieldValue.serverTimestamp();
+    }
+    await doc.set(data, SetOptions(merge: true));
   }
 
   Future<void> deleteNotice(String id) =>

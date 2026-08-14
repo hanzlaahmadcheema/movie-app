@@ -35,7 +35,7 @@ service cloud.firestore {
     }
 
     function optionalTimestamp(data, field) {
-      return !(field in data) || data[field] is timestamp;
+      return !(field in data) || data[field] == null || data[field] is timestamp;
     }
 
     function optionalBool(data, field) {

@@ -1394,19 +1394,31 @@ Future<void> _showNoticeDialog(
                 if (title.text.trim().isEmpty || message.text.trim().isEmpty) {
                   return;
                 }
-                await AdminRepository.instance.saveNotice(
-                  id: initial?.id,
-                  notice: AdminNotice(
-                    id: initial?.id ?? '',
-                    title: title.text,
-                    message: message.text,
-                    type: type,
-                    target: target,
-                    enabled: enabled,
-                  ),
-                );
-                if (!dialogContext.mounted) return;
-                Navigator.pop(dialogContext);
+                try {
+                  await AdminRepository.instance.saveNotice(
+                    id: initial?.id,
+                    notice: AdminNotice(
+                      id: initial?.id ?? '',
+                      title: title.text,
+                      message: message.text,
+                      type: type,
+                      target: target,
+                      enabled: enabled,
+                    ),
+                  );
+                  if (!dialogContext.mounted) return;
+                  Navigator.pop(dialogContext);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notice saved successfully.')),
+                    );
+                  }
+                } catch (e) {
+                  if (!dialogContext.mounted) return;
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text('Failed to save notice: $e')),
+                  );
+                }
               },
               child: const Text('Save'),
             ),
