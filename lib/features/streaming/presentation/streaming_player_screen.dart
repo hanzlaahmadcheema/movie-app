@@ -283,7 +283,28 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             const style = document.createElement('style');
             style.id = '_easylist_cosmetic_style';
             style.innerHTML = `
-              a[href*="/dl/"], a[href^="/dl/"],
+              /* HA Player Recolor Engine: Replace #EAB308 (yellow/amber) with App Primary (#0FEFFD) */
+              [class*="amber"], [class*="yellow"], [style*="234, 179, 8"], [style*="234,179,8"], [style*="EAB308"], [style*="eab308"], [style*="245, 158, 11"] {
+                color: #0FEFFD !important;
+              }
+              .bg-amber-500, .bg-yellow-500, [class*="bg-amber"], [class*="bg-yellow"] {
+                background-color: #0FEFFD !important;
+                color: #000000 !important;
+              }
+              .text-amber-500, .text-yellow-500, [class*="text-amber"], [class*="text-yellow"] {
+                color: #0FEFFD !important;
+              }
+              .border-amber-500, .border-yellow-500, [class*="border-amber"], [class*="border-yellow"] {
+                border-color: #0FEFFD !important;
+              }
+              .fill-amber-500, .fill-yellow-500, [class*="fill-amber"], [class*="fill-yellow"], svg[fill*="EAB308"], svg[fill*="eab308"] {
+                fill: #0FEFFD !important;
+              }
+              .stroke-amber-500, .stroke-yellow-500, [class*="stroke-amber"], [class*="stroke-yellow"], svg[stroke*="EAB308"], svg[stroke*="eab308"] {
+                stroke: #0FEFFD !important;
+              }
+
+              a[href*="nxsha.app"], a[href*="/dl/"], a[href^="/dl/"],
               div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc],
               iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
               div[style*="2147483"], div[style*="z-index: 214748364"], div[style*="z-index: 2147483647"],
