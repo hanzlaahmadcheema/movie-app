@@ -279,6 +279,23 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           window.confirm = function() { return false; };
           window.prompt = function() { return null; };
 
+          if (!document.getElementById('_easylist_cosmetic_style')) {
+            const style = document.createElement('style');
+            style.id = '_easylist_cosmetic_style';
+            style.innerHTML = `
+              iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], iframe[src*="casino"],
+              div[id*="pop"], div[id*="ad-"], div[class*="ad-"], div[class*="pop"], div[class*="banner"],
+              div[style*="z-index: 999999"], div[style*="z-index: 2147483647"],
+              a[href*="bet"], a[href*="casino"], a[href*="1xbet"], a[target="_blank"] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+              }
+            `;
+            (document.head || document.documentElement).appendChild(style);
+          }
+
           if (!window._adClickShieldAttached) {
             window._adClickShieldAttached = true;
             document.addEventListener('click', function(e) {

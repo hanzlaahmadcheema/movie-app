@@ -1,3 +1,5 @@
+import 'ad_domain_blocklist.dart';
+
 class StreamingNavigationDecision {
   const StreamingNavigationDecision._({
     required this.allowed,
@@ -30,6 +32,14 @@ class StreamingNavigationPolicy {
       return const StreamingNavigationDecision.block(
         'Malformed provider URL',
         causesFallback: true,
+      );
+    }
+
+    // Network Domain Blocker: Check against known ad/popup domain blocklist
+    if (AdDomainBlocklist.isAdUrl(uri)) {
+      return StreamingNavigationDecision.block(
+        'Blocked ad domain request: ${uri.host}',
+        causesFallback: false,
       );
     }
 
