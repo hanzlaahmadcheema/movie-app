@@ -1,7 +1,39 @@
 // MovieApp Download Site — Interactive Script
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Mobile Menu Toggle
+  // 1. Render QR Code for APK Direct Download Link
+  const qrContainer = document.getElementById('qrCanvasContainer');
+  const apkDownloadUrl = 'https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.9.1/app-release.apk';
+
+  if (qrContainer) {
+    try {
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrContainer, {
+          text: apkDownloadUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#ffffff',
+          colorLight: '#0d1117',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      } else {
+        const fallbackImg = document.createElement('img');
+        fallbackImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(apkDownloadUrl)}&color=ffffff&bcolor=0d1117`;
+        fallbackImg.alt = 'MovieApp APK Download QR Code';
+        fallbackImg.className = 'qr-img';
+        qrContainer.appendChild(fallbackImg);
+      }
+    } catch (e) {
+      console.warn('QR Code generation fallback triggered:', e);
+      const fallbackImg = document.createElement('img');
+      fallbackImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(apkDownloadUrl)}&color=ffffff&bcolor=0d1117`;
+      fallbackImg.alt = 'MovieApp APK Download QR Code';
+      fallbackImg.className = 'qr-img';
+      qrContainer.appendChild(fallbackImg);
+    }
+  }
+
+  // 2. Mobile Menu Toggle
   const menuToggle = document.getElementById('menuToggle');
   const navMenu = document.getElementById('navMenu');
 
@@ -20,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Scroll Progress Fallback for Browsers without CSS scroll-timeline support
+  // 3. Scroll Progress Fallback for Browsers without CSS scroll-timeline support
   if (!CSS.supports('animation-timeline', 'scroll()')) {
     const progress = document.querySelector('#progress');
     if (progress) {
@@ -33,16 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 3. Download APK Button Feedback
+  // 4. Download APK Button Feedback
   const downloadBtns = document.querySelectorAll('a[href*="app-release.apk"]');
   downloadBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const originalText = btn.innerHTML;
       showToast('Downloading MovieApp v1.9.1 APK...');
     });
   });
 
-  // 4. Lightweight Toast Notification System
+  // 5. Lightweight Toast Notification System
   function showToast(message) {
     let toast = document.getElementById('site-toast');
     if (!toast) {
