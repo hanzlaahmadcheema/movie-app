@@ -14,6 +14,7 @@ class AdDomainBlocklist {
     'clck.ru',
     'mngbtt.com',
     'hqq.tv',
+    'fieldybejeled',
     'bet365',
     '1xbet',
     'melbet',
@@ -53,11 +54,12 @@ class AdDomainBlocklist {
   }
 
   static const String easyListCosmeticCss = '''
+    div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc],
     iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
-    div[style*="2147483"], div[style*="z-index: 214748364"],
+    div[style*="2147483"], div[style*="z-index: 214748364"], div[style*="z-index: 2147483647"],
     iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], iframe[src*="casino"],
     div[id*="pop"], div[id*="ad-"], div[class*="ad-"], div[class*="pop"], div[class*="banner"],
-    div[style*="z-index: 999999"], div[style*="z-index: 2147483647"],
+    div[style*="z-index: 999999"],
     a[href*="bet"], a[href*="casino"], a[href*="1xbet"], a[target="_blank"] {
       display: none !important;
       visibility: hidden !important;
@@ -65,6 +67,8 @@ class AdDomainBlocklist {
       pointer-events: none !important;
       width: 0px !important;
       height: 0px !important;
+      max-width: 0px !important;
+      max-height: 0px !important;
     }
   ''';
 }

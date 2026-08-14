@@ -283,11 +283,12 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             const style = document.createElement('style');
             style.id = '_easylist_cosmetic_style';
             style.innerHTML = `
+              div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc],
               iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
-              div[style*="2147483"], div[style*="z-index: 214748364"],
+              div[style*="2147483"], div[style*="z-index: 214748364"], div[style*="z-index: 2147483647"],
               iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], iframe[src*="casino"],
               div[id*="pop"], div[id*="ad-"], div[class*="ad-"], div[class*="pop"], div[class*="banner"],
-              div[style*="z-index: 999999"], div[style*="z-index: 2147483647"],
+              div[style*="z-index: 999999"],
               a[href*="bet"], a[href*="casino"], a[href*="1xbet"], a[target="_blank"] {
                 display: none !important;
                 visibility: hidden !important;
@@ -295,6 +296,8 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
                 pointer-events: none !important;
                 width: 0px !important;
                 height: 0px !important;
+                max-width: 0px !important;
+                max-height: 0px !important;
               }
             `;
             (document.head || document.documentElement).appendChild(style);
@@ -302,9 +305,21 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
 
           if (!window._adClickShieldAttached) {
             window._adClickShieldAttached = true;
+            window.addEventListener('message', function(e) {
+              if (e.data && (e.data.\$G\$ || e.data.event === 'open' || (typeof e.data === 'string' && e.data.includes('OUT_URL')))) {
+                e.stopImmediatePropagation();
+              }
+            }, true);
+
             document.addEventListener('click', function(e) {
               let el = e.target;
               while (el && el !== document.body && el !== document.documentElement) {
+                if (el.getAttribute && (el.getAttribute('data-shb') || el.classList.contains('D1BnW') || el.classList.contains('_0Or05'))) {
+                  el.remove();
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return false;
+                }
                 if (el.tagName === 'A' && el.href) {
                   try {
                     const u = new URL(el.href);
@@ -326,17 +341,28 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           }
 
           const cleanPage = function() {
-            // Target any fixed-position or high z-index overlay iframe (e.g. z-index: 2147483645)
-            document.querySelectorAll('iframe').forEach(function(f) {
+            // Instantly delete exact ad containers provided by user
+            document.querySelectorAll('div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
+              el.remove();
+            });
+
+            // Target any fixed-position or high z-index overlay iframe or div (e.g. z-index: 2147483647)
+            document.querySelectorAll('iframe, div').forEach(function(f) {
               try {
-                const s = window.getComputedStyle(f);
-                if (s.position === 'fixed' || (parseInt(s.zIndex, 10) > 100000)) {
+                if (f.getAttribute('data-shb') || f.classList.contains('D1BnW')) {
                   f.remove();
+                  return;
+                }
+                const s = window.getComputedStyle(f);
+                if ((s.position === 'fixed' || s.position === 'absolute') && (parseInt(s.zIndex, 10) > 100000)) {
+                  if (!f.querySelector('video') && !f.classList.contains('jwplayer') && !f.classList.contains('vjs-tech')) {
+                    f.remove();
+                  }
                 }
               } catch(err) {}
             });
 
-            const selector = 'iframe[style*="position: fixed"], iframe[style*="2147483"], div[style*="2147483"], iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], div[id*="pop"], div[class*="ad-"], div[class*="pop"], a[target="_blank"]';
+            const selector = 'div[data-shb], .D1BnW, ._0Or05, iframe[srcdoc], iframe[style*="position: fixed"], iframe[style*="2147483"], div[style*="2147483"], iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], div[id*="pop"], div[class*="ad-"], div[class*="pop"], a[target="_blank"]';
             document.querySelectorAll(selector).forEach(function(el) {
               if (el.tagName === 'A') {
                 el.removeAttribute('target');
@@ -348,7 +374,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           };
           cleanPage();
           if (!window._adCleanerInterval) {
-            window._adCleanerInterval = setInterval(cleanPage, 300);
+            window._adCleanerInterval = setInterval(cleanPage, 200);
           }
         } catch (e) {}
       })();
