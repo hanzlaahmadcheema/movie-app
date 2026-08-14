@@ -496,6 +496,8 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
     }
   }
 
+  final GlobalKey _playerBodyKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final playerController = _playerController;
@@ -504,11 +506,16 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
 
     final bool isMobileLandscape = !kIsWeb && (Platform.isAndroid || Platform.isIOS) && MediaQuery.orientationOf(context) == Orientation.landscape;
 
+    final playerBodyWidget = KeyedSubtree(
+      key: _playerBodyKey,
+      child: _buildPlayerBody(),
+    );
+
     if (isMobileLandscape) {
       return Stack(
         fit: StackFit.expand,
         children: [
-          _buildPlayerBody(),
+          playerBodyWidget,
           Positioned(
             top: 0,
             left: 0,
@@ -550,10 +557,10 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           SizedBox(
             height: 240,
             width: double.infinity,
-            child: _buildPlayerBody(),
+            child: playerBodyWidget,
           )
         else
-          AspectRatio(aspectRatio: 16 / 9, child: _buildPlayerBody()),
+          AspectRatio(aspectRatio: 16 / 9, child: playerBodyWidget),
         _FigmaServerSelector(
           candidates: candidates,
           currentIndex: currentIndex,

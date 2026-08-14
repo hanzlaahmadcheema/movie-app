@@ -36,9 +36,14 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
     return path.endsWith('.m3u8') || path.endsWith('.mp4');
   }
 
+  static final Set<String> _registeredViews = <String>{};
+
   void _registerView() {
-    _viewType =
-        'movie-app-player-${identityHashCode(this)}-${widget.url.hashCode}';
+    _viewType = 'movie-app-player-${widget.url.toString().hashCode}';
+    if (_registeredViews.contains(_viewType)) {
+      return;
+    }
+    _registeredViews.add(_viewType);
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (_) {
       if (_isDirectStream) {
         return html.VideoElement()
