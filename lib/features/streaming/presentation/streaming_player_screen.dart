@@ -348,15 +348,9 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           }
 
           const cleanPage = function() {
-            // Instantly delete VidPro buttons, download links, and ad containers
+            // Instantly delete download links and ad containers
             document.querySelectorAll('a[href*="/dl/"], a[href^="/dl/"], div[data-shb], .D1BnW, ._0Or05, .Kv1JU, iframe[srcdoc]').forEach(function(el) {
               el.remove();
-            });
-
-            document.querySelectorAll('button, a, div').forEach(function(btn) {
-              if (btn.innerText && (btn.innerText.includes('VidPro') || btn.textContent.includes('VidPro'))) {
-                btn.remove();
-              }
             });
 
             // Target any fixed-position or high z-index overlay iframe or div (e.g. z-index: 2147483647)
