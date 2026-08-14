@@ -283,6 +283,8 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
             const style = document.createElement('style');
             style.id = '_easylist_cosmetic_style';
             style.innerHTML = `
+              iframe[style*="position: fixed"], iframe[style*="2147483"], iframe[style*="z-index"],
+              div[style*="2147483"], div[style*="z-index: 214748364"],
               iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], iframe[src*="casino"],
               div[id*="pop"], div[id*="ad-"], div[class*="ad-"], div[class*="pop"], div[class*="banner"],
               div[style*="z-index: 999999"], div[style*="z-index: 2147483647"],
@@ -291,6 +293,8 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
                 visibility: hidden !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
+                width: 0px !important;
+                height: 0px !important;
               }
             `;
             (document.head || document.documentElement).appendChild(style);
@@ -311,7 +315,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
                     }
                   } catch(err) {}
                 }
-                if (el.style && (el.style.zIndex > 1000 || el.style.position === 'fixed')) {
+                if (el.tagName === 'IFRAME' || (el.style && (el.style.zIndex > 1000 || el.style.position === 'fixed'))) {
                   if (!el.querySelector('video') && !el.classList.contains('jwplayer') && !el.classList.contains('vjs-tech')) {
                     el.remove();
                   }
@@ -322,7 +326,17 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           }
 
           const cleanPage = function() {
-            const selector = 'iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], div[id*="pop"], div[class*="ad-"], div[class*="pop"], div[style*="z-index: 999999"], div[style*="z-index: 2147483647"], a[target="_blank"]';
+            // Target any fixed-position or high z-index overlay iframe (e.g. z-index: 2147483645)
+            document.querySelectorAll('iframe').forEach(function(f) {
+              try {
+                const s = window.getComputedStyle(f);
+                if (s.position === 'fixed' || (parseInt(s.zIndex, 10) > 100000)) {
+                  f.remove();
+                }
+              } catch(err) {}
+            });
+
+            const selector = 'iframe[style*="position: fixed"], iframe[style*="2147483"], div[style*="2147483"], iframe[src*="ad"], iframe[src*="pop"], iframe[src*="bet"], div[id*="pop"], div[class*="ad-"], div[class*="pop"], a[target="_blank"]';
             document.querySelectorAll(selector).forEach(function(el) {
               if (el.tagName === 'A') {
                 el.removeAttribute('target');
@@ -334,7 +348,7 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
           };
           cleanPage();
           if (!window._adCleanerInterval) {
-            window._adCleanerInterval = setInterval(cleanPage, 500);
+            window._adCleanerInterval = setInterval(cleanPage, 300);
           }
         } catch (e) {}
       })();
