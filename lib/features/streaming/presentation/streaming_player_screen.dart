@@ -265,6 +265,37 @@ class _StreamingPlayerPanelState extends State<StreamingPlayerPanel> {
     }
     _playerController?.markPageLoaded(_loadedAttempt);
     unawaited(_inspectPageTitle(_loadedAttempt));
+    _suppressUnwantedPopupsAndAds();
+  }
+
+  void _suppressUnwantedPopupsAndAds() {
+    if (kIsWeb || _webViewController == null) return;
+    const js = '''
+      (function() {
+        try {
+          window.open = function() { return null; };
+          window.alert = function() {};
+          window.confirm = function() { return false; };
+          window.prompt = function() { return null; };
+
+          const cleanPage = function() {
+            const targets = document.querySelectorAll('iframe[src*="ad"], iframe[src*="pop"], div[id*="pop"], div[class*="ad-"], div[style*="z-index: 999999"], div[style*="z-index: 2147483647"], a[target="_blank"]');
+            targets.forEach(function(el) {
+              if (el.tagName === 'A') {
+                el.removeAttribute('target');
+              } else {
+                el.remove();
+              }
+            });
+          };
+          cleanPage();
+          if (!window._adCleanerInterval) {
+            window._adCleanerInterval = setInterval(cleanPage, 1000);
+          }
+        } catch (e) {}
+      })();
+    ''';
+    _webViewController?.runJavaScript(js).catchError((_) {});
   }
 
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
