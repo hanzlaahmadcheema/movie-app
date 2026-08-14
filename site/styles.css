@@ -531,23 +531,32 @@ body {
 
 /* Hero Mockup Showcase with 3D Float & Depth */
 .hero-visual {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   transform-style: preserve-3d;
 }
 
 .mockup-card {
-  padding: 18px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px;
   background: var(--bg-surface);
   border: 1px solid var(--border-3d);
   box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.95);
   animation: mockup3DFloat 7s ease-in-out infinite;
+  box-sizing: border-box;
 }
 
 .mockup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -567,7 +576,7 @@ body {
 
 .mockup-title-bar {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
@@ -577,85 +586,95 @@ body {
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   transform: translateZ(20px);
+  width: 100%;
 }
 
 .app-screen-content {
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   background: var(--bg-card);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .screen-hero-banner {
   background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(14,17,24,0.95) 100%), url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80') center/cover;
-  padding: 28px;
+  padding: 20px;
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 180px;
+  min-height: 160px;
   border: 1px solid var(--border-subtle);
+  width: 100%;
 }
 
 .banner-tag {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--accent-cyan);
   letter-spacing: 0.1em;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .banner-title {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .banner-meta {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .meta-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   background: rgba(255, 255, 255, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .meta-rating {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #f59e0b;
   font-weight: 600;
 }
 
 .section-heading {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .provider-pill-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
+  width: 100%;
 }
 
 .prov-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-subtle);
-  padding: 10px 14px;
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 500;
   transition: transform 0.25s ease, border-color 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .prov-pill:hover {
