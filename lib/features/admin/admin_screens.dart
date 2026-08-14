@@ -8,6 +8,7 @@ import '../../core/auth/current_user_role.dart';
 import '../../core/auth/user_role_service.dart';
 import '../../core/services/admin_repository.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/utils/csv_exporter.dart';
 import '../../widgets/app_chrome.dart';
 import '../../widgets/state_views.dart';
 
@@ -351,49 +352,121 @@ class AdminUsersScreen extends StatefulWidget {
 class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String _query = '';
 
+  void _exportUsersCsv(
+    BuildContext context,
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    final records = docs.map((doc) {
+      final data = doc.data();
+      String createdAtStr = '';
+      String lastLoginAtStr = '';
+
+      if (data['createdAt'] is Timestamp) {
+        createdAtStr = (data['createdAt'] as Timestamp).toDate().toIso8601String();
+      } else if (data['createdAt'] != null) {
+        createdAtStr = data['createdAt'].toString();
+      }
+
+      if (data['lastLoginAt'] is Timestamp) {
+        lastLoginAtStr = (data['lastLoginAt'] as Timestamp).toDate().toIso8601String();
+      } else if (data['lastLoginAt'] != null) {
+        lastLoginAtStr = data['lastLoginAt'].toString();
+      }
+
+      return <String, dynamic>{
+        'uid': data['uid'] ?? doc.id,
+        'displayName': data['displayName'] ?? 'N/A',
+        'email': data['email'] ?? 'N/A',
+        'emailVerified': data['emailVerified'] == true,
+        'role': data['role'] ?? 'user',
+        'status': data['status'] ?? 'active',
+        'createdAt': createdAtStr,
+        'lastLoginAt': lastLoginAtStr,
+      };
+    }).toList();
+
+    CsvExporter.exportUsers(context: context, userRecords: records);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MovieBottomNavigation(),
-      appBar: AppBar(title: const Text('Users')),
-      body: StreamBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
-        stream: AdminRepository.instance.watchUsers(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.active &&
-              !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return AppErrorView(
-              title: 'Could not load users',
-              message: userMessageForError(snapshot.error),
-            );
-          }
-          final docs = snapshot.data ?? const [];
-          final filtered = docs.where((doc) {
-            if (_query.trim().isEmpty) return true;
-            final data = doc.data();
-            final haystack =
-                '${data['displayName'] ?? ''} ${data['email'] ?? ''}'
-                    .toLowerCase();
-            return haystack.contains(_query.trim().toLowerCase());
-          }).toList();
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextField(
-                onChanged: (value) => setState(() => _query = value),
-                decoration: const InputDecoration(
-                  hintText: 'Search by name or email',
-                  prefixIcon: Icon(Icons.search),
-                ),
+    return StreamBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+      stream: AdminRepository.instance.watchUsers(),
+      builder: (context, snapshot) {
+        final docs = snapshot.data ?? const [];
+        final filtered = docs.where((doc) {
+          if (_query.trim().isEmpty) return true;
+          final data = doc.data();
+          final haystack =
+              '${data['displayName'] ?? ''} ${data['email'] ?? ''}'
+                  .toLowerCase();
+          return haystack.contains(_query.trim().toLowerCase());
+        }).toList();
+
+        return Scaffold(
+          bottomNavigationBar: const MovieBottomNavigation(),
+          appBar: AppBar(
+            title: Text('Users (${docs.length})'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.download),
+                tooltip: 'Export Users CSV',
+                onPressed: docs.isEmpty
+                    ? null
+                    : () => _exportUsersCsv(context, docs),
               ),
-              const SizedBox(height: 12),
-              ...filtered.map((doc) => _UserSummaryCard(doc: doc)),
             ],
-          );
-        },
-      ),
+          ),
+          body: () {
+            if (snapshot.connectionState != ConnectionState.active &&
+                !snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return AppErrorView(
+                title: 'Could not load users',
+                message: userMessageForError(snapshot.error),
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (value) => setState(() => _query = value),
+                        decoration: const InputDecoration(
+                          hintText: 'Search by name or email',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: docs.isEmpty
+                          ? null
+                          : () => _exportUsersCsv(context, docs),
+                      icon: const Icon(Icons.file_download, size: 18),
+                      label: const Text('Export CSV'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...filtered.map((doc) => _UserSummaryCard(doc: doc)),
+              ],
+            );
+          }(),
+        );
+      },
     );
   }
 }
