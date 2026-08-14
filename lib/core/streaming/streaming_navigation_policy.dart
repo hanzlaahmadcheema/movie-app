@@ -35,7 +35,7 @@ class StreamingNavigationPolicy {
       );
     }
 
-    // Network Domain Blocker: Check against known ad/popup domain blocklist
+    // 1. Network Domain Blocker: Check against known ad/popup domain blocklist
     if (AdDomainBlocklist.isAdUrl(uri)) {
       return StreamingNavigationDecision.block(
         'Blocked ad domain request: ${uri.host}',
@@ -43,6 +43,7 @@ class StreamingNavigationPolicy {
       );
     }
 
+    // 2. Block external app schemes (intent, market, whatsapp, etc.)
     const blockedSchemes = {
       'intent',
       'market',
@@ -57,6 +58,7 @@ class StreamingNavigationPolicy {
     if (blockedSchemes.contains(uri.scheme.toLowerCase())) {
       return StreamingNavigationDecision.block(
         'Blocked unsupported/external scheme: ${uri.scheme}',
+        causesFallback: false,
       );
     }
 
@@ -65,15 +67,24 @@ class StreamingNavigationPolicy {
       return const StreamingNavigationDecision.allow();
     }
 
+    // 3. Strict Host Whitelist Lockdown for Subframes & Popups
     if (!isMainFrame) {
       if (uri.scheme == 'http' || uri.scheme == 'https') {
+        if (!isAllowedHost(uri.host)) {
+          return StreamingNavigationDecision.block(
+            'Blocked non-whitelisted subframe/popup domain: ${uri.host}',
+            causesFallback: false,
+          );
+        }
         return const StreamingNavigationDecision.allow();
       }
       return StreamingNavigationDecision.block(
         'Blocked non-web subframe scheme: ${uri.scheme}',
+        causesFallback: false,
       );
     }
 
+    // 4. Strict Host Whitelist Lockdown for Main Frame
     if (uri.scheme == 'http' && isHttpAllowedHost?.call(uri.host) == true) {
       if (!isAllowedHost(uri.host)) {
         return StreamingNavigationDecision.block(
