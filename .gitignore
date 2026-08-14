@@ -35,3 +35,6 @@ firepit-log.txt
 google-services.json
 releases/
 *.apk
+
+# Local Netlify folder
+.netlify
