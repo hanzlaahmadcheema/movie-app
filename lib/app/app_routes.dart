@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'app_theme.dart';
 
 import '../features/account/account_screens.dart';
 import '../features/admin/admin_screens.dart';
@@ -659,9 +661,6 @@ class _ProtectedAppScreen extends StatelessWidget {
           );
         }
         final config = configSnapshot.data!;
-        if (!config.maintenanceMode) {
-          return child;
-        }
         final user = AuthService.instance.currentUser;
         return FutureBuilder<CurrentUserRole>(
           future: UserRoleService.instance.loadRole(user),
@@ -678,17 +677,118 @@ class _ProtectedAppScreen extends StatelessWidget {
             if (role.isAdmin) {
               return child;
             }
-            return Scaffold(
-              body: AppErrorView(
-                title: 'Maintenance mode',
-                message: config.maintenanceMessage.trim().isEmpty
-                    ? 'The app is temporarily unavailable. Please try again later.'
-                    : config.maintenanceMessage,
-              ),
-            );
+            if (config.maintenanceMode) {
+              return Scaffold(
+                body: AppErrorView(
+                  title: 'Maintenance mode',
+                  message: config.maintenanceMessage.trim().isEmpty
+                      ? 'The app is temporarily unavailable. Please try again later.'
+                      : config.maintenanceMessage,
+                ),
+              );
+            }
+            if (config.forceUpdateEnabled) {
+              return _ForceUpdateBarrierView(config: config);
+            }
+            return child;
           },
         );
       },
+    );
+  }
+}
+
+class _ForceUpdateBarrierView extends StatelessWidget {
+  const _ForceUpdateBarrierView({required this.config});
+
+  final AppRemoteConfig config;
+
+  static const String _defaultUpdateUrl =
+      'https://github.com/hanzlaahmadcheema/movie-app/releases/download/v1.16.2/app-release.apk';
+
+  Future<void> _openUpdateUrl(BuildContext context) async {
+    final updateUrl = config.termsUrl.trim().isNotEmpty && config.termsUrl.contains('.apk')
+        ? config.termsUrl.trim()
+        : _defaultUpdateUrl;
+    final uri = Uri.parse(updateUrl);
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open update link.')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final msg = config.forceUpdateMessage.trim().isNotEmpty
+        ? config.forceUpdateMessage.trim()
+        : 'A new mandatory update is available for HA MovieApp. Please update to continue.';
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.system_update_rounded,
+                    size: 64,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  'Update Required',
+                  style: AppTextStyles.title.copyWith(color: Colors.white, fontSize: 24),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  msg,
+                  style: AppTextStyles.medium.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 36),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () => _openUpdateUrl(context),
+                    icon: const Icon(Icons.download_rounded, size: 22),
+                    label: const Text(
+                      'Update Now',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
